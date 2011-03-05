@@ -30,7 +30,7 @@ $(function() {
 		})
 	});
 	
-	$("script[type='text/html']").each(function() {		
+	$("script[type='text/html']:not([disabled])").each(function() {		
 		var results = $($("#testTemplate").html()).appendTo($("#tests"));
 		data.push($(this).html());
 		var ind = data.length - 1;

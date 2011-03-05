@@ -468,6 +468,8 @@ element.prototype.renderBorders = function(ctx) {
 	}
 };
 
+
+var backgroundCache = { };
 element.prototype.renderBackground = function(ctx, cb) {
 	var offsetLeft = this.css.marginLeft;
 	var offsetTop = this.css.marginTop;
@@ -482,8 +484,8 @@ element.prototype.renderBackground = function(ctx, cb) {
 		if (src.indexOf("data:") == -1) {
 			var url = new RegExp(/url\((.*)\)/);
 			src = url(this.css.backgroundImage)[1];
-			if (element.prototype.renderBackground.cache[src]) {
-				src = element.prototype.renderBackground.cache[src];
+			if (backgroundCache[src]) {
+				src = backgroundCache[src];
 			}
 		}
 		
@@ -496,7 +498,7 @@ element.prototype.renderBackground = function(ctx, cb) {
 			imgCanvas.width = img.width;
 			imgCanvas.height = img.height;
 			imgCtx.drawImage(img, 0, 0, img.width, img.height);
-			element.prototype.renderBackground.cache[src] = imgCanvas.toDataURL("image/png");
+			backgroundCache[src] = imgCanvas.toDataURL("image/png");
 			
 			ctx.drawImage(imgCanvas, 0, 0, imgCanvas.width, imgCanvas.height);
 			cb();
@@ -507,7 +509,7 @@ element.prototype.renderBackground = function(ctx, cb) {
 		cb();
 	}
 };
-element.prototype.renderBackground.cache = { };
+
 
 function wordWrap(ctx, phrase, maxWidth, initialOffset, isNewLine) {
 	var words = phrase.split(" ");
