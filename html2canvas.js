@@ -481,7 +481,8 @@ element.prototype.renderBackground = function(ctx, cb) {
 	}
 	
 	var ownerDoc = this.jq[0].ownerDocument;
-	
+	cb();
+	return;
 	if (this.tagName == "img") {
 		retrieveImageCanvas(this.src, function(imgCanvas) {
 	    	ctx.drawImage(imgCanvas, 0, 0, imgCanvas.width, imgCanvas.height);
