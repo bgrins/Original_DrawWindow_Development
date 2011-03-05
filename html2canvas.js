@@ -96,7 +96,6 @@ function html2canvas(body, width, cb) {
 	}
 	
 	var el = new element(body, function() {
-		el._canvas = canvas;
 		canvas.width = el.css.outerWidthMargins;
 		canvas.height = el.css.outerHeightMargins;
 		el.copyToCanvas(canvas);
