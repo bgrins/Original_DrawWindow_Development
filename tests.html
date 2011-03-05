@@ -8,7 +8,7 @@ canvas { border:solid 1px green;}
 h2 { border-bottom: dashed 2px #eee; border-top: dashed 2px #eee; }
 .clear { clear: both; }
 #tests { }
-.result { margin: 20px 3px; }
+.result { margin: 20px; border: 1px solid black; padding:15px; }
 #testTemplate { display:none; }
 #options { vertical-align:top; margin: 40px; border: solid 1px; font-size:.8em;}
 </style>
@@ -53,49 +53,33 @@ h2 { border-bottom: dashed 2px #eee; border-top: dashed 2px #eee; }
 <div class='result'><h2></h2><div class='frame'></div><div class='canvas'></div><br class='clear' /></div>
 </div>
 
-<script type='text/html' data-description='Basic Font Styles'>
-	<style>body { border:3px solid; font-size:110%;} strong{ font-size: 1.5em;  } p { font-size:76%; border: solid 10px;}</style>
+<script type='text/html' log='false' 
+	description='Basic Font Styles' data-src='tests/basicfont.html'></script>
 	
-	<strong>Some strong text <em>Nested EM2hhhhhhhhh That will break kjhjkjhkjjkhjkhjkhjkhkjhjhkhjhjhjkjhjhhjjhkhjkjkhjkhhkjhkkhj</em></strong><br />
-	<em>Some emphasized text <strong>Nested Strong</strong></em><br />
-	<p>
-		This 'p' should be smaller<strong>Some strong text <em>Nested EM</em></strong><br />
-		<em>Some emphasized text <strong>Nested Strong</strong></em><br />
-	</p>
-	<p>text node <strong>strong</strong> another text <span>ok <em>emphasized</em></span> inside test</p>
-</script>
+<script type='text/html' log='false' 
+	description='Advanced Font Styles' data-src='tests/advancedfont.html'></script>
+	
+<script type='text/html' log='false' 
+	description='Test Images' data-src='tests/image.html'></script>
+	
+<script type='text/html' log='false' 
+	description='External Stylesheet' data-src='tests/blueprintsample.html'></script>
+	
+<script type='text/html' log='false' 
+	description='404 Stylesheet' data-src='tests/404css.html'></script>
+	
+<script type='text/html' log='false' 
+	description='Forms' data-src='tests/forms.html'></script>
 
-<script type='text/html' data-description='Test Images' data-src='tests/testimage.html'></script>
-<script type='text/html' data-description='External Stylesheet' data-src='tests/blueprintsample.html'></script>
-<script type='text/html' data-description='404 Stylesheet' data-src='tests/404css.html'></script>
-<script type='text/html' data-description='Forms' data-src='tests/forms.html'></script>
-<script type='text/html' data-description='Javascript' data-src='tests/javascript.html'></script>
+<script type='text/html' log='false' 
+	description='Javascript' data-src='tests/javascript.html'></script>
+
+<script type='text/html' log='false' 
+	description='Invalid Nodes' data-src='tests/invalidnodes.html'></script>
 
 <script type='text/html'>
-	<style>
-		body {font-size:76%; border: solid 3px;} 
-		strong{ font-size: 2em; font-weight:bold; } 
-		p.test { border: solid 5px; margin-left:10px; padding-left:10px; line-height:4.3;} 
-		.left { float:left; padding-left:50px; }
-		#green { background-color:green; margin:10px; padding:10px; border: solid 2px; }
-	</style>
-	<div id="green">
-	text node <br /> and break <div>ok</div> 
-	what next <strong data-debug="true">stronf dsalsdfjlksdaf ljfsd  lkfsdsdfka fsdksdfajsf kfsdjfdskjfsadfaksdfjdkg</strong> <span>asdf adsdsa</span>
-	<p class='test'>Huge line height</p>
-	<p class='test'>Huge line height with <br />Multiple lines</p>
+<p>Inline Test</p>
 </script>
-
-<script type='text/html' data-description='Test Invalid Nodes'>
-	<style>
-		body { font-size:76%; border: solid 3px; } 
-	</style>
-	<!-- Don't try and parse this one out -->
-	<p>This should be the 
-	<!-- This could mess it up too -->
-	only thing that prints</p>
-</script>
-
 
 </body>
 </html>
