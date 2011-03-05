@@ -480,36 +480,41 @@ element.prototype.renderBackground = function(ctx, cb) {
 	}
 	
 	if (this.css.backgroundImage != "none") {
-		var src = this.css.backgroundImage;
-		if (src.indexOf("data:") == -1) {
-			var url = new RegExp(/url\((.*)\)/);
-			src = url(this.css.backgroundImage)[1];
-			if (backgroundCache[src]) {
-				src = backgroundCache[src];
-			}
-		}
-		
-		var that = this;
-		
-		var imgCanvas = document.createElement("canvas");
-		var imgCtx = imgCanvas.getContext("2d");
-		var img = new Image();
-		img.onload = function() {
-			imgCanvas.width = img.width;
-			imgCanvas.height = img.height;
-			imgCtx.drawImage(img, 0, 0, img.width, img.height);
-			backgroundCache[src] = imgCanvas.toDataURL("image/png");
-			
-			ctx.drawImage(imgCanvas, 0, 0, imgCanvas.width, imgCanvas.height);
-			cb();
-		};
-		img.src = src;
+		retrieveImageCanvas(this.css.backgroundImage, function(imgCanvas) {
+	    	ctx.drawImage(imgCanvas, 0, 0, imgCanvas.width, imgCanvas.height);
+	    	cb();
+
+		});
 	}
 	else {
 		cb();
 	}
 };
 
+function retrieveImageCanvas(src, cb) {
+
+	if (src.indexOf("data:") == -1) {
+	    var url = new RegExp(/url\((.*)\)/);
+	    src = url(src)[1];
+	    if (backgroundCache[src]) {
+	    	src = backgroundCache[src];
+	    }
+	}
+	
+	var imgCanvas = document.createElement("canvas");
+	var imgCtx = imgCanvas.getContext("2d");
+	var img = new Image();
+	img.onload = function() {
+	    imgCanvas.width = img.width;
+	    imgCanvas.height = img.height;
+	    imgCtx.drawImage(img, 0, 0, img.width, img.height);
+	    backgroundCache[src] = imgCanvas.toDataURL("image/png");
+	    
+	    cb(imgCanvas);
+	};
+	img.src = src;
+
+}
 
 function wordWrap(ctx, phrase, maxWidth, initialOffset, isNewLine) {
 	var words = phrase.split(" ");
