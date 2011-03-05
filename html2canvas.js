@@ -199,13 +199,17 @@ element.prototype.copyDOM = function() {
 	this.elementWidth = this.overflowHiddenWidth = el.width();
 	
 	// Offset needs to be computed with the margin to show where to start the bounding box of element
-	// Offset does not take body's border into account http://bugs.jquery.com/ticket/7948
+	// Offset does not take body's border into account, except in certain cases:
+	// http://bugs.jquery.com/ticket/7948
 	var body = this._domElement.ownerDocument.body._element;
-	this.hasAbsoluteParent = this.parent && (this.parent.hasAbsoluteParent || this.parent.css.position == "absolute");
-	var includeBodyBordersInOffset = true;
+	this.hasAbsoluteParent = this.parent && 
+		(this.parent.hasAbsoluteParent || this.parent.css.position == "absolute");
+		
+	var includeBodyBordersInOffset = (this != body);
 	if ($.browser.mozilla && !this.hasAbsoluteParent && this.css.position != "fixed") {
 		includeBodyBordersInOffset = false;
 	}
+	
 	var bodyBorderTopWidth = includeBodyBordersInOffset ? body.css.borderTopWidth : 0;
 	var bodyBorderLeftWidth = includeBodyBordersInOffset ? body.css.borderLeftWidth : 0;
 	
@@ -228,6 +232,7 @@ element.prototype.copyDOM = function() {
 		this.isOverflowing = this.overflowHiddenWidth != this.width;
 	}
 	
+	// Check if this element is overflowing by seeing if it's width is different than it's parent
 	if (this.closestBlock && (this.closestBlock.width < this.width)) {
 		this.overflowHiddenWidth = this.closestBlock.width;
 		this.isOverflowing = this.overflowHiddenWidth != this.width;
@@ -240,18 +245,21 @@ element.prototype.copyDOM = function() {
 	
 	this.css.font = $.trim(this.css.fontStyle + " " + this.css.fontWeight + " "  + this.css.fontSize + "px " + this.css.fontFamily);
 	
+	// outerHeight: Full height, but without the margins
 	this.css.outerHeight = 
 		this.elementHeight + 
 		this.css.paddingTop +
 		this.css.paddingBottom +
 		this.css.borderTopWidth +
 		this.css.borderBottomWidth;
-		
+	
+	// outerHeightMargins: The total bounding height of the object
 	this.css.outerHeightMargins = 
 		this.css.outerHeight + 
 		this.css.marginTop + 
 		this.css.marginBottom;
 		
+	// outerWidth: Full width, but without the margins
 	this.css.outerWidth = 
 		this.elementWidth + 
 		this.css.paddingLeft +
@@ -259,6 +267,7 @@ element.prototype.copyDOM = function() {
 		this.css.borderLeftWidth + 
 		this.css.borderRightWidth;
 		
+	// outerWidthMargins: The total bounding width of the object
 	this.css.outerWidthMargins = 
 		this.css.outerWidth + 
 		this.css.marginLeft +
@@ -270,16 +279,18 @@ element.prototype.copyDOM = function() {
 		top: this.css.marginTop + this.css.borderTopWidth + this.css.paddingTop
 	};
 	
+	// innerHeight: Just the base height + padding
 	this.css.innerHeight = 
 		this.elementHeight + 
 		this.css.paddingBottom + 
 		this.css.paddingTop;
 		
+	// innerWidth: Just the base width + padding
 	this.css.innerWidth = 
 		this.elementWidth + 
 		this.css.paddingLeft + 
 		this.css.paddingRight;
-		
+	
 	this.shouldRender = (this.css.outerWidthMargins > 0 && this.css.outerHeightMargins > 0);
 	this.x = this.offsetRenderBox.left;
 	this.y = this.offsetRenderBox.top;

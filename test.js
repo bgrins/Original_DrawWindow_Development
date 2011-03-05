@@ -36,7 +36,7 @@ $(function() {
 		var ind = data.length - 1;
 		var src = $(this).data("src") || blankSrc;
 		results.find("h2").text($(this).data("description") || ("Test " + ind));
-	    var iframe = $("<iframe onload='frameLoaded(this, "+ind+");' src='"+src+"' />").
+	    var iframe = $("<iframe id='test-"+ind+"' onload='frameLoaded(this, "+ind+");' src='"+src+"' />").
 	    	appendTo(results.find(".frame"));
 	});
 });
