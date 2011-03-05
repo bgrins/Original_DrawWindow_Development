@@ -43,6 +43,7 @@ var styleAttributes = [
 	'border-right-style', 'border-right-color',
 	'border-bottom-style', 'border-bottom-color',
 	'border-left-style', 'border-left-color',
+	'outline-style', 'outline-color',
 	'display', 'text-decoration',
 	'font-family', 'font-style', 'font-weight', 'color',
 	'position', 'float', 'clear', 'overflow',
@@ -52,6 +53,7 @@ var styleAttributesPx = [
 	'padding-top','padding-right','padding-bottom','padding-left',
 	'margin-top','margin-right','margin-bottom','margin-left',
 	'border-top-width', 'border-right-width', 'border-bottom-width', 'border-left-width',
+	'outline-width',
 	'top', 'bottom', 'left', 'right', 
 	'line-height', 'font-size'
 ];
@@ -95,6 +97,11 @@ function html2canvas(body, width, cb) {
 		$(body).width(width);
 	}
 	
+	// TODO: cloning wipes current styles, but we probably still want to seperate it
+	// since we manipulate the dom
+	//var clone = body.cloneNode();
+	//log(clone, body, clone.ownerDocument == body.ownerDocument);
+	
 	var el = new element(body, function() {
 		canvas.width = el.css.outerWidthMargins;
 		canvas.height = el.css.outerHeightMargins;
@@ -123,13 +130,14 @@ function element(DOMElement, onready) {
 	this.readyChildren = 0;
 	this.ready = false;
 	this.onready = onready || function() { };
-	this.body = DOMElement.ownerDocument.body._element;
 	if (this.tagName == "body") {
 		this.totalChildren = 0;
 		this.readyChilren = 0;
+		this.body = this;
 	}
 	else {
 		this.parent = this._domElement.parentNode._element;
+		this.body = this.parent.body;
 		this.closestBlock = (this.parent.isBlock) ? this.parent : this.parent.closestBlock;
 		this.body.totalChildren++;
 	}
@@ -198,7 +206,7 @@ element.prototype.copyDOM = function() {
 	// Offset needs to be computed with the margin to show where to start the bounding box of element
 	// Offset does not take body's border into account, except in certain cases:
 	// http://bugs.jquery.com/ticket/7948
-	var body = this._domElement.ownerDocument.body._element;
+	var body = this.body;
 	this.hasAbsoluteParent = this.parent && 
 		(this.parent.hasAbsoluteParent || this.parent.css.position == "absolute");
 		
@@ -340,10 +348,17 @@ element.prototype.copyToCanvas = function(canvas) {
 	
 	log2("Rendering", this.tagName, this.text, x, y, w, h);
 	
-	// Draw a bounding box to show where the DOM Element lies
 	if (this.jq.attr("data-debug") || settings.drawBoundingBox) {
 		ctx.strokeStyle = "#d66";
 		ctx.lineWidth = 1;
+		ctx.strokeRect(x, y, w, h);
+	}
+	
+	// TODO: DRAW OUTLINE
+	// Draw a bounding box to show where the DOM Element lies
+	if (this.css.outlineWidth > 0) {
+		ctx.strokeStyle = this.css.outlineColor;
+		ctx.lineWidth = this.css.outlineWidth;
 		ctx.strokeRect(x, y, w, h);
 	}
 	
