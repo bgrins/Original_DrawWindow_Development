@@ -32,7 +32,6 @@ function computedStyle(elem, styles) {
 	var ret = { };
 	for (var i = 0; i < styles.length; i++) {
 		ret[styles[i]] = computedStyle.getPropertyValue( styles[i] );
-		if (styles[i] == "font-weight") { log("weight", elem, computedStyle.getPropertyValue( styles[i] ));}
 	}
 	return ret;
 }
@@ -102,7 +101,6 @@ function html2canvas(body, width, cb) {
 		canvas.height = el.css.outerHeightMargins;
 		el.copyToCanvas(canvas);
 		canvas._el = el;
-		log("ready");
 		cb(canvas);
 	});
 	
@@ -371,9 +369,9 @@ element.prototype.renderCanvas = function() {
 	canvas.height = this.height;
 	var ctx = canvas.getContext("2d");
 	
-	this.renderBorders(ctx);
 	var that = this;
-	this.renderBackground(ctx, function() {
+	that.renderBackground(ctx, function() {
+		that.renderBorders(ctx);
 		that.renderText(ctx);
 		that.signalReady();
 	});
@@ -433,39 +431,41 @@ element.prototype.renderText = function(ctx) {
 
 element.prototype.renderBorders = function(ctx) {
 	
-	var offsetLeft = this.css.marginLeft;
-	var offsetTop = this.css.marginTop;
-
-	var borderLeftWidth = this.css.borderLeftWidth;
-	if (borderLeftWidth) {		
-		ctx.fillStyle = this.css.borderLeftColor;
+	// TODO: Insets, etc.
+	
+	var css = this.css;
+	var offsetLeft = css.marginLeft;
+	var offsetTop = css.marginTop;
+	var borderLeftWidth = css.borderLeftWidth;
+	if (borderLeftWidth) {
+		ctx.fillStyle = css.borderLeftColor;
 		ctx.fillRect(
 			offsetLeft, offsetTop, 
-			borderLeftWidth, this.css.outerHeight);
+			borderLeftWidth, css.outerHeight);
 	}
 	
-	var borderTopWidth = this.css.borderTopWidth;
+	var borderTopWidth = css.borderTopWidth;
 	if (borderTopWidth) {		
-		ctx.fillStyle = this.css.borderTopColor;
+		ctx.fillStyle = css.borderTopColor;
 		ctx.fillRect(
 			offsetLeft, offsetTop, 
-			this.css.outerWidth, borderTopWidth);
+			css.outerWidth, borderTopWidth);
 	}
 	
-	var borderBottomWidth = this.css.borderBottomWidth;
+	var borderBottomWidth = css.borderBottomWidth;
 	if (borderBottomWidth) {		
-		ctx.fillStyle = this.css.borderBottomColor;
+		ctx.fillStyle = css.borderBottomColor;
 		ctx.fillRect(
-			offsetLeft, offsetTop + this.css.outerHeight - borderBottomWidth, 
-			this.css.outerWidth, borderBottomWidth);
+			offsetLeft, offsetTop + css.outerHeight - borderBottomWidth, 
+			css.outerWidth, borderBottomWidth);
 	}
 	
-	var borderRightWidth = this.css.borderRightWidth;
+	var borderRightWidth = css.borderRightWidth;
 	if (borderRightWidth) {		
-		ctx.fillStyle = this.css.borderRightColor;
+		ctx.fillStyle = css.borderRightColor;
 		ctx.fillRect(
-			offsetLeft + this.css.outerWidth - borderRightWidth, 
-			offsetTop, borderRightWidth, this.css.outerHeight);
+			offsetLeft + css.outerWidth - borderRightWidth, 
+			offsetTop, borderRightWidth, css.outerHeight);
 	}
 };
 
