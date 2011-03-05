@@ -295,7 +295,9 @@ element.prototype.copyDOM = function() {
 	this.height = this.css.outerHeightMargins;
 	
 	if (this.tagName == "img") { log("FOUND IMG", this, this.shouldRender, this.jq[0].loaded); } 
-	
+	if (this.tagName == "img") {
+		this.src = el.attr("src");
+	}
 	
 	var childNodes = this._domElement.childNodes;
 	this.hasOnlyTextNodes = (childNodes.length > 0); // img, hr, etc shouldn't show up as text nodes
@@ -469,7 +471,6 @@ element.prototype.renderBorders = function(ctx) {
 };
 
 
-var backgroundCache = { };
 element.prototype.renderBackground = function(ctx, cb) {
 	var offsetLeft = this.css.marginLeft;
 	var offsetTop = this.css.marginTop;
@@ -479,25 +480,46 @@ element.prototype.renderBackground = function(ctx, cb) {
 		ctx.fillRect(offsetLeft, offsetTop, this.css.outerWidth, this.css.outerHeight);
 	}
 	
-	if (this.css.backgroundImage != "none") {
+	var ownerDoc = this.jq[0].ownerDocument;
+	
+	if (this.tagName == "img") {
+		retrieveImageCanvas(this.src, function(imgCanvas) {
+	    	ctx.drawImage(imgCanvas, 0, 0, imgCanvas.width, imgCanvas.height);
+	    	cb();
+		}, ownerDoc);
+	}
+	else if (this.css.backgroundImage != "none") {
 		retrieveImageCanvas(this.css.backgroundImage, function(imgCanvas) {
 	    	ctx.drawImage(imgCanvas, 0, 0, imgCanvas.width, imgCanvas.height);
 	    	cb();
-
-		});
+		}, ownerDoc);
 	}
 	else {
 		cb();
 	}
 };
 
-function retrieveImageCanvas(src, cb) {
+retrieveImageCanvas.cache = { };
+function retrieveImageCanvas(src, cb, ownerDocument) {
 
 	if (src.indexOf("data:") == -1) {
 	    var url = new RegExp(/url\((.*)\)/);
-	    src = url(src)[1];
-	    if (backgroundCache[src]) {
-	    	src = backgroundCache[src];
+	    var matched = url(src);
+	    if (matched && matched[1]) {
+	    	src = matched[1];
+	    }
+	    
+	    
+	    // Convert a relative path into absolute.
+	    // TODO: Is this worth the js URI dependancy since it may not be running in frame?
+	    var original = new URI(src);
+	    if (!original.getAuthority()) {
+	    	 var root = new URI((ownerDocument || document).location.href);
+	    	 src = original.resolve(root).toString();
+	    }
+	    
+	    if (retrieveImageCanvas.cache[src]) {
+	    	src = retrieveImageCanvas.cache[src];
 	    }
 	}
 	
@@ -508,10 +530,15 @@ function retrieveImageCanvas(src, cb) {
 	    imgCanvas.width = img.width;
 	    imgCanvas.height = img.height;
 	    imgCtx.drawImage(img, 0, 0, img.width, img.height);
-	    backgroundCache[src] = imgCanvas.toDataURL("image/png");
+	    retrieveImageCanvas.cache[src] = imgCanvas.toDataURL("image/png");
 	    
 	    cb(imgCanvas);
 	};
+	img.onerror = function() {
+		// Todo: draw 'broken' image
+		imgCanvas.width = imgCanvas.height = 1;
+		cb(imgCanvas);
+	}
 	img.src = src;
 
 }
