@@ -21,6 +21,7 @@ var settings = html2canvas.settings = {
 	logLevel: html2canvas.logLevels.RELEASE
 };
 
+
 function log() { if (window.console) { console.log(Array.prototype.slice.apply(arguments)); } }
 function log1() { if (settings.logLevel >= 1) { log.apply(this, arguments); } }
 function log2() { if (settings.logLevel >= 2) { log.apply(this, arguments); } }
@@ -86,8 +87,6 @@ function html2canvas(body, width, cb) {
 		var iframe = $("<iframe src=''></iframe>").appendTo("body");
 		body = iframe.contents().find("body").html(body)[0];
 	}
-	var canvas = document.createElement("canvas");
-	body.canvas = canvas;
 	
 	if ($.isFunction(width)) {
 		cb = width;
@@ -102,11 +101,7 @@ function html2canvas(body, width, cb) {
 	//var clone = body.cloneNode();
 	//log(clone, body, clone.ownerDocument == body.ownerDocument);
 	
-	var el = new element(body, function() {
-		canvas.width = el.css.outerWidthMargins;
-		canvas.height = el.css.outerHeightMargins;
-		el.copyToCanvas(canvas);
-		canvas._el = el;
+	var el = new element(body, function(canvas) {
 		cb(canvas);
 	});
 	
@@ -130,10 +125,13 @@ function element(DOMElement, onready) {
 	this.readyChildren = 0;
 	this.ready = false;
 	this.onready = onready || function() { };
+	
 	if (this.tagName == "body") {
 		this.totalChildren = 0;
 		this.readyChilren = 0;
 		this.body = this;
+		this.outputCanvas = document.createElement("canvas");
+		this.outputCanvas._el = this;
 	}
 	else {
 		this.parent = this._domElement.parentNode._element;
@@ -143,8 +141,22 @@ function element(DOMElement, onready) {
 	}
 	
 	this.jq.wrapSiblingTextNodes("<span></span>");
+	
 	this.copyDOM();
-
+	
+	// Count the new document as another child so no ready signal will be recieved until it is done.
+	// The iframe's readySignal will be recieved when the actual box finishes
+	if (this.tagName == "iframe") {
+		this.body.totalChildren++;
+		var iframe = this;
+		var iframeElement = new element(iframe.jq.contents().find("body")[0], function(canvas) {
+			iframe.contents = canvas;
+			iframe.signalReady();
+		});
+		
+		iframeElement.renderCanvas();
+	}
+	
 	// Recursively instantiate all childNodes, filtering out non element nodes
 	this.childNodes = this._domElement.childNodes;
 	this.childElements = [];
@@ -156,19 +168,17 @@ function element(DOMElement, onready) {
 	}
 }
 
+
 element.prototype.signalReady = function() {
 	if (this.tagName != "body") {
-		this.body.readyChildren++;
-		if (this.body.readyChildren == this.body.totalChildren) {
-			this.body.onready();
+		var body = this.body;
+		body.readyChildren++;
+		if (body.readyChildren == body.totalChildren) {	
+			body.outputCanvas.width = body.css.outerWidthMargins;
+			body.outputCanvas.height = body.css.outerHeightMargins;
+			body.copyToCanvas(body.outputCanvas);
+			body.onready(body.outputCanvas);
 		}
-	}
-};
-
-element.prototype.traverseChildren = function(f) {
-	for (var i = 0, len = this.childElements.length; i < len; i++) {
-		f(this.childElements[i]);
-		this.childElements[i].traverseChildren(f);
 	}
 };
 
@@ -217,11 +227,6 @@ element.prototype.copyDOM = function() {
 	
 	var bodyBorderTopWidth = includeBodyBordersInOffset ? body.css.borderTopWidth : 0;
 	var bodyBorderLeftWidth = includeBodyBordersInOffset ? body.css.borderLeftWidth : 0;
-	
-	this.offsetRenderBox = { 
-		top:  Math.floor(Math.max(0, this.offset.top - this.css.marginTop + bodyBorderTopWidth)), 
-		left: Math.floor(Math.max(0, this.offset.left - this.css.marginLeft + bodyBorderLeftWidth))
-	};
 	
 	this.isBlock = this.css.display == "block" || this.tagName == "body";
 	
@@ -297,12 +302,22 @@ element.prototype.copyDOM = function() {
 		this.css.paddingRight;
 	
 	this.shouldRender = (this.css.outerWidthMargins > 0 && this.css.outerHeightMargins > 0);
+	
+	this.offsetRenderBox = { 
+		top:  Math.floor(Math.max(0, this.offset.top - this.css.marginTop + bodyBorderTopWidth)), 
+		left: Math.floor(Math.max(0, this.offset.left - this.css.marginLeft + bodyBorderLeftWidth))
+	};
 	this.x = this.offsetRenderBox.left;
 	this.y = this.offsetRenderBox.top;
 	this.width = this.css.outerWidthMargins;
 	this.height = this.css.outerHeightMargins;
-	
-	if (this.tagName == "img") { log("FOUND IMG", this, this.shouldRender, this.jq[0].loaded); } 
+	this.css.outlineOffset = {
+		left: this.x + this.css.marginLeft - (this.css.outlineWidth / 2),
+		top: this.y + this.css.marginTop - (this.css.outlineWidth / 2),
+		width: this.css.outerWidth + (this.css.outlineWidth),
+		height: this.css.outerHeight + (this.css.outlineWidth)
+	}
+	 
 	if (this.tagName == "img") {
 		this.src = el.attr("src");
 	}
@@ -359,13 +374,22 @@ element.prototype.copyToCanvas = function(canvas) {
 	if (this.css.outlineWidth > 0) {
 		ctx.strokeStyle = this.css.outlineColor;
 		ctx.lineWidth = this.css.outlineWidth;
-		ctx.strokeRect(x, y, w, h);
+		ctx.strokeRect(
+			this.css.outlineOffset.left, this.css.outlineOffset.top, 
+			this.css.outlineOffset.width, this.css.outlineOffset.height);
 	}
 	
 	// Render the element's canvas onto this canvas.  May eventually need to move
 	// to a getImageData / putImageData model to better use caching	
 	if (w > 0 && h > 0) {
 		ctx.drawImage(this.canvas, x, y, w, h);
+	}
+	
+	// iframes have a contents canvas, that we need to render
+	if (this.tagName == "iframe") {
+		var c = this.contents;
+		var innerOffset = this.css.innerOffset;
+		ctx.drawImage(c, innerOffset.left + x, innerOffset.top + y, c.width, c.height);
 	}
 	
 	
@@ -384,6 +408,7 @@ element.prototype.renderCanvas = function() {
 	canvas.width = this.width;
 	canvas.height = this.height;
 	var ctx = canvas.getContext("2d");
+	
 	
 	var that = this;
 	that.renderBackground(ctx, function() {
@@ -613,6 +638,10 @@ function wordWrap(ctx, phrase, maxWidth, initialOffset, isNewLine) {
 	}
 	
 	return output;
+}
+
+if (window.html2canvasProcessOnLoad) {
+	html2canvas(document.body, window.html2canvasProcessOnLoad)
 }
 
 })();
