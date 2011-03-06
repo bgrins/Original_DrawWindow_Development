@@ -1,6 +1,13 @@
+<!doctype html>
 <html>
 <head>
 <script type='text/javascript' src='jquery-1.5.1.min.js'></script>
+<style>
+span { background-color:orange; }
+
+</style>
+</head>
+<body>
 <script>
 
 function loader() {
@@ -17,10 +24,8 @@ function loader() {
 	s.setAttribute("src", base + "html2canvas.js");
 	document.body.appendChild(s);
 }
+document.write((new Date()).getTime());
 </script>
-</head>
-<body>
-
 <h1>Html2Canvas Bookmarklet Tester</h1>
 <a href='javascript:loader();'>Convert to image</a>
 <p>

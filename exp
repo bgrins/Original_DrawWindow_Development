@@ -1,0 +1,37 @@
+
+function html2canvas(document, cb) {
+	var c = $(document.body).clone();
+	$(document.body).append(c.children())
+	
+	var iframe = $("<iframe src='javascript:void(0);'></iframe>");//.appendTo("body");
+	var win = window.open();
+	var markup = '<!DOCTYPE html><html><head></head><body></body></html>';
+	var h2cDocument = win.document; //iframe.contents()[0];
+	//document.documentElement.innerHTML
+	//var frag = h2cDocument.createDocumentFragment();
+	//frag.innerHTML = document.body.innerHTML;
+	
+	//log(frag, $(frag).find("script"));
+	//$(frag).find("script").remove();
+	//log(frag, $(frag).find("script"));
+	
+	//h2cDocument.open();
+	//h2cDocument.write(markup);
+	//h2cDocument.write(markup);
+	//h2cDocument.close();
+	
+	var body = h2cDocument.body;
+	//log(markup, document.documentElement, body)
+	var clone = $(document.body).clone();
+	clone.find("script").remove();
+	//$(body).width($(document.body).width()).append(clone.children());
+	
+	//log(clone.html(), body)
+	
+	var el = new element(body, function(canvas) {
+		log("done", canvas.width)
+		cb(canvas);
+	});
+	
+	el.renderCanvas();
+}

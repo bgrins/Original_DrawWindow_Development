@@ -58,6 +58,7 @@ var styleAttributesPx = [
 	'top', 'bottom', 'left', 'right', 
 	'line-height', 'font-size'
 ];
+var h2cStyles = "body span.h2c { background:inherit !important; display:inline !important; border: none !important; outline: none !important; }";
 
 // Convert: <div>Hi <strong>there.</strong> <!-- some comment --></div>
 // Into: <div><span>Hi </span><strong>there.</strong></div>
@@ -76,15 +77,21 @@ $.fn.wrapSiblingTextNodes = function(wrapper) {
 		    	$(this).remove();
 		    }
 		});
-		
+		//log(element.contents().filter(function() {return this.nodeType == 3; }));
 	});
 };
 
 function html2canvas(body, width, cb) {
 	
 	if ((typeof body) == "string") {
-		var iframe = $("<iframe src=''></iframe>").appendTo("body");
+		var iframe = $("<iframe src='javascript:'></iframe>").appendTo("body");
 		body = iframe.contents().find("body").html(body)[0];
+	}
+	else {
+		// TODO: cloning wipes current styles, but we probably still want to seperate it
+		// since we manipulate the dom
+		//var clone = body.cloneNode();
+		//log(clone, body, clone.ownerDocument == body.ownerDocument);
 	}
 	
 	if ($.isFunction(width)) {
@@ -95,10 +102,9 @@ function html2canvas(body, width, cb) {
 		$(body).width(width);
 	}
 	
-	// TODO: cloning wipes current styles, but we probably still want to seperate it
-	// since we manipulate the dom
-	//var clone = body.cloneNode();
-	//log(clone, body, clone.ownerDocument == body.ownerDocument);
+	if (!body.ownerDocument.getElementById('h2c-styles')) {
+		$(body).append("<style type='text/css' id='h2c-styles'>" + h2cStyles + "</style>");
+	}
 	
 	var el = new element(body, function(canvas) {
 		cb(canvas);
@@ -139,7 +145,7 @@ function element(DOMElement, onready) {
 		this.body.totalChildren++;
 	}
 	
-	this.jq.wrapSiblingTextNodes("<span></span>");
+	this.jq.wrapSiblingTextNodes("<span class='h2c'></span>");
 	
 	this.copyDOM();
 	
