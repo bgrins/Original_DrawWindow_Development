@@ -59,7 +59,6 @@ var styleAttributesPx = [
 	'line-height', 'font-size'
 ];
 
-
 // Convert: <div>Hi <strong>there.</strong> <!-- some comment --></div>
 // Into: <div><span>Hi </span><strong>there.</strong></div>
 $.fn.wrapSiblingTextNodes = function(wrapper) {
@@ -460,7 +459,18 @@ element.prototype.renderText = function(ctx) {
 		    		//error("Text parsing: '" + lines[j] + "' is too low (" + startY + ", " + minimumTextY + ")");
 		    	}
 		    	
+		    	var width = ctx.measureText(lines[j]).width;
 		    	ctx.fillText(lines[j], startX, startY);
+		    	
+				if (this.css.textDecoration == 'underline') {
+					
+					ctx.moveTo(startX, this.css.fontSize);
+					ctx.lineTo(startX + width, this.css.fontSize);
+					ctx.strokeStyle = this.css.color;
+					ctx.lineWidth = 1; //face.underlineThickness;
+					ctx.stroke();
+				}
+
 		    	startY = startY + this.css.lineHeight;
 		    }
 		    
