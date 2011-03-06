@@ -13,11 +13,14 @@ function frameLoaded(frame, ind) {
 	if (frame.src == blankSrc) {
 		body.html(data[ind]);
 	}
-	$(frame).height(body[0].scrollHeight).width(body[0].scrollWidth);
+	
+	setTimeout(function() {
+		$(frame).height(body[0].scrollHeight).width(body[0].scrollWidth);	
+		html2canvas(body[0], function(canvas) {
+			$(frame).closest(".result").find('.canvas').html('').append(canvas);
+		});
+	}, 100);
 
-	html2canvas(body[0], function(canvas) {
-		$(frame).closest(".result").find('.canvas').html('').append(canvas);
-	});
 }
 
 $(function() {
