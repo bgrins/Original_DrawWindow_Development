@@ -7,9 +7,9 @@ span { background-color:orange; }
 
 </style>
 </head>
-<body>
-<script>
+<body onload='console.log("loaded");document.getElementById("output").innerHTML=Math.random();'>
 
+<script>
 function loader() {
 	var w = window.open("about:blank", "_blank", "menubar=0,location=0,toolbar=0,resizable=1,width=350,height=300");
 	
@@ -26,12 +26,14 @@ function loader() {
 }
 document.write((new Date()).getTime());
 </script>
+<div id='output'></div>
 <h1>Html2Canvas Bookmarklet Tester</h1>
 <a href='javascript:loader();'>Convert to image</a>
 <p>
-Let's get some text <strong>in <em>here</em></strong>!
+Let's get some<span >YO</span> text <strong>in <em>here</em></strong>!
 </p>
-<iframe src='mini.html?'></iframe>
+<iframe src='mini.html?2'></iframe>
+<link />
 </body>
 </html>
 

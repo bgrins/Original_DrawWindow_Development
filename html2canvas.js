@@ -80,6 +80,56 @@ $.fn.wrapSiblingTextNodes = function(wrapper) {
 		//log(element.contents().filter(function() {return this.nodeType == 3; }));
 	});
 };
+$.fn.wrapAllTextNodes = function(wrapper) {
+	return this.each(function() {
+		if ($(this).is("style") || $(this).is("img")) {
+			return;
+		}
+		
+		var all = $(this).find("*");
+		$(this).contents().each(function() {
+		    if (this.nodeType == 3) {
+		    	if ($.trim(this.data) == "") { $(this).remove(); }
+		    	//this.data.split(' ')
+		    	$(this).wrap(wrapper);
+		    }
+		    else if (this.nodeType != 1) {
+		    	$(this).remove();
+		    }
+		    else {
+		    	$(this).wrapAllTextNodes(wrapper);
+		    }
+		});	
+	});
+};
+
+$.fn.cloneDocument = function() {
+	// TODO: This isn't compatible cross browser
+	var b = $(this[0].body);
+	
+	var clonedBody = b.clone();
+	clonedBody.find("script").remove();
+	
+	var clonedHead = $(this[0].head).clone();
+	clonedHead.find("script").remove();
+	
+	var w = window.open();
+	var d = w.document;
+	$(d.head).replaceWith(clonedHead);
+	$(d.body).replaceWith(clonedBody).width(b.width()).height(b.height());
+	
+	
+	var originalFrames = b.find("iframe");
+	var clonedFrames = clonedBody.find("iframe");
+	originalFrames.each(function(i) {
+		var originalDoc = $(this).contents()[0];
+		var frameDoc = $(this).contents().cloneDocument();
+		clonedFrames.contents().find("head").replaceWith(frameDoc.head);
+		clonedFrames.contents().find("body").replaceWith(frameDoc.body).width($(originalDoc.body).width()).height($(originalDoc.body).height());
+	});
+
+	return d;
+};
 
 function html2canvas(body, width, cb) {
 	
@@ -88,10 +138,7 @@ function html2canvas(body, width, cb) {
 		body = iframe.contents().find("body").html(body)[0];
 	}
 	else {
-		// TODO: cloning wipes current styles, but we probably still want to seperate it
-		// since we manipulate the dom
-		//var clone = body.cloneNode();
-		//log(clone, body, clone.ownerDocument == body.ownerDocument);
+		var doc = $(body.ownerDocument).cloneDocument().body;
 	}
 	
 	if ($.isFunction(width)) {
@@ -137,6 +184,7 @@ function element(DOMElement, onready) {
 		this.body = this;
 		this.outputCanvas = document.createElement("canvas");
 		this.outputCanvas._el = this;
+		//this.jq.wrapAllTextNodes("<span class='h2c'></span>");
 	}
 	else {
 		this.parent = this._domElement.parentNode._element;
