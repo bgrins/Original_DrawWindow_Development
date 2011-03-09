@@ -58,7 +58,7 @@ var styleAttributesPx = [
 	'top', 'bottom', 'left', 'right', 
 	'line-height', 'font-size'
 ];
-var h2cStyles = 'body span.h2c { background:inherit !important; display:inline !important; border: none !important; outline: none !important; }\n.h2c-clearfix:after { content: "."; display: block; height: 0; clear: both; visibility: hidden; }\n.h2c-clearfix { zoom:1; }';
+var h2cStyles = 'body span.h2c { background:inherit !important; display:inline !important; border: none !important; outline: none !important; }\n.h2c-clearfix:after { content: "."; display: block; height: 0; clear: both; visibility: hidden; }\n.h2c-clearfix { zoom:1; } .h2c-clear { clear:both; height:0; line-height:0; }';
 
 // Convert: <div>Hi <strong>there.</strong> <!-- some comment --></div>
 // Into: <div><span>Hi </span><strong>there.</strong></div>
@@ -173,18 +173,19 @@ function element(DOMElement, onready) {
 	this.uniqueID = getUniqueID();
 	this._domElement = DOMElement;
 	this.jq = $(this._domElement);
+	this.document = this._domElement.ownerDocument;
 	this.nodeType = this._domElement.nodeType;
 	this.tagName = this._domElement.tagName.toLowerCase();
+	this.isBody = this.tagName == "body";
 	this.readyChildren = 0;
 	this.ready = false;
 	this.onready = onready || function() { };
 	
-	if (this.tagName == "body") {
+	if (this.isBody) {
 		this.totalChildren = 0;
 		this.body = this;
 		this.outputCanvas = document.createElement("canvas");
 		this.outputCanvas._el = this;
-		this.jq.addClass("h2c-clearfix");
 		//this.jq.wrapAllTextNodes("<span class='h2c'></span>");
 	}
 	else {
@@ -224,7 +225,7 @@ function element(DOMElement, onready) {
 	}
 	
 	// Kick off the rendering since this is the body
-	if (this.tagName == "body") {
+	if (this.isBody) {
 		this.renderCanvas();
 	}
 }
@@ -311,7 +312,13 @@ element.prototype.copyDOM = function() {
 	
 	this.offset = el.offset();
 	this.position = el.position();
-	this.elementHeight = (this.tagName == "body") ? el[0].scrollHeight : el.height();
+	if (this.isBody) {
+		this.elementHeight = $(this.document).height() - this.css.marginTop - this.css.marginBottom;
+	}
+	else {
+		this.elementHeight = el.height();
+	}
+	
 	this.elementWidth = this.overflowHiddenWidth = el.width();
 	
 	// Offset needs to be computed with the margin to show where to start the bounding box of element
@@ -329,27 +336,7 @@ element.prototype.copyDOM = function() {
 	var bodyBorderTopWidth = includeBodyBordersInOffset ? body.css.borderTopWidth : 0;
 	var bodyBorderLeftWidth = includeBodyBordersInOffset ? body.css.borderLeftWidth : 0;
 	
-	this.isBlock = this.css.display == "block" || this.tagName == "body";
-	
-	// Todo: this width needs to be tested for all types of elements.
-	// should be easy to set up a case in the harness with div's, p's, and body
-	if (this.isBlock) {
-		var oldStyle = el.attr("style");
-		this.overflowHiddenWidth = el.css("overflow", "hidden").width();
-		
-		if (oldStyle) { el.attr("style", oldStyle); }
-		else { el.removeAttr("style"); }
-		
-		this.isOverflowing = this.overflowHiddenWidth != this.width;
-	}
-	
-	// Check if this element is overflowing by seeing if it's width is different than it's parent
-	if (this.closestBlock && (this.closestBlock.width < this.width)) {
-		this.overflowHiddenWidth = this.closestBlock.width;
-		this.isOverflowing = this.overflowHiddenWidth != this.width;
-	}
-	
-	// For some reason, <strong> elements in FF report a font-weight of 401 even though they are bold
+		// For some reason, <strong> elements in FF report a font-weight of 401 even though they are bold
 	if ($.browser.mozilla && parseInt(this.css.fontWeight, 10) == 401) {
 		this.css.fontWeight = "bold";
 	}
@@ -383,6 +370,12 @@ element.prototype.copyDOM = function() {
 		this.css.outerWidth + 
 		this.css.marginLeft +
 		this.css.marginRight;
+	
+	// The body needs to render background over margins (at least in Chrome)
+	if (this.isBody) {
+		//this.css.outerHeightMargins = this.css.outerHeightMargins - this.css.marginTop - this.css.marginBottom;
+		//this.css.outerWidthMargins = this.css.outerWidthMargins - this.css.marginLeft - this.css.marginRight;
+	}
 	
 	// innerOffset: where to start printing content from within the context of the element.
 	this.css.innerOffset = {
@@ -419,6 +412,29 @@ element.prototype.copyDOM = function() {
 		height: this.css.outerHeight + (this.css.outlineWidth)
 	}
 	 
+	 
+	this.isBlock = this.css.display == "block" || this.isBody;
+	/*
+	// Todo: this width needs to be tested for all types of elements.
+	// should be easy to set up a case in the harness with div's, p's, and body
+	if (this.isBlock) {
+		var oldStyle = el.attr("style");
+		this.overflowHiddenWidth = el.css("overflow", "hidden").width();
+		
+		if (oldStyle) { el.attr("style", oldStyle); }
+		else { el.removeAttr("style"); }
+		
+		this.isOverflowing = this.overflowHiddenWidth != this.width;
+	}
+	
+	// Check if this element is overflowing by seeing if it's width is different than it's parent
+	if (this.closestBlock && (this.closestBlock.width < this.width)) {
+		this.overflowHiddenWidth = this.closestBlock.width;
+		this.isOverflowing = this.overflowHiddenWidth != this.width;
+	}
+	*/
+
+
 	if (this.tagName == "img") {
 		this.src = el.attr("src");
 	}
@@ -543,6 +559,7 @@ element.prototype.renderBorders = function(ctx) {
 	var css = this.css;
 	var offsetLeft = css.marginLeft;
 	var offsetTop = css.marginTop;
+	
 	var borderLeftWidth = css.borderLeftWidth;
 	if (borderLeftWidth) {
 		ctx.fillStyle = css.borderLeftColor;
@@ -578,8 +595,8 @@ element.prototype.renderBorders = function(ctx) {
 
 
 element.prototype.renderBackground = function(ctx, cb) {
-	var offsetLeft = this.css.marginLeft;
-	var offsetTop = this.css.marginTop;
+	var offsetLeft = this.isBody ? 0 : this.css.marginLeft;
+	var offsetTop = this.isBody ? 0 : this.css.marginTop;
 	
 	if (this.css.backgroundColor) {
 		ctx.fillStyle = this.css.backgroundColor;
