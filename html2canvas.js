@@ -58,7 +58,7 @@ var styleAttributesPx = [
 	'top', 'bottom', 'left', 'right', 
 	'line-height', 'font-size'
 ];
-var h2cStyles = "body span.h2c { background:inherit !important; display:inline !important; border: none !important; outline: none !important; }";
+var h2cStyles = 'body span.h2c { background:inherit !important; display:inline !important; border: none !important; outline: none !important; }\n.h2c-clearfix:after { content: "."; display: block; height: 0; clear: both; visibility: hidden; }\n.h2c-clearfix { zoom:1; }';
 
 // Convert: <div>Hi <strong>there.</strong> <!-- some comment --></div>
 // Into: <div><span>Hi </span><strong>there.</strong></div>
@@ -106,26 +106,29 @@ $.fn.wrapAllTextNodes = function(wrapper) {
 $.fn.cloneDocument = function() {
 	// TODO: This isn't compatible cross browser
 	var b = $(this[0].body);
-	
+	log("CLONING", this);
 	var clonedBody = b.clone();
 	clonedBody.find("script").remove();
-	
+	clonedBody.find("iframe").attr("src", "javascript:");
 	var clonedHead = $(this[0].head).clone();
 	clonedHead.find("script").remove();
 	
-	var w = window.open();
-	var d = w.document;
+	var originalFrames = b.find("iframe");
+	
+	var iframe = $("<iframe src='javascript:' />").appendTo(b).width(b.width())
+	var d = iframe[0].contentDocument;
+	return d;
+	//var d = window.open().document;
+	//iframe.remove(); // wasn't working in firefox
+	
 	$(d.head).replaceWith(clonedHead);
 	$(d.body).replaceWith(clonedBody).width(b.width()).height(b.height());
-	
-	
-	var originalFrames = b.find("iframe");
 	var clonedFrames = clonedBody.find("iframe");
+	
 	originalFrames.each(function(i) {
-		var originalDoc = $(this).contents()[0];
-		var frameDoc = $(this).contents().cloneDocument();
-		clonedFrames.contents().find("head").replaceWith(frameDoc.head);
-		clonedFrames.contents().find("body").replaceWith(frameDoc.body).width($(originalDoc.body).width()).height($(originalDoc.body).height());
+		//var frameDoc = $(this).contents().cloneDocument();
+		//clonedFrames.eq(i).contents().find("head").replaceWith(frameDoc.head);
+		//clonedFrames.eq(i).contents().find("body").html('yo');//replaceWith(frameDoc.body);
 	});
 
 	return d;
@@ -138,7 +141,7 @@ function html2canvas(body, width, cb) {
 		body = iframe.contents().find("body").html(body)[0];
 	}
 	else {
-		var doc = $(body.ownerDocument).cloneDocument().body;
+		//body = $(body.ownerDocument).cloneDocument().body;
 	}
 	
 	if ($.isFunction(width)) {
@@ -156,8 +159,6 @@ function html2canvas(body, width, cb) {
 	var el = new element(body, function(canvas) {
 		cb(canvas);
 	});
-	
-	el.renderCanvas();
 }
 
 function element(DOMElement, onready) {
@@ -180,22 +181,24 @@ function element(DOMElement, onready) {
 	
 	if (this.tagName == "body") {
 		this.totalChildren = 0;
-		this.readyChilren = 0;
 		this.body = this;
 		this.outputCanvas = document.createElement("canvas");
 		this.outputCanvas._el = this;
+		this.jq.addClass("h2c-clearfix");
 		//this.jq.wrapAllTextNodes("<span class='h2c'></span>");
 	}
 	else {
 		this.parent = this._domElement.parentNode._element;
 		this.body = this.parent.body;
 		this.closestBlock = (this.parent.isBlock) ? this.parent : this.parent.closestBlock;
-		this.body.totalChildren++;
 	}
 	
 	this.jq.wrapSiblingTextNodes("<span class='h2c'></span>");
 	
 	this.copyDOM();
+	if (this.shouldRender) {
+		this.body.totalChildren++;
+	}
 	
 	// Count the new document as another child so no ready signal will be recieved until it is done.
 	// The iframe's readySignal will be recieved when the actual box finishes
@@ -219,19 +222,64 @@ function element(DOMElement, onready) {
 	   		this.childElements.push(new element(child));
 	   	}
 	}
+	
+	// Kick off the rendering since this is the body
+	if (this.tagName == "body") {
+		this.renderCanvas();
+	}
 }
 
-
 element.prototype.signalReady = function() {
-	if (this.tagName != "body") {
-		var body = this.body;
-		body.readyChildren++;
-		if (body.readyChildren == body.totalChildren) {	
-			body.outputCanvas.width = body.css.outerWidthMargins;
-			body.outputCanvas.height = body.css.outerHeightMargins;
-			body.copyToCanvas(body.outputCanvas);
-			body.onready(body.outputCanvas);
+	var body = this.body;
+	body.readyChildren++;
+	if (body.readyChildren == body.totalChildren) {	
+	    body.outputCanvas.width = body.css.outerWidthMargins;
+	    body.outputCanvas.height = body.css.outerHeightMargins;
+	    body.copyToCanvas(body.outputCanvas);
+	    body.onready(body.outputCanvas);
+	}
+};
+
+element.prototype.copyToCanvas = function(canvas) {
+	if (this.shouldRender) { 	
+		var ctx = canvas.getContext("2d"),
+			x = this.x, y = this.y,
+			w = this.width, h = this.height;
+		
+		log2("Rendering", this.tagName, this.text, x, y, w, h);
+		
+		if (this.jq.attr("data-debug") || settings.drawBoundingBox) {
+			ctx.strokeStyle = "#d66";
+			ctx.lineWidth = 1;
+			ctx.strokeRect(x, y, w, h);
 		}
+		
+		// TODO: DRAW OUTLINE
+		// Draw a bounding box to show where the DOM Element lies
+		if (this.css.outlineWidth > 0) {
+			ctx.strokeStyle = this.css.outlineColor;
+			ctx.lineWidth = this.css.outlineWidth;
+			ctx.strokeRect(
+				this.css.outlineOffset.left, this.css.outlineOffset.top, 
+				this.css.outlineOffset.width, this.css.outlineOffset.height);
+		}
+		
+		// Render the element's canvas onto this canvas.  May eventually need to move
+		// to a getImageData / putImageData model to better use caching	
+		if (w > 0 && h > 0) {
+			ctx.drawImage(this.canvas, x, y, w, h);
+		}
+		
+		// iframes have a contents canvas, that we need to render
+		if (this.tagName == "iframe") {
+			var c = this.contents;
+			var innerOffset = this.css.innerOffset;
+			ctx.drawImage(c, innerOffset.left + x, innerOffset.top + y, c.width, c.height);
+		}
+	}
+	
+	for (var i = 0, len = this.childElements.length; i < len; i++) {
+		this.childElements[i].copyToCanvas(canvas);
 	}
 };
 
@@ -263,7 +311,7 @@ element.prototype.copyDOM = function() {
 	
 	this.offset = el.offset();
 	this.position = el.position();
-	this.elementHeight = el.height();
+	this.elementHeight = (this.tagName == "body") ? el[0].scrollHeight : el.height();
 	this.elementWidth = this.overflowHiddenWidth = el.width();
 	
 	// Offset needs to be computed with the margin to show where to start the bounding box of element
@@ -407,69 +455,23 @@ element.prototype.copyDOM = function() {
 	}
 };
 
-element.prototype.copyToCanvas = function(canvas) {
-	if (!this.shouldRender) { return; }
-	
-	var ctx = canvas.getContext("2d"),
-		x = this.x, y = this.y,
-		w = this.width, h = this.height;
-	
-	log2("Rendering", this.tagName, this.text, x, y, w, h);
-	
-	if (this.jq.attr("data-debug") || settings.drawBoundingBox) {
-		ctx.strokeStyle = "#d66";
-		ctx.lineWidth = 1;
-		ctx.strokeRect(x, y, w, h);
-	}
-	
-	// TODO: DRAW OUTLINE
-	// Draw a bounding box to show where the DOM Element lies
-	if (this.css.outlineWidth > 0) {
-		ctx.strokeStyle = this.css.outlineColor;
-		ctx.lineWidth = this.css.outlineWidth;
-		ctx.strokeRect(
-			this.css.outlineOffset.left, this.css.outlineOffset.top, 
-			this.css.outlineOffset.width, this.css.outlineOffset.height);
-	}
-	
-	// Render the element's canvas onto this canvas.  May eventually need to move
-	// to a getImageData / putImageData model to better use caching	
-	if (w > 0 && h > 0) {
-		ctx.drawImage(this.canvas, x, y, w, h);
-	}
-	
-	// iframes have a contents canvas, that we need to render
-	if (this.tagName == "iframe") {
-		var c = this.contents;
-		var innerOffset = this.css.innerOffset;
-		ctx.drawImage(c, innerOffset.left + x, innerOffset.top + y, c.width, c.height);
-	}
-	
-	
-	for (var i = 0, len = this.childElements.length; i < len; i++) {
-		this.childElements[i].copyToCanvas(canvas);
-	}
-};
-
-
 element.prototype.renderCanvas = function() {
 
-	if (!this.shouldRender) { return; }
-	log2("RENDERING CANVAS", this.tagName, this.height, this.width);
-	
-	var canvas = this.canvas = document.createElement("canvas");
-	canvas.width = this.width;
-	canvas.height = this.height;
-	var ctx = canvas.getContext("2d");
-	
-	
-	var that = this;
-	that.renderBackground(ctx, function() {
-		that.renderBorders(ctx);
-		that.renderText(ctx);
-		that.signalReady();
-	});
-	
+	if (this.shouldRender) {
+		log2("RENDERING CANVAS", this.tagName, this.height, this.width);
+		
+		var canvas = this.canvas = document.createElement("canvas");
+		canvas.width = this.width;
+		canvas.height = this.height;
+		var ctx = canvas.getContext("2d");
+		
+		var that = this;
+		that.renderBackground(ctx, function() {
+			that.renderBorders(ctx);
+			that.renderText(ctx);
+			that.signalReady();
+		});
+	}
 	for (var i = 0, len = this.childElements.length; i < len; i++) {
 		this.childElements[i].renderCanvas();
 	}
