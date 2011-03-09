@@ -58,7 +58,7 @@ var styleAttributesPx = [
 	'top', 'bottom', 'left', 'right', 
 	'line-height', 'font-size'
 ];
-var h2cStyles = 'body span.h2c { background:inherit !important; display:inline !important; border: none !important; outline: none !important; }\n.h2c-clearfix:after { content: "."; display: block; height: 0; clear: both; visibility: hidden; }\n.h2c-clearfix { zoom:1; } .h2c-clear { clear:both; height:0; line-height:0; }';
+var h2cStyles = 'body span.h2c, body span.h2c-holder { background:transparent !important; display:inline !important; border: none !important; outline: none !important; text-decoration:inherit; font:inherit; } .h2c-clearfix:after { content: "."; display: block; height: 0; clear: both; visibility: hidden; } .h2c-clearfix { zoom:1; } .h2c-clear { clear:both; height:0; line-height:0; }';
 
 // Convert: <div>Hi <strong>there.</strong> <!-- some comment --></div>
 // Into: <div><span>Hi </span><strong>there.</strong></div>
@@ -80,27 +80,55 @@ $.fn.wrapSiblingTextNodes = function(wrapper) {
 		//log(element.contents().filter(function() {return this.nodeType == 3; }));
 	});
 };
-$.fn.wrapAllTextNodes = function(wrapper) {
-	return this.each(function() {
-		if ($(this).is("style") || $(this).is("img")) {
-			return;
-		}
+$.fn.splitTextNodes = function(wrapper) {
+	
+	var trimMultiple = /^[\s]+|[\s]+/g;
+	
+	var all = this.find("*").andSelf();
+	
+	for (var i = 0; i < all.length; i++) {
+		var element = $(all[i]);
+		if (element.is("style") || element.is("script")) { return; }
+		var hasTextNodes = false;
+		var hasOtherNodes = false;
+		var textNodes = [];
 		
-		var all = $(this).find("*");
-		$(this).contents().each(function() {
-		    if (this.nodeType == 3) {
-		    	if ($.trim(this.data) == "") { $(this).remove(); }
-		    	//this.data.split(' ')
-		    	$(this).wrap(wrapper);
-		    }
-		    else if (this.nodeType != 1) {
-		    	$(this).remove();
-		    }
-		    else {
-		    	$(this).wrapAllTextNodes(wrapper);
-		    }
-		});	
-	});
+		element.contents().each(function() {
+			if (element[0].tagName == "BODY") {
+			
+			}
+			if (this.nodeType == 3) {
+				hasTextNodes = true;
+				textNodes.push(this);
+			}
+			else if (this.nodeType != 1) {
+				$(this).remove();
+			}
+			else {
+				hasOtherNodes = true;
+			}
+		});
+		
+		// If this only has text nodes, 
+		if (hasTextNodes && !hasOtherNodes) {
+			var singleSpaces = $.trim(element.html().replace(trimMultiple," "));
+			var spA = singleSpaces.split(" ");
+			
+			var newHtml = [];
+			for (var j = 0; j < spA.length; j++) {
+				newHtml.push('<span class="h2c">'+spA[j]+' </span>');
+			}
+			
+			element.html(newHtml.join(''));
+		}
+		else if (hasTextNodes && hasOtherNodes) {
+			// Wrap each node, then push it onto list for processing (splitting up spaces)
+			for (var j = 0; j < textNodes.length; j++) {
+				var newElement = $(textNodes[j]).wrap('<span class="h2c-holder"></span>').parent();
+				all = all.add(newElement);
+			}
+		}
+	}
 };
 
 $.fn.cloneDocument = function() {
@@ -153,7 +181,13 @@ function html2canvas(body, width, cb) {
 	}
 	
 	if (!body.ownerDocument.getElementById('h2c-styles')) {
-		$(body).append("<style type='text/css' id='h2c-styles'>" + h2cStyles + "</style>");
+		var style = $("<style type='text/css' id='h2c-styles' />", body.ownerDocument).appendTo(body);
+		if ($.browser.msie) {
+    	    style[0].styleSheet.cssText = h2cStyles;
+    	}
+    	else {
+    	    style.html(h2cStyles);
+    	}
 	}
 	
 	var el = new element(body, function(canvas) {
@@ -177,6 +211,7 @@ function element(DOMElement, onready) {
 	this.nodeType = this._domElement.nodeType;
 	this.tagName = this._domElement.tagName.toLowerCase();
 	this.isBody = this.tagName == "body";
+	this.isTextPlaceholder = this.jq.is("span.h2c");
 	this.readyChildren = 0;
 	this.ready = false;
 	this.onready = onready || function() { };
@@ -186,7 +221,7 @@ function element(DOMElement, onready) {
 		this.body = this;
 		this.outputCanvas = document.createElement("canvas");
 		this.outputCanvas._el = this;
-		//this.jq.wrapAllTextNodes("<span class='h2c'></span>");
+		this.jq.splitTextNodes("<span class='h2c'></span>");
 	}
 	else {
 		this.parent = this._domElement.parentNode._element;
@@ -194,7 +229,7 @@ function element(DOMElement, onready) {
 		this.closestBlock = (this.parent.isBlock) ? this.parent : this.parent.closestBlock;
 	}
 	
-	this.jq.wrapSiblingTextNodes("<span class='h2c'></span>");
+	//this.jq.wrapTextNodes("<span class='h2c'></span>");
 	
 	this.copyDOM();
 	if (this.shouldRender) {
@@ -493,7 +528,34 @@ element.prototype.renderCanvas = function() {
 	}
 };
 
+
 element.prototype.renderText = function(ctx) {
+	if (this.hasOnlyTextNodes) {
+		// Time to print out some text, don't have to worry about any more elements changing styles
+  		ctx.font = this.css.font;
+  		ctx.fillStyle = this.css.color;
+		ctx.textBaseline = "bottom";
+		
+		
+		var startX = this.css.innerOffset.left;
+		var startY = this.css.innerOffset.top + this.css.textBaselinePx;
+		
+		
+		//log("Recieved lines", this.tagName, this.textStartsOnDifferentLine, this.text, this.css.innerOffset.left, this.css.marginLeft, this.css.paddingLeft, this.css.borderLeftWidth);
+		
+		ctx.fillText(this.text, startX, startY);
+		
+		if (this.css.textDecoration == 'underline') {
+			var width = ctx.measureText(this.text).width;
+		    ctx.moveTo(startX, this.css.fontSize);
+		    ctx.lineTo(startX + width, this.css.fontSize);
+		    ctx.strokeStyle = this.css.color;
+		    ctx.lineWidth = 1; //face.underlineThickness;
+		    ctx.stroke();
+		}
+	}
+}
+element.prototype.renderTextLines = function(ctx) {
 	if (this.hasOnlyTextNodes) {
 		
 		// Time to print out some text, don't have to worry about any more elements changing styles
@@ -501,8 +563,9 @@ element.prototype.renderText = function(ctx) {
   		ctx.fillStyle = this.css.color;
 		ctx.textBaseline = "bottom";
 		
+		
 		var startX = this.css.innerOffset.left;
-		var startY = this.css.innerOffset.top + this.css.textBaselinePx;
+		var startY = this.css.innerOffset.top + this.css.textBaselinePx;		
 		var minimumTextY = this.css.outerHeightMargins - this.css.marginBottom - this.css.borderBottomWidth;
 		
 		if (this.textStartsOnDifferentLine) {
@@ -511,8 +574,8 @@ element.prototype.renderText = function(ctx) {
 		
 		var lines = wordWrap(ctx, this.text, this.overflowHiddenWidth, 
 			startX, !this.textStartsOnDifferentLine);
-	
-		log2("Recieved lines", lines, startX, this.css, this.css.lineHeight, this.overflowHiddenWidth, this.css.outerWidthMargins);
+		
+		//log("Recieved lines", this.tagName, this.text, lines, startX, this.css, this.css.lineHeight, this.overflowHiddenWidth, this.css.outerWidthMargins);
 		
 		for (var j = 0; j < lines.length; j++) {
 		
@@ -601,6 +664,14 @@ element.prototype.renderBackground = function(ctx, cb) {
 	if (this.css.backgroundColor) {
 		ctx.fillStyle = this.css.backgroundColor;
 		ctx.fillRect(offsetLeft, offsetTop, this.css.outerWidth, this.css.outerHeight);
+	}
+	if (this.tagName == "a") {
+		//ctx.fillStyle = "red";
+		//ctx.fillRect(offsetLeft, offsetTop, this.css.outerWidth, this.css.outerHeight);
+	}
+	if (this.tagName == "span") {
+		//ctx.fillStyle = "green";
+		//ctx.fillRect(offsetLeft, offsetTop, this.css.outerWidth, this.css.outerHeight);
 	}
 	var ownerDoc = this.jq[0].ownerDocument;
 	
