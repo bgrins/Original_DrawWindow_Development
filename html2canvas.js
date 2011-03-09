@@ -458,7 +458,7 @@ element.prototype.copyDOM = function() {
 element.prototype.renderCanvas = function() {
 
 	if (this.shouldRender) {
-		log2("RENDERING CANVAS", this.tagName, this.height, this.width);
+		log2("RENDERING CANVAS", this.tagName, this.text, this.height, this.width, this.hasOnlyTextNodes);
 		
 		var canvas = this.canvas = document.createElement("canvas");
 		canvas.width = this.width;
@@ -496,7 +496,7 @@ element.prototype.renderText = function(ctx) {
 		var lines = wordWrap(ctx, this.text, this.overflowHiddenWidth, 
 			startX, !this.textStartsOnDifferentLine);
 	
-		log2("Recieved lines", lines, startX, this.css.lineHeight, this.overflowHiddenWidth, this.css.outerWidthMargins);
+		log2("Recieved lines", lines, startX, this.css, this.css.lineHeight, this.overflowHiddenWidth, this.css.outerWidthMargins);
 		
 		for (var j = 0; j < lines.length; j++) {
 		
@@ -585,18 +585,18 @@ element.prototype.renderBackground = function(ctx, cb) {
 		ctx.fillStyle = this.css.backgroundColor;
 		ctx.fillRect(offsetLeft, offsetTop, this.css.outerWidth, this.css.outerHeight);
 	}
-	
 	var ownerDoc = this.jq[0].ownerDocument;
 	
 	if (this.tagName == "img") {
 		retrieveImageCanvas(this.src, function(imgCanvas) {
-	    	ctx.drawImage(imgCanvas, 0, 0, imgCanvas.width, imgCanvas.height);
+	    	ctx.drawImage(imgCanvas, offsetLeft, offsetTop, imgCanvas.width, imgCanvas.height);
 	    	cb();
 		}, ownerDoc);
 	}
 	else if (this.css.backgroundImage != "none") {
 		retrieveImageCanvas(this.css.backgroundImage, function(imgCanvas) {
-	    	ctx.drawImage(imgCanvas, 0, 0, imgCanvas.width, imgCanvas.height);
+			
+	    	ctx.drawImage(imgCanvas, offsetLeft, offsetTop, imgCanvas.width, imgCanvas.height);
 	    	cb();
 		}, ownerDoc);
 	}
