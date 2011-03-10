@@ -282,7 +282,7 @@ element.prototype.copyToCanvas = function(canvas) {
 			x = this.x, y = this.y,
 			w = this.width, h = this.height;
 		
-		log2("Rendering", this.tagName, this.text, x, y, w, h);
+		log("Rendering", this.tagName, this.text, x, y, w, h, canvas.width, canvas.height, this.canvas.width, this.canvas.height);
 		
 		if (this.jq.attr("data-debug") || settings.drawBoundingBox) {
 			ctx.strokeStyle = "#d66";
@@ -323,7 +323,7 @@ element.prototype.copyDOM = function() {
 		
 	var el = this.jq;
 	
-	this.css = { };
+	var css = this.css = { };
 	
 	var computedStyleNormal = computedStyle(el[0], styleAttributes);
 	var computedStylePx = computedStyle(el[0], styleAttributesPx);
@@ -347,6 +347,9 @@ element.prototype.copyDOM = function() {
 	
 	this.offset = el.offset();
 	this.position = el.position();
+	this.scrollHeight = el[0].scollHeight;
+	this.scrollWidth = el[0].scrollWidth;
+	
 	if (this.isBody) {
 		this.elementHeight = $(this.document).height() - this.css.marginTop - this.css.marginBottom;
 	}
@@ -354,8 +357,10 @@ element.prototype.copyDOM = function() {
 		this.elementHeight = el.height();
 	}
 	
-	this.elementWidth = this.overflowHiddenWidth = el.width();
-	
+	//this.elementWidth = this.scrollWidth;
+	//this.elementHeight = this.scrollHeight;
+	this.overflowHiddenWidth = el.width();
+	this.elementWidth = this.overflowHiddenWidth;
 	// Offset needs to be computed with the margin to show where to start the bounding box of element
 	// Offset does not take body's border into account, except in certain cases:
 	// http://bugs.jquery.com/ticket/7948
@@ -381,35 +386,35 @@ element.prototype.copyDOM = function() {
 	// outerHeight: Full height, but without the margins
 	this.css.outerHeight = 
 		this.elementHeight + 
-		this.css.paddingTop +
-		this.css.paddingBottom +
-		this.css.borderTopWidth +
-		this.css.borderBottomWidth;
+		css.paddingTop +
+		css.paddingBottom +
+		css.borderTopWidth +
+		css.borderBottomWidth;
 	
 	// outerHeightMargins: The total bounding height of the object
-	this.css.outerHeightMargins = 
-		this.css.outerHeight + 
-		this.css.marginTop + 
-		this.css.marginBottom;
+	css.outerHeightMargins = 
+		css.outerHeight + 
+		css.marginTop + 
+		css.marginBottom;
 		
 	// outerWidth: Full width, but without the margins
-	this.css.outerWidth = 
+	css.outerWidth = 
 		this.elementWidth + 
-		this.css.paddingLeft +
-		this.css.paddingRight +
-		this.css.borderLeftWidth + 
-		this.css.borderRightWidth;
+		css.paddingLeft +
+		css.paddingRight +
+		css.borderLeftWidth + 
+		css.borderRightWidth;
 		
 	// outerWidthMargins: The total bounding width of the object
-	this.css.outerWidthMargins = 
-		this.css.outerWidth + 
-		this.css.marginLeft +
-		this.css.marginRight;
+	css.outerWidthMargins = 
+		css.outerWidth + 
+		css.marginLeft +
+		css.marginRight;
 	
 	// The body needs to render background over margins (at least in Chrome)
 	if (this.isBody) {
-		//this.css.outerHeightMargins = this.css.outerHeightMargins - this.css.marginTop - this.css.marginBottom;
-		//this.css.outerWidthMargins = this.css.outerWidthMargins - this.css.marginLeft - this.css.marginRight;
+		this.css.outerHeightMargins = this.css.outerHeightMargins - this.css.marginTop - this.css.marginBottom;
+		this.css.outerWidthMargins = this.css.outerWidthMargins - this.css.marginLeft - this.css.marginRight;
 	}
 	
 	// innerOffset: where to start printing content from within the context of the element.
@@ -529,7 +534,7 @@ element.prototype.renderCanvas = function() {
 };
 
 
-element.prototype.renderText = function(ctx) {
+element.prototype.renderTextNoLines = function(ctx) {
 	if (this.hasOnlyTextNodes) {
 		// Time to print out some text, don't have to worry about any more elements changing styles
   		ctx.font = this.css.font;
@@ -555,7 +560,7 @@ element.prototype.renderText = function(ctx) {
 		}
 	}
 }
-element.prototype.renderTextLines = function(ctx) {
+element.prototype.renderText = function(ctx) {
 	if (this.hasOnlyTextNodes) {
 		
 		// Time to print out some text, don't have to worry about any more elements changing styles

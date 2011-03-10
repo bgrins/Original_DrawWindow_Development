@@ -21,7 +21,8 @@
     }
     a { background-color:orange; }
     #footer-text { /*overflow:hidden;*/ }
-    
+    .wrap { word-wrap: break-word; width:100px; }
+    #wrap {  }
 </style> 
 
 <script type='text/javascript' src='../../jquery-1.5.1.min.js'></script>
@@ -30,8 +31,11 @@
 </head> 
 <body id="items" class="browse">
 text nodes not wrapped in tag.
+
+<div class='wrap'>
+alsdkfjadsdsfdsadfsalsdkfjadsdsalsdkfjadsdsfdsadfsalsdkfjadsdsfdsadfsalsdkfjadsdsfdsadfsalsdkfjadsdsfdsadfsalsdkfjadsdsfdsadfs</div>
 <a href='javascript:loader();'>Convert to image</a>
-	<div id="wrap"> 
+	<div id="wrap" class='wrap'> 
 		<!-- brian: site title child of wrap now instead of page - update in header -->
 		<div id="site-title"> 
 			<a href='http://kopn.us/r2r'><h1>Reel-To-Reel Project</h1></a>
@@ -150,6 +154,7 @@ function appendToDoc(canvas) {
 	document.body.appendChild(canvas);
 }
 function loader() {
+	console.log("Loader");
 	//var w = window.open("about:blank", "_blank", "menubar=0,location=0,toolbar=0,resizable=1,width=350,height=300");
 	
 	window.html2canvasProcessOnLoad = function(canvas) {
