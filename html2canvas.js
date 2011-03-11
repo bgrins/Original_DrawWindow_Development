@@ -84,19 +84,18 @@ $.fn.splitTextNodes = function(wrapper) {
 	
 	var trimMultiple = /^[\s]+|[\s]+/g;
 	
-	var all = this.find("*").andSelf();
+	var all = this.add(this.find("*"));
+	
+	var skip = "style, script, .h2c";
 	
 	for (var i = 0; i < all.length; i++) {
 		var element = $(all[i]);
-		if (element.is("style") || element.is("script")) { return; }
+		if (element.is(skip)) { return; }
 		var hasTextNodes = false;
 		var hasOtherNodes = false;
 		var textNodes = [];
 		
 		element.contents().each(function() {
-			if (element[0].tagName == "BODY") {
-			
-			}
 			if (this.nodeType == 3) {
 				hasTextNodes = true;
 				textNodes.push(this);
@@ -111,12 +110,18 @@ $.fn.splitTextNodes = function(wrapper) {
 		
 		// If this only has text nodes, 
 		if (hasTextNodes && !hasOtherNodes) {
-			var singleSpaces = $.trim(element.html().replace(trimMultiple," "));
-			var spA = singleSpaces.split(" ");
-			
+			// Collapse all whitespace down to one space each
+			var singleSpaces = element.html().replace(trimMultiple," ");
+			var words = singleSpaces.split(" ");
 			var newHtml = [];
-			for (var j = 0; j < spA.length; j++) {
-				newHtml.push('<span class="h2c">'+spA[j]+' </span>');
+			var space = '';
+			for (var j = 0, wordLength = words.length; j < wordLength; j++) {
+				// There was a space before this unless if it is the first word.
+				//if (j == ' ') { space = ' '; }
+				//else { space = ''; }
+				
+				space = (j == 0) ? '' : ' ';
+				newHtml.push(space + '<span class="h2c">'+words[j]+'</span>');
 			}
 			
 			element.html(newHtml.join(''));
@@ -574,7 +579,7 @@ element.prototype.renderText = function(ctx) {
 		var minimumTextY = this.css.outerHeightMargins - this.css.marginBottom - this.css.borderBottomWidth;
 		
 		if (this.textStartsOnDifferentLine) {
-			startX = this.textStart.left;
+			//startX = this.textStart.left;
 		}
 		
 		var lines = wordWrap(ctx, this.text, this.overflowHiddenWidth, 

@@ -1,45 +1,80 @@
 <!doctype html>
 <html>
 <head>
-<script type='text/javascript' src='jquery-1.5.1.min.js'></script>
-<style>
-span { background-color:orange; }
-
+<style type='text/css'>
+iframe { width:100%; border:none; margin:0; padding:0; }
+canvas { border:solid 1px green;}
+.frame, .canvas { float:left; width: 50%; height:400px; overflow:scroll; }
+h2 { border-bottom: dashed 2px #eee; border-top: dashed 2px #eee; }
+.clear { clear: both; }
+#tests { }
+.result { margin: 20px; border: 1px solid black; padding:15px; }
+#testTemplate { display:none; }
+#options { vertical-align:top; margin: 0; width:100%; font-size:.8em;}
+#newTests { display:none; }
 </style>
+<script type='text/javascript' src='jquery-1.5.1.min.js'></script>
+<script type='text/javascript' src='html2canvas.js'></script>
+<script type='text/javascript' src='test.js'></script>
+</head>
 
-<script>
-function loader() {
-	var w = window.open("about:blank", "_blank", "menubar=0,location=0,toolbar=0,resizable=1,width=350,height=300");
+<body>
+
+<h2>html2canvas</h2>
+
+<table id='options'>
+<tr>
+<td><label for='drawBoundingBox'>Draw Bounding Boxes</label><br /><br /></td>
+<td><input type='checkbox' id='drawBoundingBox' /></td>
+</tr>
+<tr>
+<td valign="top"><label for='runTests'>Run tests: </label><br />
+	<a href='#' id='selectAll'>Select/ Deselect All</a></td>
+<td id='testsToRun'></td>
+</tr>
+<tr><td><input type='button' value='Run' id='run' /></td></tr>
+
+</table>
+
+
+<div id='tests'></div>
+<div id='testTemplate'>
+<div class='result'><h2></h2><div class='frame'></div><div class='canvas'></div><br class='clear' /></div>
+</div>
+
+<script type='text/html' log='false' 
+	description='Omeka' data-src='tests/zach/items.html'></script>
 	
-	window.html2canvasProcessOnLoad = function(canvas) {
-		var d = w.document;
-		var b = w.document.body;
-		$(b).css("margin", "0").css("padding", "0").html("Drawing controls").append(canvas);
-	};
-	var s = document.createElement("script");
-	var base = "http://localhost/~brian/html2canvas/"; 
-	s.setAttribute("type", "text/javascript");
-	s.setAttribute("src", base + "html2canvas.js");
-	document.body.appendChild(s);
-}
-document.write((new Date()).getTime());
+<script type='text/html' log='false' 
+	description='Basic Font Styles' data-src='tests/basicfont.html'></script>
+	
+<script type='text/html' log='false' 
+	description='Advanced Font Styles' data-src='tests/advancedfont.html'></script>
+	
+<script type='text/html' log='false' 
+	description='Test Images' data-src='tests/image.html'></script>
+	
+<script type='text/html' log='false' 
+	description='External Stylesheet' data-src='tests/blueprintsample.html'></script>
+	
+<script type='text/html' log='false' 
+	description='404 Stylesheet' data-src='tests/404css.html'></script>
+	
+<script type='text/html' log='false' 
+	description='Forms' data-src='tests/forms.html'></script>
+
+<script type='text/html' log='false' 
+	description='Javascript' data-src='tests/javascript.html'></script>
+
+<script type='text/html' log='false' 
+	description='Invalid Nodes' data-src='tests/invalidnodes.html'></script>
+	
+<script type='text/html' log='false' 
+	description='Floats' data-src='tests/floats.html'></script>
+
+<script type='text/html' description="Inline Test">
+<p>Inline Test</p>
 </script>
 
-</head>
-<body onload='console.log("loaded");document.getElementById("output").innerHTML=Math.random();'>
-
-
-asdf
-<div id='output'></div>
-<h1>Html2Canvas Bookmarklet Tester</h1>
-
-<a href='javascript:loader();'>Convert to image</a>
-<p>
-Let's get some<span >YO</span> text <strong>in <em>here</em></strong>!
-</p>
-<iframe src='mini.html?2'></iframe>
-<link />
 </body>
 </html>
-
-
