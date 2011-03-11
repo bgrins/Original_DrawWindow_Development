@@ -19,10 +19,15 @@
     #header {
         background:transparent url('header1.5.4.jpg') top left no-repeat;
     }
-    a { background-color:orange; }
+    a { background-color:#ddd; }
     #footer-text { /*overflow:hidden;*/ }
     .wrap { word-wrap: break-word; width:100px; }
     #wrap {  }
+    .tags p { background:green; }
+    .tags p strong { background:blue;}
+    .tags a { outline: red solid 2px ;}
+    #specialtag { background:orange; }
+    #specialtag a { background:inherit;}
 </style> 
 
 <script type='text/javascript' src='../../jquery-1.5.1.min.js'></script>
@@ -86,7 +91,7 @@ alsdkfjadsdsfdsadfsalsdkfjadsdsalsdkfjadsdsfdsadfsalsdkfjadsdsfdsadfsalsdkfjadsd
                                 <a href="http://thanksroy.org/items/browse/tag/collaboration" rel="tag">collaboration</a>
                                 <a href="http://thanksroy.org/items/browse/tag/History Department" rel="tag">History Department</a>
                                 <a href="http://thanksroy.org/items/browse/tag/George Mason University" rel="tag">George Mason University</a>
-                                <a href="http://thanksroy.org/items/browse/tag/Coffee with Roy" rel="tag">Coffee with Roy</a>
+                                <span id='specialtag'><a href="http://thanksroy.org/items/browse/tag/Coffee with Roy" rel="tag">Coffee with Roy</a></span>
                                 <a href="http://thanksroy.org/items/browse/tag/Department Meetings" rel="tag">Department Meetings</a>
                                 <a href="http://thanksroy.org/items/browse/tag/Mediator" rel="tag">Mediator</a>
                                 <a href="http://thanksroy.org/items/browse/tag/community building" rel="tag">community building</a>

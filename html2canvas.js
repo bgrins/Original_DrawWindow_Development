@@ -120,8 +120,8 @@ $.fn.splitTextNodes = function(wrapper) {
 				//if (j == ' ') { space = ' '; }
 				//else { space = ''; }
 				
-				space = (j == 0) ? '' : ' ';
-				newHtml.push(space + '<span class="h2c">'+words[j]+'</span>');
+				space = (j == 0) ? '' : ' ';// '<span class="h2c"> </span>';
+				newHtml.push(space+'<span class="h2c">'+words[j]+'</span>');
 			}
 			
 			element.html(newHtml.join(''));
@@ -287,7 +287,7 @@ element.prototype.copyToCanvas = function(canvas) {
 			x = this.x, y = this.y,
 			w = this.width, h = this.height;
 		
-		log("Rendering", this.tagName, this.text, x, y, w, h, canvas.width, canvas.height, this.canvas.width, this.canvas.height);
+		//log("Rendering", this.tagName, this.text, x, y, w, h, canvas.width, canvas.height, this.canvas.width, this.canvas.height);
 		
 		if (this.jq.attr("data-debug") || settings.drawBoundingBox) {
 			ctx.strokeStyle = "#d66";
@@ -338,6 +338,20 @@ element.prototype.copyDOM = function() {
 	for (var i in computedStylePx) {
 		this.css[$.camelCase(i)] = parseInt(computedStylePx[i]) || 0;
 	}
+	
+	if (css.backgroundColor == "rgba(0, 0, 0, 0)") {
+		css.backgroundColor = false;
+	}
+	
+	// Keep track of the parent's color since they won't be reported, but are still needed
+	if (css.display == "inline") {
+		css.parentBackgroundColor = css.backgroundColor || this.parent.css.parentBackgroundColor;
+	}
+	else {
+		// Clear out the parent background color if we aren't inline
+		css.parentBackgroundColor = css.backgroundColor;
+	}
+	
 	
 	/* May want to use jQuery CSS (it is a little slower, but MAY give better results?
 	for (var i = 0; i < styleAttributes.length; i++) {
@@ -490,17 +504,24 @@ element.prototype.copyDOM = function() {
 		if (childNodes[i].nodeType != 3) { this.hasOnlyTextNodes = false; }
 	}
 	
+
+	// Is a span h2c
 	if (this.hasOnlyTextNodes) {
 	
 		this.text = el.text();
+		if (!this.css.lineHeight) {
+			this.css.lineHeight = el.height();
+			//this.css.lineHeight = measured.height();
+		}
+		
+		this.css.textBaselinePx = (this.css.lineHeight) - ((this.css.lineHeight - this.css.fontSize) / 2);
+	}
 	
+	if (css.display == "inline" && !this.hasOnlyTextNodes) {
 		var oldHtml = el.html();
-		var newHtml = "<span id='measure'>x</span>";
+		var newHtml = "<span id='measure' class='h2c'>x</span>";
 		var measured = el.html(newHtml).find("#measure");
 		var textStart = el.position();
-		if (!this.css.lineHeight) {
-			this.css.lineHeight = measured.height();
-		}
 		el.html(oldHtml);
 		
 		this.textStartsOnDifferentLine = 
@@ -511,9 +532,8 @@ element.prototype.copyDOM = function() {
 			top: textStart.top - this.position.top,
 			left: textStart.left - this.position.left
 		};
-		
-		this.css.textBaselinePx = (this.css.lineHeight) - ((this.css.lineHeight - this.css.fontSize) / 2);
 	}
+	
 };
 
 element.prototype.renderCanvas = function() {
@@ -581,10 +601,9 @@ element.prototype.renderText = function(ctx) {
 		if (this.textStartsOnDifferentLine) {
 			//startX = this.textStart.left;
 		}
-		
 		var lines = wordWrap(ctx, this.text, this.overflowHiddenWidth, 
-			startX, !this.textStartsOnDifferentLine);
-		
+			startX, !this.textStartsOnDifferentLine); 
+			
 		//log("Recieved lines", this.tagName, this.text, lines, startX, this.css, this.css.lineHeight, this.overflowHiddenWidth, this.css.outerWidthMargins);
 		
 		for (var j = 0; j < lines.length; j++) {
@@ -668,11 +687,22 @@ element.prototype.renderBorders = function(ctx) {
 
 
 element.prototype.renderBackground = function(ctx, cb) {
+	var css = this.css;
 	var offsetLeft = this.isBody ? 0 : this.css.marginLeft;
 	var offsetTop = this.isBody ? 0 : this.css.marginTop;
+	var backgroundColor = css.parentBackgroundColor;
+	var backgroundImage = css.backgroundImage; 
 	
-	if (this.css.backgroundColor) {
-		ctx.fillStyle = this.css.backgroundColor;
+	if (this.tagName == "span" && this.text == "community")
+		{
+		log("HEREEEE", backgroundColor);
+		}
+	if (this.textStartsOnDifferentLine) {
+		backgroundColor = false;
+	}
+	
+	if (backgroundColor) {
+		ctx.fillStyle = backgroundColor;
 		ctx.fillRect(offsetLeft, offsetTop, this.css.outerWidth, this.css.outerHeight);
 	}
 	if (this.tagName == "a") {
@@ -691,9 +721,8 @@ element.prototype.renderBackground = function(ctx, cb) {
 	    	cb();
 		}, ownerDoc);
 	}
-	else if (this.css.backgroundImage != "none") {
-		retrieveImageCanvas(this.css.backgroundImage, function(imgCanvas) {
-			
+	else if (backgroundImage != "none") {
+		retrieveImageCanvas(backgroundImage, function(imgCanvas) {
 	    	ctx.drawImage(imgCanvas, offsetLeft, offsetTop, imgCanvas.width, imgCanvas.height);
 	    	cb();
 		}, ownerDoc);
