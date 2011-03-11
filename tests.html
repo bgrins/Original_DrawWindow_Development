@@ -11,6 +11,7 @@ h2 { border-bottom: dashed 2px #eee; border-top: dashed 2px #eee; }
 .result { margin: 20px; border: 1px solid black; padding:15px; }
 #testTemplate { display:none; }
 #options { vertical-align:top; margin: 40px; border: solid 1px; font-size:.8em;}
+#newTests { display:none; }
 </style>
 <script type='text/javascript' src='jquery-1.5.1.min.js'></script>
 <script type='text/javascript' src='html2canvas.js'></script>
@@ -24,25 +25,15 @@ h2 { border-bottom: dashed 2px #eee; border-top: dashed 2px #eee; }
 
 <table id='options'>
 <tr>
-<td><label for='drawBoundingBox'>Draw Bounding Boxes</label></td>
+<td><label for='drawBoundingBox'>Draw Bounding Boxes</label><br /><br /></td>
 <td><input type='checkbox' id='drawBoundingBox' /></td>
 </tr>
 <tr>
-<td><label for='newHtml'>Add New</label></td>
-<td>
-<textarea id='newHtml' rows='5' cols='40'>
-<html>
-	<head>
-		<style>p { border: solid 1px; }</style>
-	</head>
-	<body>
-		<p><strong>Hello</strong></p>
-	</body>
-</html>
-</textarea>
-</td>
+<td valign="top"><label for='runTests'>Run tests: </label><br />
+	<a href='#' id='selectAll'>Select/ Deselect All</a></td>
+<td id='testsToRun'></td>
 </tr>
-<tr><td><input type='button' value='Add' /></td></tr>
+<tr><td><input type='button' value='Run' id='run' /></td></tr>
 
 </table>
 
@@ -82,7 +73,7 @@ h2 { border-bottom: dashed 2px #eee; border-top: dashed 2px #eee; }
 <script type='text/html' log='false' 
 	description='Floats' data-src='tests/floats.html'></script>
 
-<script type='text/html'>
+<script type='text/html' description="Inline Test">
 <p>Inline Test</p>
 </script>
 

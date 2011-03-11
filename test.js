@@ -33,13 +33,42 @@ $(function() {
 		})
 	});
 	
-	$("script[type='text/html']:not([disabled])").each(function() {		
-		var results = $($("#testTemplate").html()).appendTo($("#tests"));
+	$("#run").click(function() {
+		$("#tests").empty();
+		
+		$("#testsToRun input:checked").each(function() {
+			var results = $($("#testTemplate").html()).appendTo($("#tests"));
+			var src = $(this).attr("src");
+			var ind = $(this).attr("ind");
+			results.find("h2").text($(this).attr("description") || ("Test " + ind));
+	    	var iframe = $("<iframe id='test-"+ind+"' onload='frameLoaded(this, "+ind+");' src='"+src+"' />").
+	    		appendTo(results.find(".frame"));
+		});
+	});
+	
+	var inputs = [];
+	$("script[type='text/html']:not([disabled])").each(function() {	
 		data.push($(this).html());
 		var ind = data.length - 1;
-		var src = $(this).data("src") || blankSrc;
-		results.find("h2").text($(this).attr("description") || ("Test " + ind));
-	    var iframe = $("<iframe id='test-"+ind+"' onload='frameLoaded(this, "+ind+");' src='"+src+"' />").
-	    	appendTo(results.find(".frame"));
+		var desc = $(this).attr("description");
+		var src = $(this).attr("data-src") || blankSrc;
+		inputs.push(
+			"<label>" +
+			"<input type='checkbox' ind='"+ind+"' description='"+desc+"' src='"+src+"' />" +
+			desc +
+			"</label><br />"
+		);
+	});
+	$("#testsToRun").html(inputs.join('')).find("input:first").attr("checked", "checked");
+	
+	$("#selectAll").click(function() {
+		var allInputs = $("#testsToRun input");
+		if (allInputs.filter(":checked").length > 0) {
+			allInputs.removeAttr("checked");
+		}
+		else {
+			allInputs.attr("checked", "checked");
+		}
+		return false;
 	});
 });
