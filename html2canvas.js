@@ -141,28 +141,28 @@ $.fn.cloneDocument = function() {
 	var b = $(this[0].body);
 	log("CLONING", this);
 	var clonedBody = b.clone();
-	clonedBody.find("script").remove();
+	clonedBody.find("script, iframe.h2cframe").remove();
 	clonedBody.find("iframe").attr("src", "javascript:");
 	var clonedHead = $(this[0].head).clone();
 	clonedHead.find("script").remove();
 	
-	var originalFrames = b.find("iframe");
+	//var originalFrames = b.find("iframe");
 	
-	var iframe = $("<iframe src='javascript:' />").appendTo(b).width(b.width())
-	var d = iframe[0].contentDocument;
-	return d;
-	//var d = window.open().document;
+	//var iframe = $("<iframe class='h2cframe' src='javascript:' />").appendTo(b).width(b.width())
+	//var d = iframe[0].contentDocument;
+	//return d;
+	var d = window.open().document;
 	//iframe.remove(); // wasn't working in firefox
 	
 	$(d.head).replaceWith(clonedHead);
-	$(d.body).replaceWith(clonedBody).width(b.width()).height(b.height());
+	$(d.body).replaceWith(clonedBody).width(this[0].width).height(this[0].height);
 	var clonedFrames = clonedBody.find("iframe");
 	
-	originalFrames.each(function(i) {
+	//originalFrames.each(function(i) {
 		//var frameDoc = $(this).contents().cloneDocument();
 		//clonedFrames.eq(i).contents().find("head").replaceWith(frameDoc.head);
 		//clonedFrames.eq(i).contents().find("body").html('yo');//replaceWith(frameDoc.body);
-	});
+	//});
 
 	return d;
 };
