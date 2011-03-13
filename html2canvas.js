@@ -539,7 +539,7 @@ element.prototype.copyDOM = function() {
 element.prototype.renderCanvas = function() {
 
 	if (this.shouldRender) {
-		log2("RENDERING CANVAS", this.tagName, this.text, this.height, this.width, this.hasOnlyTextNodes);
+		log("RENDERING CANVAS", this.tagName, this.text, this.height, this.width, this.hasOnlyTextNodes);
 		
 		var canvas = this.canvas = document.createElement("canvas");
 		canvas.width = this.width;
