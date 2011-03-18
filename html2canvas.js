@@ -296,26 +296,6 @@ element.prototype.copyToCanvas = function(canvas) {
 		var ctx = canvas.getContext("2d"),
 			x = this.x, y = this.y,
 			w = this.width, h = this.height;
-	
-	/*
-	    var newCanvas = createCanvas();
-		var canvas2 = createCanvas();
-		if (runonce) {
-		runonce = false;
-		
-		var img = document.createElement("img");
-		img.onload= function() {
-		    newCanvas.width = canvas2.width = img.width;
-		    newCanvas.height = canvas2.height = img.height;
-		    canvas2.getContext("2d").drawImage(img, 0, 0);
-		    newCanvas.getContext("2d").drawImage(canvas2, 0, 0);
-		    
-			ctx.drawImage(newCanvas, 0, 0);
-			
-		}
-		img.src = "flashcanvastest/ff.jpg";
-		}
-			*/
 		
 		//log("Rendering", this.tagName, this.text, x, y, w, h, canvas.width, canvas.height, this.canvas.width, this.canvas.height);
 		
