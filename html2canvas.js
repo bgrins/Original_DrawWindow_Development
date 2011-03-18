@@ -326,9 +326,9 @@ element.prototype.copyToCanvas = function(canvas) {
 			
 			var c = this.canvas;
 			//document.body.appendChild(c);
-			setTimeout(function() {
-			//ctx.drawImage(c, x, y, w, h);
-			}, 5000);
+			//setTimeout(function() {
+			ctx.drawImage(c, x, y, w, h);
+			//}, 5000);
 		}
 		
 		// iframes have a contents canvas, that we need to render
