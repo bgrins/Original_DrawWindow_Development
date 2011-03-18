@@ -29,12 +29,29 @@ function log2() { if (settings.logLevel >= 2) { log.apply(this, arguments); } }
 function error(msg) { throw "[Web Designer] " + msg; return false; }
 function shouldProcess(dom) { return (dom.nodeType == 1) && (!ignoreTags[dom.tagName.toLowerCase()]); }
 function computedStyle(elem, styles) {
-	var defaultView = elem.ownerDocument.defaultView;
-	var computedStyle = defaultView.getComputedStyle( elem, true );
+
+	// IE - Use jQuery CSS.  Others - Load the computedStyle once and read from it
+	
 	var ret = { };
-	for (var i = 0; i < styles.length; i++) {
-		ret[styles[i]] = computedStyle.getPropertyValue( styles[i] );
+	
+	if ($.browser.msie) {
+		var el = $(elem);
+		for (var i = 0, len = styles.length; i < len; i++) {
+			var attr = styles[i], val;
+			if (attr == 'outline-width') { val = 0; }
+			else { val = el.css(attr); }
+			
+			ret[$.camelCase(attr)] = val;
+		}
 	}
+	else {	
+		var defaultView = elem.ownerDocument.defaultView;
+		var computedStyle = defaultView.getComputedStyle( elem, true );
+		for (var i = 0, len = styles.length; i < len; i++) {
+			ret[$.camelCase(styles[i])] = computedStyle.getPropertyValue( styles[i] );
+		}
+	}
+	
 	return ret;
 }
 
@@ -347,37 +364,20 @@ element.prototype.copyToCanvas = function(canvas) {
 element.prototype.copyDOM = function() {
 		
 	var el = this.jq;
-	
+	var body = this.body;
 	var css = this.css = { };
 	
-	//May want to use jQuery CSS (it is a little slower, but MAY give better results? 
-	for (var i = 0; i < styleAttributes.length; i++) {
-		var attr = styleAttributes[i];
-		this.css[$.camelCase(attr)] = el.css(attr);
-	}
-	for (var i = 0; i < styleAttributesPx.length; i++) {
-		var attr = styleAttributesPx[i];
-		if (attr == 'outline-width') {
-			//log(this.tagName, el.css("outline"));
-			this.css['outlineWidth'] = 0;	
-		}
-		else {
-		this.css[$.camelCase(attr)] = parseInt(el.css(attr), 10) || 0;
-		}
-	}
-	
-	/*
 	var computedStyleNormal = computedStyle(el[0], styleAttributes);
-	var computedStylePx = computedStyle(el[0], styleAttributesPx);
 	for (var i in computedStyleNormal) {
-		this.css[$.camelCase(i)] = computedStyleNormal[i];
+		css[i] = computedStyleNormal[i];
 	}
-	for (var i in computedStylePx) {
-		this.css[$.camelCase(i)] = parseInt(computedStylePx[i]) || 0;
-	}
-	*/
 	
-	if (css.backgroundColor == "rgba(0, 0, 0, 0)") {
+	var computedStylePx = computedStyle(el[0], styleAttributesPx);
+	for (var i in computedStylePx) {
+		css[i] = parseInt(computedStylePx[i]) || 0;
+	}
+	
+	if (css.backgroundColor == "rgba(0, 0, 0, 0)" || css.backgroundColor == "transparent") {
 		css.backgroundColor = false;
 	}
 	
@@ -389,8 +389,6 @@ element.prototype.copyDOM = function() {
 		// Clear out the parent background color if we aren't inline
 		css.parentBackgroundColor = css.backgroundColor;
 	}
-	
-	
 	
 	this.offset = el.offset();
 	this.position = el.position();
@@ -411,7 +409,6 @@ element.prototype.copyDOM = function() {
 	// Offset needs to be computed with the margin to show where to start the bounding box of element
 	// Offset does not take body's border into account, except in certain cases:
 	// http://bugs.jquery.com/ticket/7948
-	var body = this.body;
 	this.hasAbsoluteParent = this.parent && 
 		(this.parent.hasAbsoluteParent || this.parent.css.position == "absolute");
 		
@@ -423,11 +420,12 @@ element.prototype.copyDOM = function() {
 	var bodyBorderTopWidth = includeBodyBordersInOffset ? body.css.borderTopWidth : 0;
 	var bodyBorderLeftWidth = includeBodyBordersInOffset ? body.css.borderLeftWidth : 0;
 	
-		// For some reason, <strong> elements in FF report a font-weight of 401 even though they are bold
+	// For some reason, <strong> elements in FF report a font-weight of 401
 	if ($.browser.mozilla && parseInt(this.css.fontWeight, 10) == 401) {
 		this.css.fontWeight = "bold";
 	}
 	
+	// Shorthand font rule to be used by canvas
 	this.css.font = $.trim(this.css.fontStyle + " " + this.css.fontWeight + " "  + this.css.fontSize + "px " + this.css.fontFamily);
 	
 	// outerHeight: Full height, but without the margins
@@ -725,10 +723,10 @@ element.prototype.renderBackground = function(ctx, cb) {
 	var backgroundImage = css.backgroundImage;
 	var backgroundRepeat = css.backgroundRepeat;
 	
-	if (this.tagName == "span" && this.text == "community")
-		{
+	if (this.tagName == "span" && this.text == "community") {
 		log("HEREEEE", backgroundColor);
-		}
+	}
+	
 	if (this.textStartsOnDifferentLine) {
 		backgroundColor = false;
 	}
@@ -754,8 +752,6 @@ element.prototype.renderBackground = function(ctx, cb) {
 		}, ownerDoc);
 	}
 	else if (backgroundImage != "none") {
-	
-        
 		retrieveImageCanvas(backgroundImage, function(imgCanvas, img) {
         	ctx.fillStyle = ctx.createPattern(img, backgroundRepeat);
 			ctx.fillRect(offsetLeft, offsetTop, outerWidth, outerHeight);
