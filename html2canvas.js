@@ -285,8 +285,8 @@ element.prototype.signalReady = function() {
 	if (body.readyChildren == body.totalChildren) {	
 	    body.outputCanvas.width = body.css.outerWidthMargins;
 	    body.outputCanvas.height = body.css.outerHeightMargins;
-	    body.copyToCanvas(body.outputCanvas);
 	    body.onready(body.outputCanvas);
+	    body.copyToCanvas(body.outputCanvas);
 	}
 };
 var runonce = true;
@@ -317,22 +317,18 @@ element.prototype.copyToCanvas = function(canvas) {
 		
 		// Render the element's canvas onto this canvas.  May eventually need to move
 		// to a getImageData / putImageData model to better use caching	
+		// FlashCanvas has a known issue about rendering a canvas that is hidden:
+		// http://flashcanvas.net/docs/issues
+		// which makes this a real pain in the ass with IE.  Need to come up with a better way
+		// of keeping track of each element and getting image data...
+		
 		if (w > 0 && h > 0) {
 			
-			/*if (runonce) {
-				runonce = false;
-				var c1 = createCanvas();
-				var c2 = createCanvas();
-				c1.width = c1.height = c2.width = c2.height = 100;
-				document.body.appendChild(c1);
-				document.body.appendChild(c2);
-				c1.getContext("2d").fillRect(0, 0, 20, 20);
-				//ctx.drawImage(c1, x, y, 40, 40);
-				c2.getContext("2d").fillRect(50, 50, 10, 10);
-				c2.getContext("2d").drawImage(c1, 0, 0);
-				//alert(this.canvas.getContext("2d").getImageData(0, 0, this.canvas.width, this.canvas.height));
-			}*/
-			ctx.drawImage(this.canvas, x, y, w, h);
+			var c = this.canvas;
+			//document.body.appendChild(c);
+			setTimeout(function() {
+			//ctx.drawImage(c, x, y, w, h);
+			}, 5000);
 		}
 		
 		// iframes have a contents canvas, that we need to render

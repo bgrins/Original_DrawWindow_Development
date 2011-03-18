@@ -5,7 +5,7 @@
 		<title>Canvas text animation example</title>
     <link rel="stylesheet" type="text/css" href="style.css" />
     
-    <!--[if lt IE 9]><script type="text/javascript" src="../flashcanvas/flashcanvas.js"></script><![endif]-->
+    <!--[if lt IE 9]><script type="text/javascript" src="../flashcanvaspro/flashcanvasstrict.js"></script><![endif]-->
 	</head>
 	<body>
     <h1>Canvas text animation example</h1>
@@ -30,10 +30,12 @@ function(){h.innerHTML="";k.removeChild(h);k.appendChild(f);l.styleSheet.cssText
       
 			window.onload = function(){
 		  	var canvas = initCanvas(document.createElement("canvas"));
+		  	var canvas2 = initCanvas(document.createElement("canvas"));
 		  	//var canvas = initCanvas(document.getElementById("test-canvas"));
-				    canvas.width = 500;
-				    canvas.height = 300;
+				    canvas.width = canvas2.width = 500;
+				    canvas.height = canvas2.height = 300;
 			document.body.appendChild(canvas);
+			document.body.appendChild(canvas2);
 			var ctx = canvas.getContext('2d');
 		  	ctx.font = "3em Optimer";
         ctx.textAlign = 'center';
@@ -70,6 +72,8 @@ function(){h.innerHTML="";k.removeChild(h);k.appendChild(f);l.styleSheet.cssText
 					/*if (n < 1000)*/ setTimeout(draw, 10);
 		  	}
 		    draw();
+          canvas2.width = canvas2.width;
+          canvas2.getContext("2d").drawImage(canvas, 0, 0);
 			}
 		</script>
     
