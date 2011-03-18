@@ -5,9 +5,10 @@ Render HTML to a canvas relying on the browser's layout engine
 
 /*
 NEEDS MORE TESTING FOR:
-  * Background Properties
   * Images
   * Page zoomed on load
+  * Body outerWidth, borders
+  * IE
 */
 
 (function() {
@@ -16,7 +17,7 @@ window.html2canvas = html2canvas;
 html2canvas.element = element;
 html2canvas.logLevels = { RELEASE: 0, NORMAL: 1, VERBOSE: 2 };
 var settings = html2canvas.settings = {
-	enabled: !!document.createElement('canvas').getContext,
+	enabled: true, // temporarily true to test flashcanvas !!document.createElement('canvas').getContext,
 	drawBoundingBox: false,
 	logLevel: html2canvas.logLevels.RELEASE
 };
@@ -200,6 +201,14 @@ function html2canvas(body, width, cb) {
 	});
 }
 
+function createCanvas() {
+	var c = document.createElement("canvas");
+    if (typeof FlashCanvas != "undefined") {
+      FlashCanvas.initElement(c);
+    }
+    return c;	
+}
+
 function element(DOMElement, onready) {
 
 	log1("initializing element", DOMElement, DOMElement.nodeType);
@@ -224,7 +233,7 @@ function element(DOMElement, onready) {
 	if (this.isBody) {
 		this.totalChildren = 0;
 		this.body = this;
-		this.outputCanvas = document.createElement("canvas");
+		this.outputCanvas = createCanvas();
 		this.outputCanvas._el = this;
 		this.jq.splitTextNodes("<span class='h2c'></span>");
 	}
@@ -280,16 +289,37 @@ element.prototype.signalReady = function() {
 	    body.onready(body.outputCanvas);
 	}
 };
-
+var runonce = true;
 element.prototype.copyToCanvas = function(canvas) {
 	if (this.shouldRender) { 	
+	
 		var ctx = canvas.getContext("2d"),
 			x = this.x, y = this.y,
 			w = this.width, h = this.height;
+	
+	/*
+	    var newCanvas = createCanvas();
+		var canvas2 = createCanvas();
+		if (runonce) {
+		runonce = false;
+		
+		var img = document.createElement("img");
+		img.onload= function() {
+		    newCanvas.width = canvas2.width = img.width;
+		    newCanvas.height = canvas2.height = img.height;
+		    canvas2.getContext("2d").drawImage(img, 0, 0);
+		    newCanvas.getContext("2d").drawImage(canvas2, 0, 0);
+		    
+			ctx.drawImage(newCanvas, 0, 0);
+			
+		}
+		img.src = "flashcanvastest/ff.jpg";
+		}
+			*/
 		
 		//log("Rendering", this.tagName, this.text, x, y, w, h, canvas.width, canvas.height, this.canvas.width, this.canvas.height);
 		
-		if (this.jq.attr("data-debug") || settings.drawBoundingBox) {
+		if (this.jq.attr("data-debug") ||settings.drawBoundingBox) {
 			ctx.strokeStyle = "#d66";
 			ctx.lineWidth = 1;
 			ctx.strokeRect(x, y, w, h);
@@ -308,7 +338,13 @@ element.prototype.copyToCanvas = function(canvas) {
 		// Render the element's canvas onto this canvas.  May eventually need to move
 		// to a getImageData / putImageData model to better use caching	
 		if (w > 0 && h > 0) {
-			ctx.drawImage(this.canvas, x, y, w, h);
+			if (runonce) {
+				runonce = false;
+				//alert(this.canvas.getContext("2d").getImageData(0, 0, this.canvas.width, this.canvas.height));
+			}
+			//document.body.appendChild(this.canvas);
+			ctx.drawImage(this.canvas, x, y);
+			//ctx.fillRect(x, y, w, h);
 		}
 		
 		// iframes have a contents canvas, that we need to render
@@ -330,6 +366,23 @@ element.prototype.copyDOM = function() {
 	
 	var css = this.css = { };
 	
+	//May want to use jQuery CSS (it is a little slower, but MAY give better results? 
+	for (var i = 0; i < styleAttributes.length; i++) {
+		var attr = styleAttributes[i];
+		this.css[$.camelCase(attr)] = el.css(attr);
+	}
+	for (var i = 0; i < styleAttributesPx.length; i++) {
+		var attr = styleAttributesPx[i];
+		if (attr == 'outline-width') {
+			//log(this.tagName, el.css("outline"));
+			this.css['outlineWidth'] = 0;	
+		}
+		else {
+		this.css[$.camelCase(attr)] = parseInt(el.css(attr), 10) || 0;
+		}
+	}
+	
+	/*
 	var computedStyleNormal = computedStyle(el[0], styleAttributes);
 	var computedStylePx = computedStyle(el[0], styleAttributesPx);
 	for (var i in computedStyleNormal) {
@@ -338,6 +391,7 @@ element.prototype.copyDOM = function() {
 	for (var i in computedStylePx) {
 		this.css[$.camelCase(i)] = parseInt(computedStylePx[i]) || 0;
 	}
+	*/
 	
 	if (css.backgroundColor == "rgba(0, 0, 0, 0)") {
 		css.backgroundColor = false;
@@ -353,16 +407,6 @@ element.prototype.copyDOM = function() {
 	}
 	
 	
-	/* May want to use jQuery CSS (it is a little slower, but MAY give better results?
-	for (var i = 0; i < styleAttributes.length; i++) {
-		var attr = styleAttributes[i];
-		this.css[$.camelCase(attr)] = el.css(attr);
-	}
-	for (var i = 0; i < styleAttributesPx.length; i++) {
-		var attr = styleAttributesPx[i];
-		this.css[$.camelCase(attr)] = parseInt(el.css(attr), 10) || 0;
-	}
-	*/
 	
 	this.offset = el.offset();
 	this.position = el.position();
@@ -517,9 +561,10 @@ element.prototype.copyDOM = function() {
 		this.css.textBaselinePx = (this.css.lineHeight) - ((this.css.lineHeight - this.css.fontSize) / 2);
 	}
 	
-	if (css.display == "inline" && !this.hasOnlyTextNodes) {
+	if (css.display == "inline" && !this.hasOnlyTextNodes && this.tagName != "img") {
 		var oldHtml = el.html();
 		var newHtml = "<span id='measure' class='h2c'>x</span>";
+		el[0].innerHTML = newHtml;
 		var measured = el.html(newHtml).find("#measure");
 		var textStart = el.position();
 		el.html(oldHtml);
@@ -539,9 +584,9 @@ element.prototype.copyDOM = function() {
 element.prototype.renderCanvas = function() {
 
 	if (this.shouldRender) {
-		log("RENDERING CANVAS", this.tagName, this.text, this.height, this.width, this.hasOnlyTextNodes);
+		//log("RENDERING CANVAS", this.tagName, this.text, this.height, this.width, this.hasOnlyTextNodes);
 		
-		var canvas = this.canvas = document.createElement("canvas");
+		var canvas = this.canvas = createCanvas();
 		canvas.width = this.width;
 		canvas.height = this.height;
 		var ctx = canvas.getContext("2d");
@@ -690,8 +735,11 @@ element.prototype.renderBackground = function(ctx, cb) {
 	var css = this.css;
 	var offsetLeft = this.isBody ? 0 : this.css.marginLeft;
 	var offsetTop = this.isBody ? 0 : this.css.marginTop;
+	var outerWidth = css.outerWidth;
+	var outerHeight = css.outerHeight;
 	var backgroundColor = css.parentBackgroundColor;
-	var backgroundImage = css.backgroundImage; 
+	var backgroundImage = css.backgroundImage;
+	var backgroundRepeat = css.backgroundRepeat;
 	
 	if (this.tagName == "span" && this.text == "community")
 		{
@@ -703,7 +751,7 @@ element.prototype.renderBackground = function(ctx, cb) {
 	
 	if (backgroundColor) {
 		ctx.fillStyle = backgroundColor;
-		ctx.fillRect(offsetLeft, offsetTop, this.css.outerWidth, this.css.outerHeight);
+		ctx.fillRect(offsetLeft, offsetTop, outerWidth, outerHeight);
 	}
 	if (this.tagName == "a") {
 		//ctx.fillStyle = "red";
@@ -722,8 +770,11 @@ element.prototype.renderBackground = function(ctx, cb) {
 		}, ownerDoc);
 	}
 	else if (backgroundImage != "none") {
-		retrieveImageCanvas(backgroundImage, function(imgCanvas) {
-	    	ctx.drawImage(imgCanvas, offsetLeft, offsetTop, imgCanvas.width, imgCanvas.height);
+	
+        
+		retrieveImageCanvas(backgroundImage, function(imgCanvas, img) {
+        	ctx.fillStyle = ctx.createPattern(img, backgroundRepeat);
+			ctx.fillRect(offsetLeft, offsetTop, outerWidth, outerHeight);
 	    	cb();
 		}, ownerDoc);
 	}
@@ -737,7 +788,8 @@ function retrieveImageCanvas(src, cb, ownerDocument) {
 
 	if (src.indexOf("data:") == -1) {
 	    var url = new RegExp(/url\((.*)\)/);
-	    var matched = url(src);
+	    //src = src.replace(/['"]/g,''); trim quotes?
+	    var matched = src.match(url);
 	    if (matched && matched[1]) {
 	    	src = matched[1];
 	    }
@@ -756,21 +808,21 @@ function retrieveImageCanvas(src, cb, ownerDocument) {
 	    }
 	}
 	
-	var imgCanvas = document.createElement("canvas");
+	var imgCanvas = createCanvas();
 	var imgCtx = imgCanvas.getContext("2d");
 	var img = new Image();
 	img.onload = function() {
 	    imgCanvas.width = img.width;
 	    imgCanvas.height = img.height;
 	    imgCtx.drawImage(img, 0, 0, img.width, img.height);
-	    retrieveImageCanvas.cache[src] = imgCanvas.toDataURL("image/png");
+	    retrieveImageCanvas.cache[src] = imgCanvas;
 	    
-	    cb(imgCanvas);
+	    cb(imgCanvas, img);
 	};
 	img.onerror = function() {
 		// Todo: draw 'broken' image
 		imgCanvas.width = imgCanvas.height = 1;
-		cb(imgCanvas);
+		cb(imgCanvas, img);
 	}
 	img.src = src;
 

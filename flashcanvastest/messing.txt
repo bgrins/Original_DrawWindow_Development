@@ -1,0 +1,20 @@
+
+	    
+	    var newCanvas = createCanvas();
+	    newCanvas.width = 300;
+	    newCanvas.height = 300;
+	    
+			var canvas2 = createCanvas();
+			
+			runonce = false;
+			var img = document.createElement("img");
+			img.onload= function() {
+				newCanvas.getContext("2d").fillRect(0, 0, 50, 50);
+				canvas2.getContext("2d").drawImage(img, 0, 0, 50, 50);
+				
+				newCanvas.getContext("2d").drawImage(canvas2, 0, 0);
+			}
+			img.src = "flashcanvastest/ff.jpg";
+			
+				document.body.appendChild(newCanvas);
+			document.body.appendChild(canvas2);
