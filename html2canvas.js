@@ -722,6 +722,7 @@ element.prototype.renderBackground = function(ctx, cb) {
 	var backgroundColor = css.parentBackgroundColor;
 	var backgroundImage = css.backgroundImage;
 	var backgroundRepeat = css.backgroundRepeat;
+	var innerOffset = this.css.innerOffset;
 	
 	if (this.tagName == "span" && this.text == "community") {
 		log("HEREEEE", backgroundColor);
@@ -746,15 +747,31 @@ element.prototype.renderBackground = function(ctx, cb) {
 	var ownerDoc = this.jq[0].ownerDocument;
 	
 	if (this.tagName == "img") {
-		retrieveImageCanvas(this.src, function(imgCanvas) {
-	    	ctx.drawImage(imgCanvas, offsetLeft, offsetTop, imgCanvas.width, imgCanvas.height);
+		retrieveImage(this.src, function(img, broken, transparent) {
+			if (img == "error") {
+				// Draw the 'broken' image if the image couldn't load
+				// This image needs to be centered on the ctx (at least in Chrome)
+				// taking into account the margins
+				var centerX = innerOffset.left + (outerWidth / 2) - (broken.width);
+				var centerY = innerOffset.top + (outerHeight / 2) - (broken.height);
+	    		ctx.drawImage(broken, centerX, centerY, broken.width, broken.height);
+			}
+			else {
+	    		ctx.drawImage(img, offsetLeft, offsetTop, img.width, img.height);
+	    	}
 	    	cb();
 		}, ownerDoc);
 	}
 	else if (backgroundImage != "none") {
-		retrieveImageCanvas(backgroundImage, function(imgCanvas, img) {
-        	ctx.fillStyle = ctx.createPattern(img, backgroundRepeat);
-			ctx.fillRect(offsetLeft, offsetTop, outerWidth, outerHeight);
+		retrieveImage(backgroundImage, function(img, broken, transparent) {
+			if (img == "error") { 
+        		ctx.fillStyle = ctx.createPattern(transparent, backgroundRepeat);
+				ctx.fillRect(offsetLeft, offsetTop, outerWidth, outerHeight);
+			}
+			else {
+        		ctx.fillStyle = ctx.createPattern(img, backgroundRepeat);
+				ctx.fillRect(offsetLeft, offsetTop, outerWidth, outerHeight);
+			}
 	    	cb();
 		}, ownerDoc);
 	}
@@ -763,9 +780,17 @@ element.prototype.renderBackground = function(ctx, cb) {
 	}
 };
 
-retrieveImageCanvas.cache = { };
-function retrieveImageCanvas(src, cb, ownerDocument) {
-
+retrieveImage.cache = { };
+function retrieveImage(src, cb, ownerDocument) {
+	if (!$.isFunction(cb)) {
+		cb = function() { };
+	}
+	
+	if (retrieveImage.cache[src]) {
+		log("Cache hit", src, retrieveImage.cache[src]);
+		return cb(retrieveImage.cache[src]);	
+	}
+	
 	if (src.indexOf("data:") == -1) {
 	    var url = new RegExp(/url\((.*)\)/);
 	    //src = src.replace(/['"]/g,''); trim quotes?
@@ -774,38 +799,28 @@ function retrieveImageCanvas(src, cb, ownerDocument) {
 	    	src = matched[1];
 	    }
 	    
-	    
 	    // Convert a relative path into absolute.
-	    // TODO: Is this worth the js URI dependancy since it may not be running in frame?
 	    var original = new URI(src);
 	    if (!original.getAuthority()) {
 	    	 var root = new URI((ownerDocument || document).location.href);
 	    	 src = original.resolve(root).toString();
 	    }
-	    
-	    if (retrieveImageCanvas.cache[src]) {
-	    	src = retrieveImageCanvas.cache[src];
-	    }
 	}
 	
-	var imgCanvas = createCanvas();
-	var imgCtx = imgCanvas.getContext("2d");
 	var img = new Image();
 	img.onload = function() {
-	    imgCanvas.width = img.width;
-	    imgCanvas.height = img.height;
-	    imgCtx.drawImage(img, 0, 0, img.width, img.height);
-	    retrieveImageCanvas.cache[src] = imgCanvas;
-	    
-	    cb(imgCanvas, img);
+	    retrieveImage.cache[src] = img;
+	    cb(img);
 	};
 	img.onerror = function() {
 		// Todo: draw 'broken' image
-		imgCanvas.width = imgCanvas.height = 1;
-		cb(imgCanvas, img);
+		cb("error", 
+			retrieveImage.cache[retrieveImage.brokenImage],
+			retrieveImage.cache[retrieveImage.transparentImage]
+		);
+		
 	}
 	img.src = src;
-
 }
 
 function wordWrap(ctx, phrase, maxWidth, initialOffset, isNewLine) {
@@ -864,6 +879,15 @@ function wordWrap(ctx, phrase, maxWidth, initialOffset, isNewLine) {
 	
 	return output;
 }
+
+retrieveImage.transparentImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAACWCAYAAABkW7XSAAADLUlEQVR4Ae3QQREAAAiAMPqXVjv4HUeCNXWLAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAwENgAfmTAf/IVJfgAAAAAElFTkSuQmCC";
+
+retrieveImage.brokenImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAAVBAMAAABWJ8jiAAAAIVBMVEUAAAAA//8A/wDAwMD/AP//AACAgIAAAID///8AgAAAAP87p9+eAAAAb0lEQVQImWPogIEGBmQmAwhkgJkcIKE0CNMYCDIyIEzLycYZbRDmpAnGDAwQ5swJxsYNEKYBM5xpbLxqAcQEU2PjhVCmSbDxqgoo09UYqB/CdAnuaIYwDYBOgjKNgSyoYRAngh0JZDBALMbuCzgTAD+sVWJQUviMAAAAAElFTkSuQmCC";
+
+retrieveImage(retrieveImage.brokenImage);
+retrieveImage(retrieveImage.transparentImage);
+
+
 
 if (window.html2canvasProcessOnLoad) {
 	html2canvas(document.body, window.html2canvasProcessOnLoad)

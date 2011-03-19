@@ -1,19 +1,27 @@
+<style>																	 
+body {border:solid 5px; margin:50px; } 									 
+#valid { background-image: url(test.jpg); background-repeat: no-repeat; padding-top:40px;}
+#valid-img { margin: 30px; background:green; }							 
+#valid-img-back { background-image: url(valid.png); background-repeat: repeat-x; padding-top:40px;}
+#valid-img-back-vert {background-image: url(valid.png); background-color:grey; height:300px; background-repeat: repeat-y; }
+#invalid { background: url(nothin.png); background-repeat:repeat-x; }	
+.spaced { margin-left: 40px; margin-top:10px; padding-left:20px; padding-top:10px; border: solid 2px;} 
+</style>																 
+<div id='valid'>													 
+<strong data-debug="true">This <span>is some text.  It will eventually need to word wrap as it gets longerrdkdkdkdkdkkd</span> dasafdsadsf</strong>
+																	 
+</div>																 
+<img id='valid-img' src='valid.png'>								 
+<div id='valid-img-back'>											 
+Yo																	 
+</div>																 
+<div id='valid-img-back-vert'>										 
+Yo																	 
+</div>																 
+																	 
+<div id="invalid">This contains a reference to an invalid image</div>
 
-	<style>
-	body {border:solid 5px; margin:50px; } 
-	#valid { background-image: url(test.jpg); background-repeat: no-repeat; padding-top:40px;}
-	#valid-img { margin: 30px; background:green; }
-	#valid-img-back { background-image: url(valid.png); background-repeat: repeat-x; padding-top:40px;}
-	#valid-img-back-vert {background-image: url(valid.png); background-color:grey; height:300px; background-repeat: repeat-y; }
-	</style>
-		<div id='valid'>
-		<strong data-debug="true">This <span>is some text.  It will eventually need to word wrap as it gets longerrdkdkdkdkdkkd</span> dasafdsadsf</strong>
-		
-		</div>
-		<img id='valid-img' src='valid.png'>
-		<div id='valid-img-back'>
-		Yo
-		</div>
-		<div id='valid-img-back-vert'>
-		Yo
-		</div>
+&nbsp; <img src='nothing.png' width='300' height='300' />
+&nbsp; <img src='nothing.png' />
+&nbsp; <img class='spaced' src='nothing.png' />
+&nbsp; <img class='spaced' src='nothing.png' width='300' height='300' />
