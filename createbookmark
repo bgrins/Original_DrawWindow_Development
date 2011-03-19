@@ -1,1 +1,1 @@
-paste -d\\n 1.txt  2.txt > 3.txt
+cat jquery-1.5.1.min.js html2canvas.js > bookmarklet.js
