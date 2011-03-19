@@ -8,6 +8,7 @@ span { background-color:orange; }
 </style>
 
 <script>
+/*http://chris.zarate.org/projects/bookmarkleter/*/
 function loader() {
 	var w = window.open("about:blank", "_blank", "menubar=0,location=0,toolbar=0,resizable=1,width=350,height=300");
 	
@@ -19,21 +20,23 @@ function loader() {
 	var s = document.createElement("script");
 	var base = "http://localhost/~brian/html2canvas/"; 
 	s.setAttribute("type", "text/javascript");
-	s.setAttribute("src", base + "html2canvas.js");
+	s.setAttribute("src", base + "bookmarklet.js");
 	document.body.appendChild(s);
 }
-document.write((new Date()).getTime());
 </script>
 
 </head>
-<body onload='console.log("loaded");document.getElementById("output").innerHTML=Math.random();'>
+<body>
 
 
+<a href='javascript:(function(){var%20w=window.open(%22about:blank%22,%22_blank%22,%22menubar=0,location=0,toolbar=0,resizable=1,width=350,height=300%22);window.html2canvasProcessOnLoad=function(canvas){var%20d=w.document;var%20b=w.document.body;$(b).css(%22margin%22,%220%22).css(%22padding%22,%220%22).html(%22Drawing%20controls%22).append(canvas);};var%20s=document.createElement(%22script%22);var%20base=%22http://localhost/~brian/html2canvas/%22;s.setAttribute(%22type%22,%22text/javascript%22);s.setAttribute(%22src%22,base+%22bookmarklet.js%22);document.body.appendChild(s);})();'>Convert to image</a> |
+<a href='javascript:loader();'>Convert to image (using function)</a>
+
+
+<br />
 asdf
 <div id='output'></div>
 <h1>Html2Canvas Bookmarklet Tester</h1>
-
-<a href='javascript:loader();'>Convert to image</a>
 <p>
 Let's get some<span >YO</span> text <strong>in <em>here</em></strong>!
 </p>

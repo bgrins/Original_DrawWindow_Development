@@ -316,7 +316,7 @@ element.prototype.copyToCanvas = function(canvas) {
 		
 		//log("Rendering", this.tagName, this.text, x, y, w, h, canvas.width, canvas.height, this.canvas.width, this.canvas.height);
 		
-		if (this.jq.attr("data-debug") ||settings.drawBoundingBox) {
+		if (this.jq.attr("data-debug") || true || settings.drawBoundingBox) {
 			ctx.strokeStyle = "#d66";
 			ctx.lineWidth = 1;
 			ctx.strokeRect(x, y, w, h);
@@ -801,9 +801,17 @@ function retrieveImage(src, cb, ownerDocument) {
 	    
 	    // Convert a relative path into absolute.
 	    var original = new URI(src);
-	    if (!original.getAuthority()) {
-	    	 var root = new URI((ownerDocument || document).location.href);
-	    	 src = original.resolve(root).toString();
+	    var authority = original.getAuthority();
+	    
+	    if (!authority) {
+	    	var root = new URI((ownerDocument || document).location.href);
+	   		src = original.resolve(root).toString();
+	    }
+	    else if (authority != document.location.host) {
+	    	
+	    	//src = document.location.host + document.location.pathname + 
+	    	//	"flashcanvaspro/proxy.php?url=" + src;	
+	    	//log("didn't match host", authority, src);
 	    }
 	}
 	

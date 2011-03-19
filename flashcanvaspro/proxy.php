@@ -31,7 +31,7 @@
  * @link       http://flashcanvas.net/
  * @link       http://code.google.com/p/flashcanvas/
  */
-
+ 
 // Whether we check referrer or not
 define('CHECK_REFERRER', true);
 
