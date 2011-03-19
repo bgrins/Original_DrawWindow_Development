@@ -156,19 +156,51 @@ $.fn.splitTextNodes = function(wrapper) {
 
 $.fn.cloneDocument = function() {
 	// TODO: This isn't compatible cross browser
+	var doc = this[0];
+	
+	doc.head = doc.head || doc.getElementsByTagName('head')[0];
+	var clonedHead = $("<head />").html(doc.head.innerHTML);
+	var clonedBody = $(doc.body).clone();
+	
+	clonedHead.find("script").remove();
+	clonedBody.find("script, iframe.h2cframe").remove();
+	clonedBody.find("iframe").attr("src", "javascript:");
+	
+	var b = $(doc.body);
+	var bodyWidth = b.outerWidth(true);
+	var bodyHeight = b.outerHeight(true);
+	var styles = 'position:absolute; top: -'+(bodyHeight*2)+'px; left:-'+(bodyWidth*2)+'px';
+	var iframe = $("<iframe class='h2cframe' style='"+styles+"' src='javascript:' />").appendTo(b).width(bodyWidth).height(bodyHeight);
+	
+	
+	var d = iframe.contents()[0];
+	d.open();
+	d.write("<html><head>"+clonedHead.html()+"</head><body>"+clonedBody.html()+"</body>");
+	d.close();
+	
+	
+	//log(clonedHead.html(), clonedBody.html(), b.width(), $(d.body).width());
+	//var html = $("<html>" + originalDocument.documentElement.innerHTML + "</html>");
+	//log(originalDocument.documentElement.innerHTML, originalDocument.head, html.html());
+	
+	return d;
 	var b = $(this[0].body);
-	log("CLONING", this);
+	//log("CLONING", this, b, b.html());
 	var clonedBody = b.clone();
 	clonedBody.find("script, iframe.h2cframe").remove();
 	clonedBody.find("iframe").attr("src", "javascript:");
+	log(this[0].head, this[0].head.innerHTML);
 	var clonedHead = $(this[0].head).clone();
 	clonedHead.find("script").remove();
-	
+	//log(clonedHead, clonedHead[0].innerHTML, clonedBody.html())
 	//var originalFrames = b.find("iframe");
 	
-	//var iframe = $("<iframe class='h2cframe' src='javascript:' />").appendTo(b).width(b.width())
-	//var d = iframe[0].contentDocument;
-	//return d;
+	//$(d.head).html(clonedHead.html());
+	//$(d.body).html(clonedBody.html()).width(bodyWidth).height(bodyHeight);
+	
+	return d;
+	
+	
 	var d = window.open().document;
 	//iframe.remove(); // wasn't working in firefox
 	
@@ -192,7 +224,7 @@ function html2canvas(body, width, cb) {
 		body = iframe.contents().find("body").html(body)[0];
 	}
 	else {
-		//body = $(body.ownerDocument).cloneDocument().body;
+		body = $(body.ownerDocument).cloneDocument().body;
 	}
 	
 	if ($.isFunction(width)) {
