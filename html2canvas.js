@@ -480,7 +480,7 @@ element.prototype.copyDOM = function() {
 		this.css.paddingLeft + 
 		this.css.paddingRight;
 	
-	this.shouldRender = (this.css.outerWidthMargins > 0 && this.css.outerHeightMargins > 0);
+	this.shouldRender = (this._domElement.offsetWidth > 0 && this._domElement.offsetHeight > 0);
 	
 	this.offsetRenderBox = { 
 		top:  Math.floor(Math.max(0, this.offset.top - this.css.marginTop + bodyBorderTopWidth)), 
