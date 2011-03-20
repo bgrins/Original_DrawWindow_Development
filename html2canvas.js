@@ -54,6 +54,27 @@ function computedStyle(elem, styles) {
 	
 	return ret;
 }
+function getDoctypeString(doc) {
+	if ($.browser.msie) {
+		var doctype = doc.all[0].text;
+		return doctype || "";
+	}
+	else {
+		var doctype = doc.doctype;
+		if (!doctype) {
+			return "";
+		}
+		var publicID = doctype.publicId;
+		var systemID = doctype.systemId;
+		var name = doctype.name;
+		
+		if (!publicID) {
+			return "<!DOCTYPE " + name + ">"
+		}
+		
+		return "<!DOCTYPE " + name + " PUBLIC \"" + publicID + "\" \"" + systemID + "\">";
+	}
+}
 
 var getUniqueID = (function(id) { return function() { return id++; } })(0);
 var ignoreTags = { 'style':1, 'br': 1, 'script': 1, 'link': 1 };
@@ -157,6 +178,7 @@ $.fn.splitTextNodes = function(wrapper) {
 $.fn.cloneDocument = function() {
 	// TODO: This isn't compatible cross browser
 	var doc = this[0];
+	log(doc.doctype, document.doctype);
 	
 	doc.head = doc.head || doc.getElementsByTagName('head')[0];
 	var clonedHead = $("<head />").html(doc.head.innerHTML);
@@ -170,20 +192,22 @@ $.fn.cloneDocument = function() {
 	var bodyWidth = b.outerWidth(true);
 	var bodyHeight = b.outerHeight(true);
 	var styles = 'position:absolute; top: -'+(bodyHeight*2)+'px; left:-'+(bodyWidth*2)+'px';
-	var iframe = $("<iframe class='h2cframe' style='"+styles+"' src='javascript:' />").appendTo(b).width(bodyWidth).height(bodyHeight);
+	var iframe = $("<iframe class='h2cframe' style='"+styles+"' src='about:blank' />").appendTo(b).width(bodyWidth).height(bodyHeight);
 	
-	
+	// TODO: Fix relative URI for resources in case the original doc is inside an iframe (such as the test harness)
+	var docType = getDoctypeString(doc);
 	var d = iframe.contents()[0];
+	d.h2cLocation = doc.location;
 	d.open();
-	d.write("<html><head>"+clonedHead.html()+"</head><body>"+clonedBody.html()+"</body>");
+	d.write(docType + "<html><head>"+clonedHead.html()+"</head><body>"+clonedBody.html()+"</body>");
 	d.close();
+	return d;
 	
-	
+	/*
 	//log(clonedHead.html(), clonedBody.html(), b.width(), $(d.body).width());
 	//var html = $("<html>" + originalDocument.documentElement.innerHTML + "</html>");
 	//log(originalDocument.documentElement.innerHTML, originalDocument.head, html.html());
 	
-	return d;
 	var b = $(this[0].body);
 	//log("CLONING", this, b, b.html());
 	var clonedBody = b.clone();
@@ -215,6 +239,7 @@ $.fn.cloneDocument = function() {
 	//});
 
 	return d;
+	*/
 };
 
 function html2canvas(body, width, cb) {
