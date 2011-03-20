@@ -188,6 +188,12 @@ $.fn.cloneDocument = function() {
 	clonedBody.find("script, iframe.h2cframe").remove();
 	clonedBody.find("iframe").attr("src", "javascript:");
 	
+	if (clonedHead.find("base").length == 0) {
+		clonedHead.prepend(
+			'<base href="'+doc.location.origin+doc.location.pathname+'" />'
+		);
+	}
+	
 	var b = $(doc.body);
 	var bodyWidth = b.outerWidth(true);
 	var bodyHeight = b.outerHeight(true);
