@@ -849,6 +849,7 @@ element.prototype.renderBackground = function(ctx, cb) {
 	}
 };
 
+// retrieveImage: a method to interface with image loading, errors, and proxy
 retrieveImage.cache = { };
 function retrieveImage(src, cb, ownerDocument) {
 	if (!$.isFunction(cb)) {
