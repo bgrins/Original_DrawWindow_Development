@@ -176,7 +176,6 @@ $.fn.splitTextNodes = function(wrapper) {
 };
 
 $.fn.cloneDocument = function() {
-	// TODO: This isn't compatible cross browser
 	var doc = this[0];
 	log(doc.doctype, document.doctype);
 	
@@ -204,6 +203,7 @@ $.fn.cloneDocument = function() {
 	var docType = getDoctypeString(doc);
 	var d = iframe.contents()[0];
 	d.h2cLocation = doc.location;
+	log(doc.location)
 	d.open();
 	d.write(docType + "<html><head>"+clonedHead.html()+"</head><body>"+clonedBody.html()+"</body>");
 	d.close();
@@ -248,11 +248,17 @@ $.fn.cloneDocument = function() {
 	*/
 };
 
+
 function html2canvas(body, width, cb) {
 	
 	if ((typeof body) == "string") {
 		var iframe = $("<iframe src='javascript:'></iframe>").appendTo("body");
-		body = iframe.contents().find("body").html(body)[0];
+		var doc = iframe.contents()[0];
+		doc.open();
+		doc.write(body);
+		doc.close();
+		
+		body = doc.body;
 	}
 	else {
 		body = $(body.ownerDocument).cloneDocument().body;
@@ -854,6 +860,8 @@ function retrieveImage(src, cb, ownerDocument) {
 		return cb(retrieveImage.cache[src]);	
 	}
 	
+	var loadImageDirectly = true;
+	
 	if (src.indexOf("data:") == -1) {
 	    var url = new RegExp(/url\((.*)\)/);
 	    //src = src.replace(/['"]/g,''); trim quotes?
@@ -872,26 +880,46 @@ function retrieveImage(src, cb, ownerDocument) {
 	    }
 	    else if (authority != document.location.host) {
 	    	
+	    	/*
+	    	loadImageDirectly = false;
+	    	PROXY.message(src, function(dataURI) {
+	    		if (dataURI) {
+	    			makeImage(dataURI);
+	    		}
+	    		else {
+	    			sendError();
+	    		}
+	    	});
+	    	*/
 	    	//src = document.location.host + document.location.pathname + 
 	    	//	"flashcanvaspro/proxy.php?url=" + src;	
 	    	//log("didn't match host", authority, src);
 	    }
 	}
 	
-	var img = new Image();
-	img.onload = function() {
-	    retrieveImage.cache[src] = img;
-	    cb(img);
-	};
-	img.onerror = function() {
-		// Todo: draw 'broken' image
+	if (loadImageDirectly) {
+		makeImage(src);
+	}
+	
+	function makeImage(src) {
+		var img = new Image();
+		img.onload = sendSuccess;
+		img.onerror = sendError;
+		img.src = src;
+	}
+	
+	function sendError() {
 		cb("error", 
 			retrieveImage.cache[retrieveImage.brokenImage],
 			retrieveImage.cache[retrieveImage.transparentImage]
 		);
-		
 	}
-	img.src = src;
+	
+	function sendSuccess() {
+		var i = this;
+	    retrieveImage.cache[src] = i;
+	    cb(i);
+	}
 }
 
 function wordWrap(ctx, phrase, maxWidth, initialOffset, isNewLine) {
