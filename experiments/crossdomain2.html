@@ -1,0 +1,11 @@
+
+<script type='text/javascript' src='jquery-1.5.1.min.js'></script>
+<script>
+
+var parent_url = decodeURIComponent(document.location.hash.replace(/^#/, ''));
+
+XD.receiveMessage(function(message){
+    window.alert(message.data + " received on "+window.location.host);
+});
+
+</script>

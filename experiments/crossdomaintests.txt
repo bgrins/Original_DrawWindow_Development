@@ -1,0 +1,18 @@
+http://closure-library.googlecode.com/svn/trunk/closure/goog/demos/xpc/index.html
+
+// ==ClosureCompiler==
+// @compilation_level SIMPLE_OPTIMIZATIONS
+// @output_file_name default.js
+
+// @use_closure_library true
+// ==/ClosureCompiler==
+
+goog.require('goog.Uri');
+goog.require('goog.debug.Logger');
+goog.require('goog.dom');
+goog.require('goog.events');
+goog.require('goog.events.EventType');
+goog.require('goog.json');
+goog.require('goog.net.xpc.CrossPageChannel');
+
+

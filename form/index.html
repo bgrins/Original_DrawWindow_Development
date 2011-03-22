@@ -1,0 +1,62 @@
+<html>
+<head>
+<style>
+#h2c-feedback {
+	position:fixed;
+	right:6px;
+	bottom:0;
+	height:200px;
+	width:200px;
+	display:block;
+	border:none;
+	z-index:1001;
+}
+#h2c-feedback.busy { display:none; }
+</style>
+</head>
+<body>
+This is just a page, with some stuff.
+<script type='text/javascript'>
+window.h2c = {
+	createFrame: function(id, src) {
+		var frame = document.createElement("iframe");
+		frame.id = id;
+		frame.src = src;
+		frame.frameborder = "0";
+		frame.scrolling = "no";
+		return frame;
+	},
+	start: function() {
+		
+		var feedback = document.getElementById("h2c-feedback");
+		if (feedback && feedback.parentNode) {
+			feedback.parentNode.removeChild(feedback);
+		}
+		
+		var render = document.getElementById("h2c-render");
+		if (render && render.parentNode) {
+			render.parentNode.removeChild(render);
+		}
+		
+		feedback = h2c.createFrame("h2c-feedback", "http://localhost/~brian/html2canvas/form/feedback.html");
+		feedback.className = "busy";
+		feedback.onload = window.h2c.load;
+		
+		render = h2c.createFrame("h2c-render", "http://localhost/~brian/html2canvas/form/render.html");
+		
+		document.body.appendChild(feedback);
+		document.body.appendChild(render);
+	},
+	load: function() {
+		var win = this.contentWindow;
+		var feedback = document.getElementById("h2c-feedback");
+		feedback.className = "";
+		
+		console.log("Loaded", arguments);
+	}
+};
+</script>
+<a href='#' onclick='return h2c.start();'>Report a problem</a>
+</body>
+</html>
+

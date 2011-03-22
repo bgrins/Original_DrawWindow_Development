@@ -1,0 +1,2 @@
+regardable.com/load.js
+render.regardable.com/?url=http://www.google.com/image

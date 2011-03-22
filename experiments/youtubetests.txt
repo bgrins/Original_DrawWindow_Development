@@ -1,0 +1,4114 @@
+(function () {
+    function h(a) {
+        throw a;
+    }
+    var j = true,
+        m = null,
+        o = false,
+        r;
+
+    function aa(a) {
+        this.t = {};
+        this.tick = function (b, c, d) {
+            this.t[b] = [d != undefined ? d : (new Date).getTime(), c]
+        };
+        this.tick("start", m, a)
+    }
+    var ba = new aa;
+    window.jstiming = {
+        Timer: aa,
+        load: ba
+    };
+    try {
+        var ca = m;
+        if (window.chrome && window.chrome.csi) ca = Math.floor(window.chrome.csi().pageT);
+        if (ca == m) if (window.gtbExternal) ca = window.gtbExternal.pageT();
+        if (ca == m) if (window.external) ca = window.external.pageT;
+        if (ca) window.jstiming.pt = ca
+    } catch (ea) {};
+    if (window.jstiming) {
+        window.jstiming.vb = {};
+        window.jstiming.jd = 1;
+        var fa = function (a, b, c) {
+            var d = a.t[b],
+                e = a.t.start;
+            if (d && (e || c)) {
+                d = a.t[b][0];
+                e = c != undefined ? c : e[0];
+                return d - e
+            }
+        },
+            ha = function (a, b, c) {
+                var d = "";
+                if (window.jstiming.pt) {
+                    d += "&srt=" + window.jstiming.pt;
+                    delete window.jstiming.pt
+                }
+                try {
+                    if (window.external && window.external.tran) d += "&tran=" + window.external.tran;
+                    else if (window.gtbExternal && window.gtbExternal.tran) d += "&tran=" + window.gtbExternal.tran();
+                    else if (window.chrome && window.chrome.csi) d += "&tran=" + window.chrome.csi().tran
+                } catch (e) {}
+                var f =
+                window.chrome;
+                if (f) if (f = f.loadTimes) {
+                    if (f().wasFetchedViaSpdy) d += "&p=s";
+                    if (f().wasNpnNegotiated) d += "&npn=1";
+                    if (f().wasAlternateProtocolAvailable) d += "&apa=1"
+                }
+                if (a.Hc) d += "&" + a.Hc;
+                f = a.t;
+                var g = f.start,
+                    k = [],
+                    q = [],
+                    p;
+                for (p in f) if (p != "start") if (p.indexOf("_") != 0) {
+                    var u = f[p][1];
+                    if (u) f[u] && q.push(p + "." + fa(a, p, f[u][0]));
+                    else g && k.push(p + "." + fa(a, p))
+                }
+                delete f.start;
+                if (b) for (var v in b) d += "&" + v + "=" + b[v];
+                return [c ? c : "http://csi.gstatic.com/csi", "?v=3", "&s=" + (window.jstiming.sn || "_s") + "&action=", a.name, q.length ? "&it=" + q.join(",") : "", "", d, "&rt=", k.join(",")].join("")
+            };
+        window.jstiming.report = function (a, b, c) {
+            a = ha(a, b, c);
+            if (!a) return "";
+            b = new Image;
+            var d = window.jstiming.jd++;
+            window.jstiming.vb[d] = b;
+            b.onload = b.onerror = function () {
+                delete window.jstiming.vb[d]
+            };
+            b.src = a;
+            b = m;
+            return a
+        }
+    };
+    var z = this,
+        ia = function (a) {
+            a = a.split(".");
+            for (var b = z, c; c = a.shift();) if (b[c] != m) b = b[c];
+            else
+            return m;
+            return b
+        },
+        ja = function () {},
+        ka = function (a) {
+            var b = typeof a;
+            if (b == "object") if (a) {
+                if (a instanceof Array) return "array";
+                else if (a instanceof Object) return b;
+                var c = Object.prototype.toString.call(a);
+                if (c == "[object Window]") return "object";
+                if (c == "[object Array]" || typeof a.length == "number" && typeof a.splice != "undefined" && typeof a.propertyIsEnumerable != "undefined" && !a.propertyIsEnumerable("splice")) return "array";
+                if (c == "[object Function]" || typeof a.call != "undefined" && typeof a.propertyIsEnumerable != "undefined" && !a.propertyIsEnumerable("call")) return "function"
+            } else
+            return "null";
+            else if (b == "function" && typeof a.call == "undefined") return "object";
+            return b
+        },
+        la = function (a) {
+            return ka(a) == "array"
+        },
+        ma = function (a) {
+            var b = ka(a);
+            return b == "array" || b == "object" && typeof a.length == "number"
+        },
+        C = function (a) {
+            return typeof a == "string"
+        },
+        oa = function (a) {
+            return ka(a) == "function"
+        },
+        pa = function (a) {
+            a = ka(a);
+            return a == "object" || a == "array" || a == "function"
+        },
+        sa = function (a) {
+            return a[qa] || (a[qa] = ++ra)
+        },
+        qa = "closure_uid_" + Math.floor(Math.random() * 2147483648).toString(36),
+        ra = 0,
+        ta = function (a) {
+            return a.call.apply(a.bind, arguments)
+        },
+        ua = function (a, b) {
+            var c = b || z;
+            if (arguments.length > 2) {
+                var d = Array.prototype.slice.call(arguments, 2);
+                return function () {
+                    var e = Array.prototype.slice.call(arguments);
+                    Array.prototype.unshift.apply(e, d);
+                    return a.apply(c, e)
+                }
+            } else
+            return function () {
+                return a.apply(c, arguments)
+            }
+        },
+        E = function () {
+            E = Function.prototype.bind && Function.prototype.bind.toString().indexOf("native code") != -1 ? ta : ua;
+            return E.apply(m, arguments)
+        },
+        va = function (a) {
+            var b = Array.prototype.slice.call(arguments, 1);
+            return function () {
+                var c = Array.prototype.slice.call(arguments);
+                c.unshift.apply(c, b);
+                return a.apply(this, c)
+            }
+        },
+        K = Date.now ||
+        function () {
+            return +new Date
+        },
+        L = function (a, b) {
+            function c() {}
+            c.prototype = b.prototype;
+            a.l = b.prototype;
+            a.prototype = new c
+        };
+    Function.prototype.bind = Function.prototype.bind ||
+    function (a) {
+        if (arguments.length > 1) {
+            var b = Array.prototype.slice.call(arguments, 1);
+            b.unshift(this, a);
+            return E.apply(m, b)
+        } else
+        return E(this, a)
+    };
+    var xa = function (a) {
+        this.stack = Error().stack || "";
+        if (a) this.message = String(a)
+    };
+    L(xa, Error);
+    xa.prototype.name = "CustomError";
+    var ya = function (a) {
+        for (var b = 1; b < arguments.length; b++) {
+            var c = String(arguments[b]).replace(/\$/g, "$$$$");
+            a = a.replace(/\%s/, c)
+        }
+        return a
+    },
+        za = /^[a-zA-Z0-9\-_.!~*'()]*$/,
+        Aa = function (a) {
+            a = String(a);
+            if (!za.test(a)) return encodeURIComponent(a);
+            return a
+        },
+        Ha = function (a) {
+            if (!Ba.test(a)) return a;
+            if (a.indexOf("&") != -1) a = a.replace(Ca, "&amp;");
+            if (a.indexOf("<") != -1) a = a.replace(Da, "&lt;");
+            if (a.indexOf(">") != -1) a = a.replace(Ea, "&gt;");
+            if (a.indexOf('"') != -1) a = a.replace(Fa, "&quot;");
+            return a
+        },
+        Ca = /&/g,
+        Da = /</g,
+        Ea = />/g,
+        Fa = /\"/g,
+        Ba = /[&<>\"]/,
+        Ia = function () {
+            return Math.floor(Math.random() * 2147483648).toString(36) + Math.abs(Math.floor(Math.random() * 2147483648) ^ K()).toString(36)
+        },
+        Ka = function (a, b) {
+            for (var c = 0, d = String(a).replace(/^[\s\xa0]+|[\s\xa0]+$/g, "").split("."), e = String(b).replace(/^[\s\xa0]+|[\s\xa0]+$/g, "").split("."), f = Math.max(d.length, e.length), g = 0; c == 0 && g < f; g++) {
+                var k = d[g] || "",
+                    q = e[g] || "",
+                    p = RegExp("(\\d*)(\\D*)", "g"),
+                    u = RegExp("(\\d*)(\\D*)", "g");
+                do {
+                    var v = p.exec(k) || ["", "", ""],
+                        B = u.exec(q) || ["", "", ""];
+                    if (v[0].length == 0 && B[0].length == 0) break;
+                    c = Ja(v[1].length == 0 ? 0 : parseInt(v[1], 10), B[1].length == 0 ? 0 : parseInt(B[1], 10)) || Ja(v[2].length == 0, B[2].length == 0) || Ja(v[2], B[2])
+                } while (c == 0)
+            }
+            return c
+        },
+        Ja = function (a, b) {
+            if (a < b) return -1;
+            else if (a > b) return 1;
+            return 0
+        };
+    var La = function (a, b) {
+        b.unshift(a);
+        xa.call(this, ya.apply(m, b));
+        b.shift();
+        this.ue = a
+    };
+    L(La, xa);
+    La.prototype.name = "AssertionError";
+    var Ma = function (a, b) {
+        if (!a) {
+            var c = Array.prototype.slice.call(arguments, 2),
+                d = "Assertion failed";
+            if (b) {
+                d += ": " + b;
+                var e = c
+            }
+            h(new La("" + d, e || []))
+        }
+    },
+        Na = function (a) {
+            h(new La("Failure" + (a ? ": " + a : ""), Array.prototype.slice.call(arguments, 1)))
+        };
+    var N = Array.prototype,
+        Oa = N.indexOf ?
+        function (a, b, c) {
+            Ma(a.length != m);
+            return N.indexOf.call(a, b, c)
+        } : function (a, b, c) {
+            c = c == m ? 0 : c < 0 ? Math.max(0, a.length + c) : c;
+            if (C(a)) {
+                if (!C(b) || b.length != 1) return -1;
+                return a.indexOf(b, c)
+            }
+            for (; c < a.length; c++) if (c in a && a[c] === b) return c;
+            return -1
+        },
+        Pa = N.forEach ?
+        function (a, b, c) {
+            Ma(a.length != m);
+            N.forEach.call(a, b, c)
+        } : function (a, b, c) {
+            for (var d = a.length, e = C(a) ? a.split("") : a, f = 0; f < d; f++) f in e && b.call(c, e[f], f, a)
+        },
+        Qa = function (a, b) {
+            for (var c = C(a) ? a.split("") : a, d = a.length - 1; d >= 0; --d) d in c && b.call(void 0, c[d], d, a)
+        },
+        Ra = N.map ?
+        function (a, b, c) {
+            Ma(a.length != m);
+            return N.map.call(a, b, c)
+        } : function (a, b, c) {
+            for (var d = a.length, e = Array(d), f = C(a) ? a.split("") : a, g = 0; g < d; g++) if (g in f) e[g] = b.call(c, f[g], g, a);
+            return e
+        },
+        Sa = function (a, b) {
+            var c = Oa(a, b),
+                d;
+            if (d = c >= 0) {
+                Ma(a.length != m);
+                N.splice.call(a, c, 1)
+            }
+            return d
+        },
+        Ta = function () {
+            return N.concat.apply(N, arguments)
+        },
+        Xa = function (a) {
+            if (la(a)) return Ta(a);
+            else {
+                for (var b = [], c = 0, d = a.length; c < d; c++) b[c] = a[c];
+                return b
+            }
+        },
+        Ya = function (a, b, c) {
+            Ma(a.length != m);
+            return arguments.length <= 2 ? N.slice.call(a, b) : N.slice.call(a, b, c)
+        };
+    var Za = "StopIteration" in z ? z.StopIteration : Error("StopIteration"),
+        $a = function () {};
+    $a.prototype.next = function () {
+        h(Za)
+    };
+    $a.prototype.Bc = function () {
+        return this
+    };
+    var ab = function (a, b) {
+        for (var c in a) b.call(void 0, a[c], c, a)
+    },
+        bb = function (a) {
+            var b = [],
+                c = 0,
+                d;
+            for (d in a) b[c++] = a[d];
+            return b
+        },
+        cb = ["constructor", "hasOwnProperty", "isPrototypeOf", "propertyIsEnumerable", "toLocaleString", "toString", "valueOf"],
+        db = function (a) {
+            for (var b, c, d = 1; d < arguments.length; d++) {
+                c = arguments[d];
+                for (b in c) a[b] = c[b];
+                for (var e = 0; e < cb.length; e++) {
+                    b = cb[e];
+                    if (Object.prototype.hasOwnProperty.call(c, b)) a[b] = c[b]
+                }
+            }
+        };
+    var eb = function (a) {
+        this.F = {};
+        this.f = [];
+        var b = arguments.length;
+        if (b > 1) {
+            b % 2 && h(Error("Uneven number of arguments"));
+            for (var c = 0; c < b; c += 2) this.$(arguments[c], arguments[c + 1])
+        } else if (a) {
+            if (a instanceof eb) {
+                c = fb(a);
+                b = ib(a)
+            } else {
+                b = [];
+                var d = 0;
+                for (c in a) b[d++] = c;
+                c = b;
+                b = bb(a)
+            }
+            for (d = 0; d < c.length; d++) this.$(c[d], b[d])
+        }
+    };
+    eb.prototype.p = 0;
+    eb.prototype.Ga = 0;
+    var ib = function (a) {
+        jb(a);
+        for (var b = [], c = 0; c < a.f.length; c++) b.push(a.F[a.f[c]]);
+        return b
+    },
+        fb = function (a) {
+            jb(a);
+            return a.f.concat()
+        };
+    eb.prototype.clear = function () {
+        this.F = {};
+        this.Ga = this.p = this.f.length = 0
+    };
+    var jb = function (a) {
+        if (a.p != a.f.length) {
+            for (var b = 0, c = 0; b < a.f.length;) {
+                var d = a.f[b];
+                if (Object.prototype.hasOwnProperty.call(a.F, d)) a.f[c++] = d;
+                b++
+            }
+            a.f.length = c
+        }
+        if (a.p != a.f.length) {
+            var e = {};
+            for (c = b = 0; b < a.f.length;) {
+                d = a.f[b];
+                if (!Object.prototype.hasOwnProperty.call(e, d)) {
+                    a.f[c++] = d;
+                    e[d] = 1
+                }
+                b++
+            }
+            a.f.length = c
+        }
+    };
+    eb.prototype.get = function (a, b) {
+        if (Object.prototype.hasOwnProperty.call(this.F, a)) return this.F[a];
+        return b
+    };
+    eb.prototype.$ = function (a, b) {
+        if (!Object.prototype.hasOwnProperty.call(this.F, a)) {
+            this.p++;
+            this.f.push(a);
+            this.Ga++
+        }
+        this.F[a] = b
+    };
+    eb.prototype.Bc = function (a) {
+        jb(this);
+        var b = 0,
+            c = this.f,
+            d = this.F,
+            e = this.Ga,
+            f = this,
+            g = new $a;
+        g.next = function () {
+            for (;;) {
+                e != f.Ga && h(Error("The map has changed since the iterator was created"));
+                b >= c.length && h(Za);
+                var k = c[b++];
+                return a ? k : d[k]
+            }
+        };
+        return g
+    };
+    var lb = function (a) {
+        return kb(a || arguments.callee.caller, [])
+    },
+        kb = function (a, b) {
+            var c = [];
+            if (Oa(b, a) >= 0) c.push("[...circular reference...]");
+            else if (a && b.length < 50) {
+                c.push(mb(a) + "(");
+                for (var d = a.arguments, e = 0; e < d.length; e++) {
+                    e > 0 && c.push(", ");
+                    var f;
+                    f = d[e];
+                    switch (typeof f) {
+                    case "object":
+                        f = f ? "object" : "null";
+                        break;
+                    case "string":
+                        break;
+                    case "number":
+                        f = String(f);
+                        break;
+                    case "boolean":
+                        f = f ? "true" : "false";
+                        break;
+                    case "function":
+                        f = (f = mb(f)) ? f : "[fn]";
+                        break;
+                    default:
+                        f = typeof f
+                    }
+                    if (f.length > 40) f = f.substr(0, 40) + "...";
+                    c.push(f)
+                }
+                b.push(a);
+                c.push(")\n");
+                try {
+                    c.push(kb(a.caller, b))
+                } catch (g) {
+                    c.push("[exception trying to get caller]\n")
+                }
+            } else a ? c.push("[...long stack...]") : c.push("[end]");
+            return c.join("")
+        },
+        mb = function (a) {
+            a = String(a);
+            if (!nb[a]) {
+                var b = /function ([^\(]+)/.exec(a);
+                nb[a] = b ? b[1] : "[Anonymous]"
+            }
+            return nb[a]
+        },
+        nb = {};
+    var ob = function (a, b, c, d, e) {
+        this.reset(a, b, c, d, e)
+    };
+    ob.prototype.pd = 0;
+    ob.prototype.Pa = m;
+    ob.prototype.Oa = m;
+    var pb = 0;
+    ob.prototype.reset = function (a, b, c, d, e) {
+        this.pd = typeof e == "number" ? e : pb++;
+        this.zc = d || K();
+        this.P = a;
+        this.ac = b;
+        this.Wc = c;
+        delete this.Pa;
+        delete this.Oa
+    };
+    ob.prototype.Qa = function () {
+        return this.P
+    };
+    ob.prototype.vc = function (a) {
+        this.P = a
+    };
+    var P = function (a) {
+        this.bc = a
+    };
+    P.prototype.n = m;
+    P.prototype.P = m;
+    P.prototype.G = m;
+    P.prototype.ea = m;
+    var qb = function (a, b) {
+        this.name = a;
+        this.value = b
+    };
+    qb.prototype.toString = function () {
+        return this.name
+    };
+    var rb = new qb("SEVERE", 1E3),
+        sb = new qb("WARNING", 900),
+        tb = new qb("INFO", 800),
+        ub = new qb("CONFIG", 700),
+        vb = new qb("FINE", 500),
+        wb = new qb("FINEST", 300);
+    P.prototype.getName = function () {
+        return this.bc
+    };
+    P.prototype.getParent = function () {
+        return this.n
+    };
+    P.prototype.vc = function (a) {
+        this.P = a
+    };
+    P.prototype.Qa = function () {
+        return this.P
+    };
+    var xb = function (a) {
+        if (a.P) return a.P;
+        if (a.n) return xb(a.n);
+        Na("Root logger has no level set.");
+        return m
+    };
+    P.prototype.log = function (a, b, c) {
+        if (a.value >= xb(this).value) {
+            a = this.Oc(a, b, c);
+            z.console && z.console.markTimeline && z.console.markTimeline("log:" + a.ac);
+            for (b = this; b;) {
+                c = b;
+                var d = a;
+                if (c.ea) for (var e = 0, f = void 0; f = c.ea[e]; e++) f(d);
+                b = b.getParent()
+            }
+        }
+    };
+    P.prototype.Oc = function (a, b, c) {
+        var d = new ob(a, String(b), this.bc);
+        if (c) {
+            d.Pa = c;
+            var e;
+            var f = arguments.callee.caller;
+            try {
+                var g;
+                var k = ia("window.location.href");
+                if (C(c)) g = {
+                    message: c,
+                    name: "Unknown error",
+                    lineNumber: "Not available",
+                    fileName: k,
+                    stack: "Not available"
+                };
+                else {
+                    var q, p, u = o;
+                    try {
+                        q = c.lineNumber || c.te || "Not available"
+                    } catch (v) {
+                        q = "Not available";
+                        u = j
+                    }
+                    try {
+                        p = c.fileName || c.filename || c.sourceURL || k
+                    } catch (B) {
+                        p = "Not available";
+                        u = j
+                    }
+                    g = u || !c.lineNumber || !c.fileName || !c.stack ? {
+                        message: c.message,
+                        name: c.name,
+                        lineNumber: q,
+                        fileName: p,
+                        stack: c.stack || "Not available"
+                    } : c
+                }
+                e = "Message: " + Ha(g.message) + '\nUrl: <a href="view-source:' + g.fileName + '" target="_new">' + g.fileName + "</a>\nLine: " + g.lineNumber + "\n\nBrowser stack:\n" + Ha(g.stack + "-> ") + "[end]\n\nJS stack traversal:\n" + Ha(lb(f) + "-> ")
+            } catch (J) {
+                e = "Exception trying to expose exception! You win, we lose. " + J
+            }
+            d.Oa = e
+        }
+        return d
+    };
+    var yb = function (a, b) {
+        a.log(sb, b, void 0)
+    };
+    P.prototype.info = function (a, b) {
+        this.log(tb, a, b)
+    };
+    var Q = function (a, b) {
+        a.log(vb, b, void 0)
+    },
+        R = function (a, b) {
+            a.log(wb, b, void 0)
+        },
+        zb = {},
+        Ab = m,
+        Bb = function () {
+            if (!Ab) {
+                Ab = new P("");
+                zb[""] = Ab;
+                Ab.vc(ub)
+            }
+        },
+        S = function (a) {
+            Bb();
+            var b;
+            if (!(b = zb[a])) {
+                b = new P(a);
+                var c = a.lastIndexOf("."),
+                    d = a.substr(c + 1);
+                c = S(a.substr(0, c));
+                if (!c.G) c.G = {};
+                c.G[d] = b;
+                b.n = c;
+                zb[a] = b
+            }
+            return b
+        };
+    var Cb = function (a) {
+        a = String(a);
+        var b;
+        b = /^\s*$/.test(a) ? o : /^[\],:{}\s\u2028\u2029]*$/.test(a.replace(/\\["\\\/bfnrtu]/g, "@").replace(/"[^"\\\n\r\u2028\u2029\x00-\x08\x10-\x1f\x80-\x9f]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, "]").replace(/(?:^|:|,)(?:[\s\u2028\u2029]*\[)+/g, ""));
+        if (b) try {
+            return eval("(" + a + ")")
+        } catch (c) {}
+        h(Error("Invalid JSON string: " + a))
+    },
+        Db = function () {};
+    Db.prototype.Fa = function (a) {
+        var b = [];
+        Eb(this, a, b);
+        return b.join("")
+    };
+    var Eb = function (a, b, c) {
+        switch (typeof b) {
+        case "string":
+            Fb(a, b, c);
+            break;
+        case "number":
+            c.push(isFinite(b) && !isNaN(b) ? b : "null");
+            break;
+        case "boolean":
+            c.push(b);
+            break;
+        case "undefined":
+            c.push("null");
+            break;
+        case "object":
+            if (b == m) {
+                c.push("null");
+                break
+            }
+            if (la(b)) {
+                var d = b.length;
+                c.push("[");
+                for (var e = "", f = 0; f < d; f++) {
+                    c.push(e);
+                    Eb(a, b[f], c);
+                    e = ","
+                }
+                c.push("]");
+                break
+            }
+            c.push("{");
+            d = "";
+            for (e in b) if (Object.prototype.hasOwnProperty.call(b, e)) {
+                f = b[e];
+                if (typeof f != "function") {
+                    c.push(d);
+                    Fb(a, e, c);
+                    c.push(":");
+                    Eb(a, f, c);
+                    d = ","
+                }
+            }
+            c.push("}");
+            break;
+        case "function":
+            break;
+        default:
+            h(Error("Unknown type: " + typeof b))
+        }
+    },
+        Gb = {
+            '"': '\\"',
+            "\\": "\\\\",
+            "/": "\\/",
+            "\u0008": "\\b",
+            "\u000c": "\\f",
+            "\n": "\\n",
+            "\r": "\\r",
+            "\t": "\\t",
+            "\u000b": "\\u000b"
+        },
+        Hb = /\uffff/.test("\uffff") ? /[\\\"\x00-\x1f\x7f-\uffff]/g : /[\\\"\x00-\x1f\x7f-\xff]/g,
+        Fb = function (a, b, c) {
+            c.push('"', b.replace(Hb, function (d) {
+                if (d in Gb) return Gb[d];
+                var e = d.charCodeAt(0),
+                    f = "\\u";
+                if (e < 16) f += "000";
+                else if (e < 256) f += "00";
+                else if (e < 4096) f += "0";
+                return Gb[d] = f + e.toString(16)
+            }), '"')
+        };
+    var Ib = function (a, b) {
+        this.x = a !== undefined ? a : 0;
+        this.y = b !== undefined ? b : 0
+    };
+    Ib.prototype.toString = function () {
+        return "(" + this.x + ", " + this.y + ")"
+    };
+    var Jb = function (a, b, c, d) {
+        this.top = a;
+        this.right = b;
+        this.bottom = c;
+        this.left = d
+    };
+    Jb.prototype.toString = function () {
+        return "(" + this.top + "t, " + this.right + "r, " + this.bottom + "b, " + this.left + "l)"
+    };
+    var Kb = function (a, b) {
+        this.width = a;
+        this.height = b
+    };
+    r = Kb.prototype;
+    r.toString = function () {
+        return "(" + this.width + " x " + this.height + ")"
+    };
+    r.ceil = function () {
+        this.width = Math.ceil(this.width);
+        this.height = Math.ceil(this.height);
+        return this
+    };
+    r.floor = function () {
+        this.width = Math.floor(this.width);
+        this.height = Math.floor(this.height);
+        return this
+    };
+    r.round = function () {
+        this.width = Math.round(this.width);
+        this.height = Math.round(this.height);
+        return this
+    };
+    r.scale = function (a) {
+        this.width *= a;
+        this.height *= a;
+        return this
+    };
+    var T = function (a, b, c, d) {
+        this.left = a;
+        this.top = b;
+        this.width = c;
+        this.height = d
+    };
+    T.prototype.toString = function () {
+        return "(" + this.left + ", " + this.top + " - " + this.width + "w x " + this.height + "h)"
+    };
+    var Lb = function () {};
+    Lb.prototype.pa = o;
+    Lb.prototype.u = function () {
+        if (!this.pa) {
+            this.pa = j;
+            this.d()
+        }
+    };
+    Lb.prototype.d = function () {};
+    var Ob, Pb, Qb, Rb, Sb = function () {
+        return z.navigator ? z.navigator.userAgent : m
+    };
+    Rb = Qb = Pb = Ob = o;
+    var Tb;
+    if (Tb = Sb()) {
+        var Ub = z.navigator;
+        Ob = Tb.indexOf("Opera") == 0;
+        Pb = !Ob && Tb.indexOf("MSIE") != -1;
+        Qb = !Ob && Tb.indexOf("WebKit") != -1;
+        Rb = !Ob && !Qb && Ub.product == "Gecko"
+    }
+    var Vb = Ob,
+        U = Pb,
+        Wb = Rb,
+        Xb = Qb,
+        Yb = z.navigator,
+        Zb = (Yb && Yb.platform || "").indexOf("Mac") != -1,
+        $b;
+    a: {
+        var ac = "",
+            bc;
+        if (Vb && z.opera) {
+            var cc = z.opera.version;
+            ac = typeof cc == "function" ? cc() : cc
+        } else {
+            if (Wb) bc = /rv\:([^\);]+)(\)|;)/;
+            else if (U) bc = /MSIE\s+([^\);]+)(\)|;)/;
+            else if (Xb) bc = /WebKit\/(\S+)/;
+            if (bc) {
+                var dc = bc.exec(Sb());
+                ac = dc ? dc[1] : ""
+            }
+        }
+        if (U) {
+            var ec, fc = z.document;
+            ec = fc ? fc.documentMode : undefined;
+            if (ec > parseFloat(ac)) {
+                $b = String(ec);
+                break a
+            }
+        }
+        $b = ac
+    }
+    var gc = $b,
+        hc = {},
+        ic = function (a) {
+            return hc[a] || (hc[a] = Ka(gc, a) >= 0)
+        };
+    var jc, kc = !U || ic("9");!Wb && !U || U && ic("9") || Wb && ic("1.9.1");U && ic("9");
+    var lc = function (a) {
+        var b;
+        b = (b = a.className) && typeof b.split == "function" ? b.split(/\s+/) : [];
+        var c;
+        c = Ya(arguments, 1);
+        for (var d = 0, e = 0; e < c.length; e++) if (!(Oa(b, c[e]) >= 0)) {
+            b.push(c[e]);
+            d++
+        }
+        c = d == c.length;
+        a.className = b.join(" ");
+        return c
+    };
+    var nc = function (a) {
+        return a ? new mc(a.nodeType == 9 ? a : a.ownerDocument || a.document) : jc || (jc = new mc)
+    },
+        pc = function (a, b) {
+            ab(b, function (c, d) {
+                if (d == "style") a.style.cssText = c;
+                else if (d == "class") a.className = c;
+                else if (d == "for") a.htmlFor = c;
+                else if (d in oc) a.setAttribute(oc[d], c);
+                else a[d] = c
+            })
+        },
+        oc = {
+            cellpadding: "cellPadding",
+            cellspacing: "cellSpacing",
+            colspan: "colSpan",
+            rowspan: "rowSpan",
+            valign: "vAlign",
+            height: "height",
+            width: "width",
+            usemap: "useMap",
+            frameborder: "frameBorder",
+            maxlength: "maxLength",
+            type: "type"
+        },
+        rc = function () {
+            return qc(document, arguments)
+        },
+        qc = function (a, b) {
+            var c = b[0],
+                d = b[1];
+            if (!kc && d && (d.name || d.type)) {
+                c = ["<", c];
+                d.name && c.push(' name="', Ha(d.name), '"');
+                if (d.type) {
+                    c.push(' type="', Ha(d.type), '"');
+                    var e = {};
+                    db(e, d);
+                    d = e;
+                    delete d.type
+                }
+                c.push(">");
+                c = c.join("")
+            }
+            c = a.createElement(c);
+            if (d) if (C(d)) c.className = d;
+            else la(d) ? lc.apply(m, [c].concat(d)) : pc(c, d);
+            b.length > 2 && sc(a, c, b);
+            return c
+        },
+        sc = function (a, b, c) {
+            function d(g) {
+                if (g) b.appendChild(C(g) ? a.createTextNode(g) : g)
+            }
+            for (var e = 2; e < c.length; e++) {
+                var f = c[e];
+                ma(f) && !(pa(f) && f.nodeType > 0) ? Pa(tc(f) ? Xa(f) : f, d) : d(f)
+            }
+        },
+        uc = function (a) {
+            a && a.parentNode && a.parentNode.removeChild(a)
+        },
+        tc = function (a) {
+            if (a && typeof a.length == "number") if (pa(a)) return typeof a.item == "function" || typeof a.item == "string";
+            else if (oa(a)) return typeof a.item == "function";
+            return o
+        },
+        mc = function (a) {
+            this.K = a || z.document || document
+        };r = mc.prototype;r.Rb = nc;r.H = function (a) {
+        return C(a) ? this.K.getElementById(a) : a
+    };r.Ja = function () {
+        return qc(this.K, arguments)
+    };r.createElement = function (a) {
+        return this.K.createElement(a)
+    };
+    r.createTextNode = function (a) {
+        return this.K.createTextNode(a)
+    };r.e = function () {
+        return this.K.parentWindow || this.K.defaultView
+    };r.appendChild = function (a, b) {
+        a.appendChild(b)
+    };
+    var vc = new Function("a", "return a");
+    var wc;!U || ic("9");U && ic("8");
+    var xc = function (a, b) {
+        this.type = a;
+        this.currentTarget = this.target = b
+    };L(xc, Lb);xc.prototype.d = function () {
+        delete this.type;
+        delete this.target;
+        delete this.currentTarget
+    };xc.prototype.za = o;xc.prototype.kd = j;xc.prototype.stopPropagation = function () {
+        this.za = j
+    };
+    var yc = function (a) {
+        a.stopPropagation()
+    };
+    var zc = {
+        zd: "click",
+        Ed: "dblclick",
+        Yd: "mousedown",
+        be: "mouseup",
+        ae: "mouseover",
+        $d: "mouseout",
+        Zd: "mousemove",
+        le: "selectstart",
+        Td: "keypress",
+        Sd: "keydown",
+        Ud: "keyup",
+        xd: "blur",
+        Md: "focus",
+        Fd: "deactivate",
+        Nd: U ? "focusin" : "DOMFocusIn",
+        Od: U ? "focusout" : "DOMFocusOut",
+        yd: "change",
+        ke: "select",
+        me: "submit",
+        Rd: "input",
+        ge: "propertychange",
+        Jd: "dragstart",
+        Gd: "dragenter",
+        Id: "dragover",
+        Hd: "dragleave",
+        Kd: "drop",
+        qe: "touchstart",
+        pe: "touchmove",
+        oe: "touchend",
+        ne: "touchcancel",
+        Bd: "contextmenu",
+        Ld: "error",
+        Qd: "help",
+        Vd: "load",
+        Wd: "losecapture",
+        he: "readystatechange",
+        ie: "resize",
+        je: "scroll",
+        re: "unload",
+        Pd: "hashchange",
+        ce: "pagehide",
+        de: "pageshow",
+        fe: "popstate",
+        Cd: "copy",
+        ee: "paste",
+        Dd: "cut",
+        Xd: "message",
+        Ad: "connect"
+    };
+    var Ac = function (a, b) {
+        a && this.va(a, b)
+    };L(Ac, xc);r = Ac.prototype;r.target = m;r.relatedTarget = m;r.offsetX = 0;r.offsetY = 0;r.clientX = 0;r.clientY = 0;r.screenX = 0;r.screenY = 0;r.button = 0;r.keyCode = 0;r.charCode = 0;r.ctrlKey = o;r.altKey = o;r.shiftKey = o;r.metaKey = o;r.$c = o;r.L = m;
+    r.va = function (a, b) {
+        var c = this.type = a.type;
+        xc.call(this, c);
+        this.target = a.target || a.srcElement;
+        this.currentTarget = b;
+        var d = a.relatedTarget;
+        if (d) {
+            if (Wb) try {
+                vc(d.nodeName)
+            } catch (e) {
+                d = m
+            }
+        } else if (c == "mouseover") d = a.fromElement;
+        else if (c == "mouseout") d = a.toElement;
+        this.relatedTarget = d;
+        this.offsetX = a.offsetX !== undefined ? a.offsetX : a.layerX;
+        this.offsetY = a.offsetY !== undefined ? a.offsetY : a.layerY;
+        this.clientX = a.clientX !== undefined ? a.clientX : a.pageX;
+        this.clientY = a.clientY !== undefined ? a.clientY : a.pageY;
+        this.screenX =
+        a.screenX || 0;
+        this.screenY = a.screenY || 0;
+        this.button = a.button;
+        this.keyCode = a.keyCode || 0;
+        this.charCode = a.charCode || (c == "keypress" ? a.keyCode : 0);
+        this.ctrlKey = a.ctrlKey;
+        this.altKey = a.altKey;
+        this.shiftKey = a.shiftKey;
+        this.metaKey = a.metaKey;
+        this.$c = Zb ? a.metaKey : a.ctrlKey;
+        this.state = a.state;
+        this.L = a;
+        delete this.kd;
+        delete this.za
+    };r.stopPropagation = function () {
+        Ac.l.stopPropagation.call(this);
+        if (this.L.stopPropagation) this.L.stopPropagation();
+        else this.L.cancelBubble = j
+    };
+    r.d = function () {
+        Ac.l.d.call(this);
+        this.relatedTarget = this.currentTarget = this.target = this.L = m
+    };
+    var V = function (a, b) {
+        this.Yb = b;
+        this.M = [];
+        a > this.Yb && h(Error("[goog.structs.SimplePool] Initial cannot be greater than max"));
+        for (var c = 0; c < a; c++) this.M.push(this.C ? this.C() : {})
+    };L(V, Lb);V.prototype.C = m;V.prototype.Hb = m;V.prototype.getObject = function () {
+        if (this.M.length) return this.M.pop();
+        return this.C ? this.C() : {}
+    };
+    var Cc = function (a, b) {
+        a.M.length < a.Yb ? a.M.push(b) : Bc(a, b)
+    },
+        Bc = function (a, b) {
+            if (a.Hb) a.Hb(b);
+            else if (pa(b)) if (oa(b.u)) b.u();
+            else
+            for (var c in b) delete b[c]
+        };
+    V.prototype.d = function () {
+        V.l.d.call(this);
+        for (var a = this.M; a.length;) Bc(this, a.pop());
+        delete this.M
+    };
+    var Dc;
+    var Ec = (Dc = "ScriptEngine" in z && z.ScriptEngine() == "JScript") ? z.ScriptEngineMajorVersion() + "." + z.ScriptEngineMinorVersion() + "." + z.ScriptEngineBuildVersion() : "0";
+    var Fc = function () {},
+        Gc = 0;r = Fc.prototype;r.key = 0;r.Z = o;r.xb = o;r.va = function (a, b, c, d, e, f) {
+        if (oa(a)) this.Vb = j;
+        else if (a && a.handleEvent && oa(a.handleEvent)) this.Vb = o;
+        else h(Error("Invalid listener argument"));
+        this.ga = a;
+        this.ic = b;
+        this.src = c;
+        this.type = d;
+        this.capture = !! e;
+        this.Ra = f;
+        this.xb = o;
+        this.key = ++Gc;
+        this.Z = o
+    };r.handleEvent = function (a) {
+        if (this.Vb) return this.ga.call(this.Ra || this.src, a);
+        return this.ga.handleEvent.call(this.ga, a)
+    };
+    var Hc, Ic, Jc, Kc, Lc, Mc, Nc, Oc, Pc, Qc, Rc;
+    (function () {
+        function a() {
+            return {
+                p: 0,
+                Y: 0
+            }
+        }
+        function b() {
+            return []
+        }
+        function c() {
+            var B = function (J) {
+                return g.call(B.src, B.key, J)
+            };
+            return B
+        }
+        function d() {
+            return new Fc
+        }
+        function e() {
+            return new Ac
+        }
+        var f = Dc && !(Ka(Ec, "5.7") >= 0),
+            g;
+        Mc = function (B) {
+            g = B
+        };
+        if (f) {
+            Hc = function () {
+                return k.getObject()
+            };
+            Ic = function (B) {
+                Cc(k, B)
+            };
+            Jc = function () {
+                return q.getObject()
+            };
+            Kc = function (B) {
+                Cc(q, B)
+            };
+            Lc = function () {
+                return p.getObject()
+            };
+            Nc = function () {
+                Cc(p, c())
+            };
+            Oc = function () {
+                return u.getObject()
+            };
+            Pc = function (B) {
+                Cc(u, B)
+            };
+            Qc = function () {
+                return v.getObject()
+            };
+            Rc = function (B) {
+                Cc(v, B)
+            };
+            var k = new V(0, 600);
+            k.C = a;
+            var q = new V(0, 600);
+            q.C = b;
+            var p = new V(0, 600);
+            p.C = c;
+            var u = new V(0, 600);
+            u.C = d;
+            var v = new V(0, 600);
+            v.C = e
+        } else {
+            Hc = a;
+            Ic = ja;
+            Jc = b;
+            Kc = ja;
+            Lc = c;
+            Nc = ja;
+            Oc = d;
+            Pc = ja;
+            Qc = e;
+            Rc = ja
+        }
+    })();
+    var Sc = {},
+        W = {},
+        Tc = {},
+        Uc = {},
+        Vc = function (a, b, c, d, e) {
+            if (b) if (la(b)) {
+                for (var f = 0; f < b.length; f++) Vc(a, b[f], c, d, e);
+                return m
+            } else {
+                d = !! d;
+                var g = W;
+                b in g || (g[b] = Hc());
+                g = g[b];
+                if (!(d in g)) {
+                    g[d] = Hc();
+                    g.p++
+                }
+                g = g[d];
+                var k = sa(a),
+                    q;
+                g.Y++;
+                if (g[k]) {
+                    q = g[k];
+                    for (f = 0; f < q.length; f++) {
+                        g = q[f];
+                        if (g.ga == c && g.Ra == e) {
+                            if (g.Z) break;
+                            return q[f].key
+                        }
+                    }
+                } else {
+                    q = g[k] = Jc();
+                    g.p++
+                }
+                f = Lc();
+                f.src = a;
+                g = Oc();
+                g.va(c, f, a, b, d, e);
+                c = g.key;
+                f.key = c;
+                q.push(g);
+                Sc[c] = g;
+                Tc[k] || (Tc[k] = Jc());
+                Tc[k].push(g);
+                if (a.addEventListener) {
+                    if (a == z || !a.Fb) a.addEventListener(b, f, d)
+                } else a.attachEvent(Wc(b), f);
+                return c
+            } else h(Error("Invalid event type"))
+        },
+        Xc = function (a, b, c, d, e) {
+            if (la(b)) for (var f = 0; f < b.length; f++) Xc(a, b[f], c, d, e);
+            else {
+                d = !! d;
+                a: {
+                    f = W;
+                    if (b in f) {
+                        f = f[b];
+                        if (d in f) {
+                            f = f[d];
+                            a = sa(a);
+                            if (f[a]) {
+                                a = f[a];
+                                break a
+                            }
+                        }
+                    }
+                    a = m
+                }
+                if (a) for (f = 0; f < a.length; f++) if (a[f].ga == c && a[f].capture == d && a[f].Ra == e) {
+                    Yc(a[f].key);
+                    break
+                }
+            }
+        },
+        Yc = function (a) {
+            if (Sc[a]) {
+                var b = Sc[a];
+                if (!b.Z) {
+                    var c = b.src,
+                        d = b.type,
+                        e = b.ic,
+                        f = b.capture;
+                    if (c.removeEventListener) {
+                        if (c == z || !c.Fb) c.removeEventListener(d, e, f)
+                    } else c.detachEvent && c.detachEvent(Wc(d), e);
+                    c = sa(c);
+                    e = W[d][f][c];
+                    if (Tc[c]) {
+                        var g = Tc[c];
+                        Sa(g, b);
+                        g.length == 0 && delete Tc[c]
+                    }
+                    b.Z = j;
+                    e.cc = j;
+                    Zc(d, f, c, e);
+                    delete Sc[a]
+                }
+            }
+        },
+        Zc = function (a, b, c, d) {
+            if (!d.wa) if (d.cc) {
+                for (var e = 0, f = 0; e < d.length; e++) if (d[e].Z) {
+                    var g = d[e].ic;
+                    g.src = m;
+                    Nc(g);
+                    Pc(d[e])
+                } else {
+                    if (e != f) d[f] = d[e];
+                    f++
+                }
+                d.length = f;
+                d.cc = o;
+                if (f == 0) {
+                    Kc(d);
+                    delete W[a][b][c];
+                    W[a][b].p--;
+                    if (W[a][b].p == 0) {
+                        Ic(W[a][b]);
+                        delete W[a][b];
+                        W[a].p--
+                    }
+                    if (W[a].p == 0) {
+                        Ic(W[a]);
+                        delete W[a]
+                    }
+                }
+            }
+        },
+        $c = function (a, b, c) {
+            var d = 0,
+                e = b == m,
+                f = c == m;
+            c = !! c;
+            if (a == m) ab(Tc, function (q) {
+                for (var p = q.length - 1; p >= 0; p--) {
+                    var u = q[p];
+                    if ((e || b == u.type) && (f || c == u.capture)) {
+                        Yc(u.key);
+                        d++
+                    }
+                }
+            });
+            else {
+                a = sa(a);
+                if (Tc[a]) {
+                    a = Tc[a];
+                    for (var g = a.length - 1; g >= 0; g--) {
+                        var k = a[g];
+                        if ((e || b == k.type) && (f || c == k.capture)) {
+                            Yc(k.key);
+                            d++
+                        }
+                    }
+                }
+            }
+            return d
+        },
+        Wc = function (a) {
+            if (a in Uc) return Uc[a];
+            return Uc[a] = "on" + a
+        },
+        bd = function (a, b, c, d, e) {
+            var f = 1;
+            b = sa(b);
+            if (a[b]) {
+                a.Y--;
+                a = a[b];
+                if (a.wa) a.wa++;
+                else a.wa = 1;
+                try {
+                    for (var g = a.length, k = 0; k < g; k++) {
+                        var q = a[k];
+                        if (q && !q.Z) f &= ad(q, e) !== o
+                    }
+                } finally {
+                    a.wa--;
+                    Zc(c, d, b, a)
+                }
+            }
+            return Boolean(f)
+        },
+        ad = function (a, b) {
+            var c = a.handleEvent(b);
+            a.xb && Yc(a.key);
+            return c
+        };
+    Mc(function (a, b) {
+        if (!Sc[a]) return j;
+        var c = Sc[a],
+            d = c.type,
+            e = W;
+        if (!(d in e)) return j;
+        e = e[d];
+        var f, g;
+        if (wc === undefined) wc = U && !z.addEventListener;
+        if (wc) {
+            f = b || ia("window.event");
+            var k = j in e,
+                q = o in e;
+            if (k) {
+                if (f.keyCode < 0 || f.returnValue != undefined) return j;
+                a: {
+                    var p = o;
+                    if (f.keyCode == 0) try {
+                        f.keyCode = -1;
+                        break a
+                    } catch (u) {
+                        p = j
+                    }
+                    if (p || f.returnValue == undefined) f.returnValue = j
+                }
+            }
+            p = Qc();
+            p.va(f, this);
+            f = j;
+            try {
+                if (k) {
+                    for (var v = Jc(), B = p.currentTarget; B; B = B.parentNode) v.push(B);
+                    g = e[j];
+                    g.Y = g.p;
+                    for (var J = v.length - 1; !p.za && J >= 0 && g.Y; J--) {
+                        p.currentTarget = v[J];
+                        f &= bd(g, v[J], d, j, p)
+                    }
+                    if (q) {
+                        g = e[o];
+                        g.Y = g.p;
+                        for (J = 0; !p.za && J < v.length && g.Y; J++) {
+                            p.currentTarget = v[J];
+                            f &= bd(g, v[J], d, o, p)
+                        }
+                    }
+                } else f = ad(c, p)
+            } finally {
+                if (v) {
+                    v.length = 0;
+                    Kc(v)
+                }
+                p.u();
+                Rc(p)
+            }
+            return f
+        }
+        d = new Ac(b, this);
+        try {
+            f = ad(c, d)
+        } finally {
+            d.u()
+        }
+        return f
+    });
+    var cd = function () {
+        this.la = {}
+    };L(cd, Lb);cd.prototype.xa = S("goog.messaging.AbstractChannel");cd.prototype.B = function (a) {
+        a && a()
+    };cd.prototype.w = function () {
+        return j
+    };cd.prototype.d = function () {
+        cd.l.d.call(this);
+        var a = this.xa;
+        a && typeof a.u == "function" && a.u();
+        delete this.xa;
+        delete this.la;
+        delete this.Gb
+    };
+    var dd = {
+        "1": "NativeMessagingTransport",
+        "2": "FrameElementMethodTransport",
+        "3": "IframeRelayTransport",
+        "4": "IframePollingTransport",
+        "5": "FlashTransport",
+        "6": "NixTransport"
+    },
+        ed = ["pu", "lru", "pru", "lpu", "ppu"],
+        fd = {},
+        hd = function () {
+            for (var a = 10, b = gd, c = b.length, d = ""; a-- > 0;) d += b.charAt(Math.floor(Math.random() * c));
+            return d
+        },
+        gd = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+        X = S("goog.net.xpc");
+    var id = function (a) {
+        this.q = a || nc()
+    };L(id, Lb);id.prototype.ba = 0;id.prototype.e = function () {
+        return this.q.e()
+    };id.prototype.getName = function () {
+        return dd[this.ba] || ""
+    };
+    var jd = function (a, b) {
+        this.q = b || nc();
+        this.a = a;
+        this.ha = [];
+        this.Jc = E(this.Kc, this)
+    };L(jd, id);r = jd.prototype;r.ba = 2;r.ab = o;r.vd = 0;r.B = function () {
+        if (kd(this.a) == 0) {
+            this.D = this.a.V;
+            this.D.XPC_toOuter = E(this.Tb, this)
+        } else this.sb()
+    };
+    r.sb = function () {
+        var a = j;
+        try {
+            if (!this.D) this.D = this.e().frameElement;
+            if (this.D && this.D.XPC_toOuter) {
+                this.Ya = this.D.XPC_toOuter;
+                this.D.XPC_toOuter.XPC_toInner = E(this.Tb, this);
+                a = o;
+                this.send("tp", "SETUP_ACK");
+                ld(this.a)
+            }
+        } catch (b) {
+            X.log(rb, "exception caught while attempting setup: " + b, void 0)
+        }
+        if (a) {
+            if (!this.rb) this.rb = E(this.sb, this);
+            this.e().setTimeout(this.rb, 100)
+        }
+    };r.kb = function (a) {
+        if (kd(this.a) == 0 && !this.a.w() && a == "SETUP_ACK") {
+            this.Ya = this.D.XPC_toOuter.XPC_toInner;
+            ld(this.a)
+        } else h(Error("Got unexpected transport message."))
+    };
+    r.Tb = function (a, b) {
+        if (!this.ab && this.ha.length == 0) md(this.a, a, b);
+        else {
+            this.ha.push({
+                rd: a,
+                $a: b
+            });
+            if (this.ha.length == 1) this.vd = this.e().setTimeout(this.Jc, 1)
+        }
+    };r.Kc = function () {
+        for (; this.ha.length;) {
+            var a = this.ha.shift();
+            md(this.a, a.rd, a.$a)
+        }
+    };r.send = function (a, b) {
+        this.ab = j;
+        this.Ya(a, b);
+        this.ab = o
+    };r.d = function () {
+        jd.l.d.call(this);
+        this.D = this.Ya = m
+    };
+    var Y = function (a, b) {
+        this.q = b || nc();
+        this.a = a;
+        this.ka = this.a.k.ppu;
+        this.fd = this.a.k.lpu;
+        this.Da = []
+    },
+        nd, od;L(Y, id);Y.prototype.ba = 4;Y.prototype.Ea = 0;Y.prototype.ca = o;Y.prototype.O = o;
+    var pd = function (a) {
+        return "googlexpc_" + a.a.name + "_msg"
+    },
+        qd = function (a) {
+            return "googlexpc_" + a.a.name + "_ack"
+        };
+    Y.prototype.B = function () {
+        Q(X, "transport connect called");
+        if (!this.O) {
+            Q(X, "initializing...");
+            var a = pd(this);
+            this.X = rd(this, a);
+            this.Wa = this.e().frames[a];
+            a = qd(this);
+            this.R = rd(this, a);
+            this.Ha = this.e().frames[a];
+            this.O = j
+        }
+        if (sd(this, pd(this)) && sd(this, qd(this))) {
+            Q(X, "foreign frames present");
+            this.Zb = new td(this, this.a.s.frames[pd(this)], E(this.dd, this));
+            this.nb = new td(this, this.a.s.frames[qd(this)], E(this.cd, this));
+            this.Ab()
+        } else {
+            R(X, "foreign frames not (yet) present");
+            if (kd(this.a) == 1 && !this.gd) {
+                R(X, "innerPeerReconnect called");
+                this.a.name = hd();
+                R(X, "switching channels: " + this.a.name);
+                ud(this);
+                this.O = o;
+                this.gd = rd(this, "googlexpc_reconnect_" + this.a.name)
+            } else if (kd(this.a) == 0) {
+                R(X, "outerPeerReconnect called");
+                a = this.a.s.frames;
+                for (var b = a.length, c = 0; c < b; c++) {
+                    var d;
+                    try {
+                        if (a[c] && a[c].name) d = a[c].name
+                    } catch (e) {}
+                    if (d) {
+                        var f = d.split("_");
+                        if (f.length == 3 && f[0] == "googlexpc" && f[1] == "reconnect") {
+                            this.a.name = f[2];
+                            ud(this);
+                            this.O = o;
+                            break
+                        }
+                    }
+                }
+            }
+            this.e().setTimeout(E(this.B, this), 100)
+        }
+    };
+    var rd = function (a, b) {
+        R(X, "constructing sender frame: " + b);
+        var c = document.createElement("iframe"),
+            d = c.style;
+        d.position = "absolute";
+        d.top = "-10px";
+        d.left = "10px";
+        d.width = "1px";
+        d.height = "1px";
+        c.id = c.name = b;
+        c.src = a.ka + "#INITIAL";
+        a.e().document.body.appendChild(c);
+        return c
+    },
+        ud = function (a) {
+            R(X, "deconstructSenderFrames called");
+            if (a.X) {
+                a.X.parentNode.removeChild(a.X);
+                a.X = m;
+                a.Wa = m
+            }
+            if (a.R) {
+                a.R.parentNode.removeChild(a.R);
+                a.R = m;
+                a.Ha = m
+            }
+        },
+        sd = function (a, b) {
+            R(X, "checking for receive frame: " + b);
+            try {
+                var c = a.a.s.frames[b];
+                if (!c || c.location.href.indexOf(a.fd) != 0) return o
+            } catch (d) {
+                return o
+            }
+            return j
+        };Y.prototype.Ab = function () {
+        var a = this.a.s.frames;
+        if (a[qd(this)] && a[pd(this)]) {
+            this.$b = new vd(this.ka, this.Wa);
+            this.oa = new vd(this.ka, this.Ha);
+            Q(X, "local frames ready");
+            this.e().setTimeout(E(function () {
+                this.$b.send("SETUP");
+                this.ca = this.ve = j;
+                Q(X, "SETUP sent")
+            }, this), 100)
+        } else {
+            if (!this.zb) this.zb = E(this.Ab, this);
+            this.e().setTimeout(this.zb, 100);
+            Q(X, "local frames not (yet) present")
+        }
+    };
+    var wd = function (a) {
+        if (a.fb && a.lc) {
+            ld(a.a);
+            if (a.T) {
+                Q(X, "delivering queued messages (" + a.T.length + ")");
+                for (var b = 0, c; b < a.T.length; b++) {
+                    c = a.T[b];
+                    md(a.a, c.qd, c.$a)
+                }
+                delete a.T
+            }
+        } else R(X, "checking if connected: ack sent:" + a.fb + ", ack rcvd: " + a.lc)
+    };
+    Y.prototype.dd = function (a) {
+        R(X, "msg received: " + a);
+        if (a == "SETUP") {
+            if (this.oa) {
+                this.oa.send("SETUP_ACK");
+                R(X, "SETUP_ACK sent");
+                this.fb = j;
+                wd(this)
+            }
+        } else if (this.a.w() || this.fb) {
+            var b = a.indexOf("|"),
+                c = a.substring(0, b);
+            a = a.substring(b + 1);
+            b = c.indexOf(",");
+            if (b == -1) {
+                var d;
+                this.oa.send("ACK:" + c);
+                xd(this, a)
+            } else {
+                d = c.substring(0, b);
+                this.oa.send("ACK:" + d);
+                c = c.substring(b + 1).split("/");
+                b = parseInt(c[0], 10);
+                c = parseInt(c[1], 10);
+                if (b == 1) this.Za = [];
+                this.Za.push(a);
+                if (b == c) {
+                    xd(this, this.Za.join(""));
+                    delete this.Za
+                }
+            }
+        } else yb(X, "received msg, but channel is not connected")
+    };Y.prototype.cd = function (a) {
+        R(X, "ack received: " + a);
+        if (a == "SETUP_ACK") {
+            this.ca = o;
+            this.lc = j;
+            wd(this)
+        } else if (this.a.w()) if (this.ca) if (parseInt(a.split(":")[1], 10) == this.Ea) {
+            this.ca = o;
+            yd(this)
+        } else yb(X, "got ack with wrong sequence");
+        else yb(X, "got unexpected ack");
+        else yb(X, "received ack, but channel not connected")
+    };
+    var yd = function (a) {
+        if (!(a.ca || !a.Da.length)) {
+            var b = a.Da.shift();
+            ++a.Ea;
+            a.$b.send(a.Ea + b);
+            R(X, "msg sent: " + a.Ea + b);
+            a.ca = j
+        }
+    },
+        xd = function (a, b) {
+            var c = b.indexOf(":"),
+                d = b.substr(0, c);
+            c = b.substring(c + 1);
+            if (a.a.w()) md(a.a, d, c);
+            else {
+                (a.T || (a.T = [])).push({
+                    qd: d,
+                    $a: c
+                });
+                R(X, "queued delivery")
+            }
+        };Y.prototype.na = 3800;
+    Y.prototype.send = function (a, b) {
+        var c = a + ":" + b;
+        if (!U || b.length <= this.na) this.Da.push("|" + c);
+        else
+        for (var d = b.length, e = Math.ceil(d / this.na), f = 0, g = 1; f < d;) {
+            this.Da.push("," + g + "/" + e + "|" + c.substr(f, this.na));
+            g++;
+            f += this.na
+        }
+        yd(this)
+    };Y.prototype.d = function () {
+        Y.l.d.call(this);
+        var a = zd;
+        Sa(a, this.Zb);
+        Sa(a, this.nb);
+        this.Zb = this.nb = m;
+        uc(this.X);
+        uc(this.R);
+        this.Wa = this.Ha = this.X = this.R = m
+    };
+    var zd = [],
+        Ad = E(function () {
+            var a = o;
+            try {
+                for (var b = 0, c = zd.length; b < c; b++) {
+                    var d;
+                    if (!(d = a)) {
+                        var e = zd[b],
+                            f = e.kc.location.href;
+                        if (f != e.Eb) {
+                            e.Eb = f;
+                            var g = f.split("#")[1];
+                            if (g) {
+                                g = g.substr(1);
+                                e.Dc(decodeURIComponent(g))
+                            }
+                            d = j
+                        } else d = o
+                    }
+                    a = d
+                }
+            } catch (k) {
+                X.info("receive_() failed: " + k);
+                b = zd[b].o.a;
+                X.info("Transport Error");
+                b.close();
+                if (!zd.length) return
+            }
+            b = K();
+            if (a) nd = b;
+            od = window.setTimeout(Ad, b - nd < 1E3 ? 10 : 100)
+        }, Y),
+        Bd = function () {
+            Q(X, "starting receive-timer");
+            nd = K();
+            od && window.clearTimeout(od);
+            od = window.setTimeout(Ad, 10)
+        },
+        vd = function (a, b) {
+            this.ka = a;
+            this.tc = b;
+            this.Ka = 0
+        };vd.prototype.send = function (a) {
+        this.Ka = ++this.Ka % 2;
+        a = this.ka + "#" + this.Ka + encodeURIComponent(a);
+        try {
+            if (Xb) this.tc.location.href = a;
+            else this.tc.location.replace(a)
+        } catch (b) {
+            X.log(rb, "sending failed", b)
+        }
+        Bd()
+    };
+    var td = function (a, b, c) {
+        this.o = a;
+        this.kc = b;
+        this.Dc = c;
+        this.Eb = this.kc.location.href.split("#")[0] + "#INITIAL";
+        zd.push(this);
+        Bd()
+    };
+    var Dd = function (a, b) {
+        this.q = b || nc();
+        this.a = a;
+        this.Zc = this.a.k.pru;
+        this.fc = this.a.k.ifrid;
+        Xb && Cd()
+    };L(Dd, id);
+    if (Xb) var Ed = [],
+        Fd = 0,
+        Cd = function () {
+            Fd || (Fd = window.setTimeout(function () {
+                Gd()
+            }, 1E3))
+        },
+        Gd = function (a) {
+            var b = K();
+            for (a = a || 3E3; Ed.length && b - Ed[0].timestamp >= a;) {
+                var c = Ed.shift().Tc;
+                uc(c);
+                R(X, "iframe removed")
+            }
+            Fd = window.setTimeout(Hd, 1E3)
+        },
+        Hd = function () {
+            Gd()
+        };
+    var Id = {};Dd.prototype.ba = 3;Dd.prototype.B = function () {
+        this.e().xpcRelay || (this.e().xpcRelay = Jd);
+        this.send("tp", "SETUP")
+    };
+    var Jd = function (a, b) {
+        var c = b.indexOf(":"),
+            d = b.substr(0, c),
+            e = b.substr(c + 1);
+        if (!U || (c = d.indexOf("|")) == -1) var f = d;
+        else {
+            f = d.substr(0, c);
+            d = d.substr(c + 1);
+            c = d.indexOf("+");
+            var g = d.substr(0, c);
+            c = parseInt(d.substr(c + 1), 10);
+            var k = Id[g];
+            k || (k = Id[g] = {
+                Qb: [],
+                mc: 0,
+                Pb: 0
+            });
+            if (d.indexOf("++") != -1) k.Pb = c + 1;
+            k.Qb[c] = e;
+            k.mc++;
+            if (k.mc != k.Pb) return;
+            e = k.Qb.join("");
+            delete Id[g]
+        }
+        md(fd[a], f, decodeURIComponent(e))
+    };Dd.prototype.kb = function (a) {
+        if (a == "SETUP") {
+            this.send("tp", "SETUP_ACK");
+            ld(this.a)
+        } else a == "SETUP_ACK" && ld(this.a)
+    };
+    Dd.prototype.send = function (a, b) {
+        var c = encodeURIComponent(b),
+            d = c.length;
+        if (U && d > 1800) for (var e = Ia(), f = 0, g = 0; f < d; g++) {
+            var k = c.substr(f, 1800);
+            f += 1800;
+            Kd(this, a, k, e + (f >= d ? "++" : "+") + g)
+        } else Kd(this, a, c)
+    };
+    var Kd = function (a, b, c, d) {
+        if (U) {
+            var e = a.e().document.createElement("div");
+            e.innerHTML = '<iframe onload="this.xpcOnload()"></iframe>';
+            e = e.childNodes[0];
+            e.xpcOnload = Ld
+        } else {
+            e = a.e().document.createElement("iframe");
+            Xb ? Ed.push({
+                timestamp: K(),
+                Tc: e
+            }) : Vc(e, "load", Ld)
+        }
+        var f = e.style;
+        f.visibility = "hidden";
+        f.width = e.style.height = "0px";
+        f.position = "absolute";
+        f = a.Zc;
+        f += "#" + a.a.name;
+        if (a.fc) f += "," + a.fc;
+        f += "|" + b;
+        if (d) f += "|" + d;
+        f += ":" + c;
+        e.src = f;
+        a.e().document.body.appendChild(e);
+        R(X, "msg sent: " + f)
+    },
+        Ld = function () {
+            R(X, "iframe-load");
+            uc(this);
+            this.we = m
+        };Dd.prototype.d = function () {
+        Dd.l.d.call(this);
+        Xb && Gd(0)
+    };
+    var Md = function (a, b, c) {
+        this.q = c || nc();
+        this.a = a;
+        this.ec = b || "*"
+    };L(Md, id);Md.prototype.O = o;Md.prototype.ba = 1;
+    var Nd = {},
+        Od = function (a) {
+            var b = a.L.data,
+                c = b.indexOf("|"),
+                d = b.indexOf(":");
+            if (c == -1 || d == -1) return o;
+            var e = b.substring(0, c);
+            c = b.substring(c + 1, d);
+            b = b.substring(d + 1);
+            Q(X, "messageReceived: channel=" + e + ", service=" + c + ", payload=" + b);
+            if (d = fd[e]) {
+                md(d, c, b, a.L.origin);
+                return j
+            }
+            for (var f in fd) {
+                a = fd[f];
+                if (kd(a) == 1 && !a.w() && c == "tp" && b == "SETUP") {
+                    Q(X, "changing channel name to " + e);
+                    a.name = e;
+                    delete fd[f];
+                    fd[e] = a;
+                    md(a, c, b);
+                    return j
+                }
+            }
+            X.info('channel name mismatch; message ignored"');
+            return o
+        };r = Md.prototype;
+    r.kb = function (a) {
+        switch (a) {
+        case "SETUP":
+            this.send("tp", "SETUP_ACK");
+            break;
+        case "SETUP_ACK":
+            ld(this.a)
+        }
+    };r.B = function () {
+        var a = this.e(),
+            b = sa(a),
+            c = Nd[b];
+        typeof c == "number" || (c = 0);
+        if (c == 0) Vc(a.postMessage ? a : a.document, "message", Od, o, Md);
+        Nd[b] = c + 1;
+        this.O = j;
+        this.Bb()
+    };r.Bb = function () {
+        if (!(this.a.w() || this.pa)) {
+            this.send("tp", "SETUP");
+            this.e().setTimeout(E(this.Bb, this), 100)
+        }
+    };
+    r.send = function (a, b) {
+        var c = this.a.s;
+        if (c) {
+            var d = c.postMessage ? c : c.document;
+            this.send = function (e, f) {
+                Q(X, "send(): payload=" + f + " to hostname=" + this.ec);
+                d.postMessage(this.a.name + "|" + e + ":" + f, this.ec)
+            };
+            this.send(a, b)
+        } else Q(X, "send(): window not ready")
+    };r.d = function () {
+        Md.l.d.call(this);
+        if (this.O) {
+            var a = this.e(),
+                b = sa(a),
+                c = Nd[b];
+            Nd[b] = c - 1;
+            if (c == 1) Xc(a.postMessage ? a : a.document, "message", Od, o, Md)
+        }
+    };
+    var Pd = function (a, b) {
+        this.q = b || nc();
+        this.a = a;
+        this.tb = a.at || "";
+        this.oc = a.rat || "";
+        var c = this.e();
+        if (!c.nix_setup_complete) try {
+            c.execScript("Class GCXPC____NIXVBS_wrapper\n Private m_Transport\nPrivate m_Auth\nPublic Sub SetTransport(transport)\nIf isEmpty(m_Transport) Then\nSet m_Transport = transport\nEnd If\nEnd Sub\nPublic Sub SetAuth(auth)\nIf isEmpty(m_Auth) Then\nm_Auth = auth\nEnd If\nEnd Sub\nPublic Function GetAuthToken()\n GetAuthToken = m_Auth\nEnd Function\nPublic Sub SendMessage(service, payload)\n Call m_Transport.GCXPC____NIXJS_handle_message(service, payload)\nEnd Sub\nPublic Sub CreateChannel(channel)\n Call m_Transport.GCXPC____NIXJS_create_channel(channel)\nEnd Sub\nPublic Sub GCXPC____NIXVBS_container()\n End Sub\nEnd Class\n Function GCXPC____NIXVBS_get_wrapper(transport, auth)\nDim wrap\nSet wrap = New GCXPC____NIXVBS_wrapper\nwrap.SetTransport transport\nwrap.SetAuth auth\nSet GCXPC____NIXVBS_get_wrapper = wrap\nEnd Function", "vbscript");
+            c.nix_setup_complete = j
+        } catch (d) {
+            X.log(rb, "exception caught while attempting global setup: " + d, void 0)
+        }
+        this.GCXPC____NIXJS_handle_message = this.Pc;
+        this.GCXPC____NIXJS_create_channel = this.Gc
+    };L(Pd, id);r = Pd.prototype;r.ba = 6;r.W = o;r.I = m;r.B = function () {
+        kd(this.a) == 0 ? this.qb() : this.pb()
+    };
+    r.qb = function () {
+        if (!this.W) {
+            var a = this.a.V;
+            try {
+                a.contentWindow.opener = this.e().GCXPC____NIXVBS_get_wrapper(this, this.tb);
+                this.W = j
+            } catch (b) {
+                X.log(rb, "exception caught while attempting setup: " + b, void 0)
+            }
+            this.W || this.e().setTimeout(E(this.qb, this), 100)
+        }
+    };
+    r.pb = function () {
+        if (!this.W) {
+            try {
+                var a = this.e().opener;
+                if (a && "GCXPC____NIXVBS_container" in a) {
+                    this.I = a;
+                    if (this.I.GetAuthToken() != this.oc) {
+                        X.log(rb, "Invalid auth token from other party", void 0);
+                        return
+                    }
+                    this.I.CreateChannel(this.e().GCXPC____NIXVBS_get_wrapper(this, this.tb));
+                    this.W = j;
+                    ld(this.a)
+                }
+            } catch (b) {
+                X.log(rb, "exception caught while attempting setup: " + b, void 0);
+                return
+            }
+            this.W || this.e().setTimeout(E(this.pb, this), 100)
+        }
+    };
+    r.Gc = function (a) {
+        if (typeof a != "unknown" || !("GCXPC____NIXVBS_container" in a)) X.log(rb, "Invalid NIX channel given to createChannel_", void 0);
+        this.I = a;
+        this.I.GetAuthToken() != this.oc ? X.log(rb, "Invalid auth token from other party", void 0) : ld(this.a)
+    };r.Pc = function (a, b) {
+        this.e().setTimeout(E(function () {
+            md(this.a, a, b)
+        }, this), 1)
+    };r.send = function (a, b) {
+        typeof this.I !== "unknown" && X.log(rb, "NIX channel not connected", void 0);
+        this.I.SendMessage(a, b)
+    };r.d = function () {
+        Pd.l.d.call(this);
+        this.I = m
+    };
+    var Rd = function (a, b) {
+        this.la = {};
+        for (var c = 0, d; d = ed[c]; c++) d in a && !/^https?:\/\//.test(a[d]) && h(Error("URI " + a[d] + " is invalid for field " + d));
+        this.k = a;
+        this.name = this.k.cn || hd();
+        this.q = b || nc();
+        fd[this.name] = this;
+        Vc(window, "unload", Qd);
+        X.info("CrossPageChannel created: " + this.name)
+    };L(Rd, cd);
+    var Sd = /^%*tp$/,
+        Td = /^%+tp$/;r = Rd.prototype;r.o = m;r.hb = 1;r.w = function () {
+        return this.hb == 2
+    };r.s = m;r.V = m;r.Ic = o;r.Fc = o;
+    r.B = function (a) {
+        this.Ec = a || ja;
+        if (this.Ic) {
+            X.info("connect() deferred");
+            this.Fc = j
+        } else {
+            X.info("connect()");
+            if (this.k.ifrid) this.V = this.q.H(this.k.ifrid);
+            if (this.V) {
+                (a = this.V.contentWindow) || (a = window.frames[this.k.ifrid]);
+                this.s = a
+            }
+            if (!this.s) if (window == top) h(Error("CrossPageChannel: Can't connect, peer window-object not set."));
+            else this.s = window.parent;
+            if (!this.o) {
+                if (!this.k.tp) {
+                    a = this.k;
+                    var b;
+                    if (oa(document.postMessage) || oa(window.postMessage) || U && window.postMessage) b = 1;
+                    else if (Wb) b = 2;
+                    else if (U && this.k.pru) b = 3;
+                    else if (U) b = 6;
+                    else if (this.k.lpu && this.k.ppu) b = 4;
+                    a.tp = b
+                }
+                switch (this.k.tp) {
+                case 1:
+                    this.o = new Md(this, this.k.ph, this.q);
+                    break;
+                case 6:
+                    this.o = new Pd(this, this.q);
+                    break;
+                case 2:
+                    this.o = new jd(this, this.q);
+                    break;
+                case 3:
+                    this.o = new Dd(this, this.q);
+                    break;
+                case 4:
+                    this.o = new Y(this, this.q)
+                }
+                this.o ? X.info("Transport created: " + this.o.getName()) : h(Error("CrossPageChannel: No suitable transport found!"))
+            }
+            this.o.B()
+        }
+    };
+    r.close = function () {
+        if (this.w()) {
+            this.hb = 3;
+            this.o.u();
+            this.o = m;
+            X.info('Channel "' + this.name + '" closed')
+        }
+    };
+    var ld = function (a) {
+        if (!a.w()) {
+            a.hb = 2;
+            X.info('Channel "' + a.name + '" connected');
+            a.Ec()
+        }
+    };Rd.prototype.send = function (a, b) {
+        if (this.w()) if (this.s.closed) {
+            X.log(rb, "Peer has disappeared.", void 0);
+            this.close()
+        } else {
+            if (pa(b)) b = (new Db).Fa(b);
+            this.o.send(Ud(this, a), b)
+        } else X.log(rb, "Can't send. Channel not connected.", void 0)
+    };
+    var md = function (a, b, c, d) {
+        var e = a.k.ph;
+        if (/^[\s\xa0]*$/.test(d == m ? "" : String(d)) || /^[\s\xa0]*$/.test(e == m ? "" : String(e)) || d == a.k.ph) if (a.pa) yb(X, "CrossPageChannel::deliver_(): Disposed.");
+        else if (!b || b == "tp") a.o.kb(c);
+        else if (a.w()) {
+            b = b.replace(/%[0-9a-f]{2}/gi, decodeURIComponent);
+            b = Td.test(b) ? b.substring(1) : b;
+            d = c;
+            if (e = a.la[b]) d = e;
+            else if (a.Gb) {
+                e = va(a.Gb, b);
+                d = pa(d);
+                d = {
+                    Ia: e,
+                    Xa: d
+                }
+            } else {
+                yb(a.xa, 'Unknown service name "' + b + '"');
+                d = m
+            }
+            if (d) {
+                a: {
+                    e = c;
+                    var f = d.Xa;
+                    if (f && C(e)) try {
+                        c = Cb(e);
+                        break a
+                    } catch (g) {
+                        yb(a.xa, "Expected JSON payload for " + b + ', was "' + e + '"');
+                        c = m;
+                        break a
+                    } else if (!f && !C(e)) {
+                        c = (new Db).Fa(e);
+                        break a
+                    }
+                    c = e
+                }
+                c != m && d.Ia(c)
+            }
+        } else X.info("CrossPageChannel::deliver_(): Not connected.");
+        else yb(X, 'Message received from unapproved origin "' + d + '" - rejected.')
+    },
+        Ud = function (a, b) {
+            if (Sd.test(b)) b = "%" + b;
+            return b.replace(/[%:|]/g, encodeURIComponent)
+        },
+        kd = function (a) {
+            return window.parent == a.s ? 1 : 0
+        };Rd.prototype.d = function () {
+        Rd.l.d.call(this);
+        this.close();
+        this.V = this.s = m;
+        delete fd[this.name]
+    };
+    var Qd = function () {
+        for (var a in fd) {
+            var b = fd[a];
+            b && b.u()
+        }
+    };
+    var ie = function () {};L(ie, Lb);r = ie.prototype;r.Fb = j;r.dc = m;r.gb = function (a) {
+        this.dc = a
+    };r.addEventListener = function (a, b, c, d) {
+        Vc(this, a, b, c, d)
+    };r.removeEventListener = function (a, b, c, d) {
+        Xc(this, a, b, c, d)
+    };r.d = function () {
+        ie.l.d.call(this);
+        $c(this);
+        this.dc = m
+    };
+    var je = z.window,
+        ke = function (a, b) {
+            if (!oa(a)) if (a && typeof a.handleEvent == "function") a = E(a.handleEvent, a);
+            else h(Error("Invalid listener argument"));
+            b > 2147483647 || je.setTimeout(a, b || 0)
+        };
+    var le = function (a) {
+        if ("isOnce" in a) return a;
+        var b = o,
+            c = function () {
+                b && h(Error("already called: " + a));
+                b = j;
+                a.apply(z, arguments)
+            };
+        c.isOnce = j;
+        return c
+    },
+        me = function (a) {
+            if ("isAsyncOnce" in a) return a;
+            var b = le(function () {
+                var c = arguments;
+                window.setTimeout(function () {
+                    a.apply(z, c)
+                }, 0)
+            });
+            b.isAsyncOnce = j;
+            return b
+        },
+        ne = function (a, b, c) {
+            var d = c ? K() + c : o,
+                e = function () {
+                    var f;
+                    try {
+                        f = a()
+                    } catch (g) {
+                        return b(o, g)
+                    }
+                    if (f) return b(j);
+                    if (d && K() + 100 > d) return b(o);
+                    ke(e, 100)
+                };
+            ke(e, 0)
+        },
+        oe = function (a) {
+            var b = ja;
+            Qa(Ya(arguments, 1), function (c) {
+                b =
+                E(c, a, b)
+            });
+            b()
+        };
+    var pe = function (a) {
+        return window.JSON ? window.JSON.stringify(a) : (new Db).Fa(a)
+    };
+    var qe;
+    (function () {
+        function a(k) {
+            k = k.match(/[\d]+/g);
+            k.length = 3;
+            return k.join(".")
+        }
+        var b = o,
+            c = "";
+        if (navigator.plugins && navigator.plugins.length) {
+            var d = navigator.plugins["Shockwave Flash"];
+            if (d) {
+                b = j;
+                if (d.description) c = a(d.description)
+            }
+            if (navigator.plugins["Shockwave Flash 2.0"]) {
+                b = j;
+                c = "2.0.0.11"
+            }
+        } else if (navigator.mimeTypes && navigator.mimeTypes.length) {
+            if (b = (d = navigator.mimeTypes["application/x-shockwave-flash"]) && d.enabledPlugin) c = a(d.enabledPlugin.description)
+        } else
+        try {
+            d = new ActiveXObject("ShockwaveFlash.ShockwaveFlash.7");
+            b =
+            j;
+            c = a(d.GetVariable("$version"))
+        } catch (e) {
+            try {
+                d = new ActiveXObject("ShockwaveFlash.ShockwaveFlash.6");
+                b = j;
+                c = "6.0.21"
+            } catch (f) {
+                try {
+                    d = new ActiveXObject("ShockwaveFlash.ShockwaveFlash");
+                    b = j;
+                    c = a(d.GetVariable("$version"))
+                } catch (g) {}
+            }
+        }
+        qe = c
+    })();
+    var re = "NONE";
+    (function () {
+        if (Ka(qe, "9") >= 0) re = "FLASH";
+        var a = document.createElement("canvas");
+        a.width = 2;
+        a.height = 1;
+        var b = a.getContext && a.getContext("2d");
+        if (b) {
+            var c = document.createElement("img");
+            c.onload = function () {
+                try {
+                    b.drawImage(c, 0, 0);
+                    a.toDataURL();
+                    var d;
+                    a: {
+                        var e = b.getImageData(0, 0, 2, 1).data,
+                            f = [0, 255, 0, 255, 255, 0, 0, 255];
+                        if (!ma(f) || !ma(e) || f.length != e.length) d = o;
+                        else {
+                            for (var g = f.length, k = 0; k < g; k++) if (f[k] !== e[k]) {
+                                d = o;
+                                break a
+                            }
+                            d = j
+                        }
+                    }
+                    if (d) re = "CANVAS"
+                } catch (q) {}
+            };
+            c.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAABCAYAAAD0In+KAAAAEUlEQVQImWNg+M/w/z8Dw38AEPgD/V7bC9oAAAAASUVORK5CYII="
+        }
+    })();
+    var se = {
+        aliceblue: "#f0f8ff",
+        antiquewhite: "#faebd7",
+        aqua: "#00ffff",
+        aquamarine: "#7fffd4",
+        azure: "#f0ffff",
+        beige: "#f5f5dc",
+        bisque: "#ffe4c4",
+        black: "#000000",
+        blanchedalmond: "#ffebcd",
+        blue: "#0000ff",
+        blueviolet: "#8a2be2",
+        brown: "#a52a2a",
+        burlywood: "#deb887",
+        cadetblue: "#5f9ea0",
+        chartreuse: "#7fff00",
+        chocolate: "#d2691e",
+        coral: "#ff7f50",
+        cornflowerblue: "#6495ed",
+        cornsilk: "#fff8dc",
+        crimson: "#dc143c",
+        cyan: "#00ffff",
+        darkblue: "#00008b",
+        darkcyan: "#008b8b",
+        darkgoldenrod: "#b8860b",
+        darkgray: "#a9a9a9",
+        darkgreen: "#006400",
+        darkgrey: "#a9a9a9",
+        darkkhaki: "#bdb76b",
+        darkmagenta: "#8b008b",
+        darkolivegreen: "#556b2f",
+        darkorange: "#ff8c00",
+        darkorchid: "#9932cc",
+        darkred: "#8b0000",
+        darksalmon: "#e9967a",
+        darkseagreen: "#8fbc8f",
+        darkslateblue: "#483d8b",
+        darkslategray: "#2f4f4f",
+        darkslategrey: "#2f4f4f",
+        darkturquoise: "#00ced1",
+        darkviolet: "#9400d3",
+        deeppink: "#ff1493",
+        deepskyblue: "#00bfff",
+        dimgray: "#696969",
+        dimgrey: "#696969",
+        dodgerblue: "#1e90ff",
+        firebrick: "#b22222",
+        floralwhite: "#fffaf0",
+        forestgreen: "#228b22",
+        fuchsia: "#ff00ff",
+        gainsboro: "#dcdcdc",
+        ghostwhite: "#f8f8ff",
+        gold: "#ffd700",
+        goldenrod: "#daa520",
+        gray: "#808080",
+        green: "#008000",
+        greenyellow: "#adff2f",
+        grey: "#808080",
+        honeydew: "#f0fff0",
+        hotpink: "#ff69b4",
+        indianred: "#cd5c5c",
+        indigo: "#4b0082",
+        ivory: "#fffff0",
+        khaki: "#f0e68c",
+        lavender: "#e6e6fa",
+        lavenderblush: "#fff0f5",
+        lawngreen: "#7cfc00",
+        lemonchiffon: "#fffacd",
+        lightblue: "#add8e6",
+        lightcoral: "#f08080",
+        lightcyan: "#e0ffff",
+        lightgoldenrodyellow: "#fafad2",
+        lightgray: "#d3d3d3",
+        lightgreen: "#90ee90",
+        lightgrey: "#d3d3d3",
+        lightpink: "#ffb6c1",
+        lightsalmon: "#ffa07a",
+        lightseagreen: "#20b2aa",
+        lightskyblue: "#87cefa",
+        lightslategray: "#778899",
+        lightslategrey: "#778899",
+        lightsteelblue: "#b0c4de",
+        lightyellow: "#ffffe0",
+        lime: "#00ff00",
+        limegreen: "#32cd32",
+        linen: "#faf0e6",
+        magenta: "#ff00ff",
+        maroon: "#800000",
+        mediumaquamarine: "#66cdaa",
+        mediumblue: "#0000cd",
+        mediumorchid: "#ba55d3",
+        mediumpurple: "#9370d8",
+        mediumseagreen: "#3cb371",
+        mediumslateblue: "#7b68ee",
+        mediumspringgreen: "#00fa9a",
+        mediumturquoise: "#48d1cc",
+        mediumvioletred: "#c71585",
+        midnightblue: "#191970",
+        mintcream: "#f5fffa",
+        mistyrose: "#ffe4e1",
+        moccasin: "#ffe4b5",
+        navajowhite: "#ffdead",
+        navy: "#000080",
+        oldlace: "#fdf5e6",
+        olive: "#808000",
+        olivedrab: "#6b8e23",
+        orange: "#ffa500",
+        orangered: "#ff4500",
+        orchid: "#da70d6",
+        palegoldenrod: "#eee8aa",
+        palegreen: "#98fb98",
+        paleturquoise: "#afeeee",
+        palevioletred: "#d87093",
+        papayawhip: "#ffefd5",
+        peachpuff: "#ffdab9",
+        peru: "#cd853f",
+        pink: "#ffc0cb",
+        plum: "#dda0dd",
+        powderblue: "#b0e0e6",
+        purple: "#800080",
+        red: "#ff0000",
+        rosybrown: "#bc8f8f",
+        royalblue: "#4169e1",
+        saddlebrown: "#8b4513",
+        salmon: "#fa8072",
+        sandybrown: "#f4a460",
+        seagreen: "#2e8b57",
+        seashell: "#fff5ee",
+        sienna: "#a0522d",
+        silver: "#c0c0c0",
+        skyblue: "#87ceeb",
+        slateblue: "#6a5acd",
+        slategray: "#708090",
+        slategrey: "#708090",
+        snow: "#fffafa",
+        springgreen: "#00ff7f",
+        steelblue: "#4682b4",
+        tan: "#d2b48c",
+        teal: "#008080",
+        thistle: "#d8bfd8",
+        tomato: "#ff6347",
+        turquoise: "#40e0d0",
+        violet: "#ee82ee",
+        wheat: "#f5deb3",
+        white: "#ffffff",
+        whitesmoke: "#f5f5f5",
+        yellow: "#ffff00",
+        yellowgreen: "#9acd32"
+    };
+    var xe = function (a) {
+        var b = {};
+        a = String(a);
+        var c = a.charAt(0) == "#" ? a : "#" + a;
+        if (te.test(c)) {
+            b.Ta = ue(c);
+            b.type = "hex";
+            return b
+        } else {
+            a: {
+                var d = a.match(ve);
+                if (d) {
+                    c = Number(d[1]);
+                    var e = Number(d[2]);
+                    d = Number(d[3]);
+                    if (c >= 0 && c <= 255 && e >= 0 && e <= 255 && d >= 0 && d <= 255) {
+                        c = [c, e, d];
+                        break a
+                    }
+                }
+                c = []
+            }
+            if (c.length) {
+                e = c[0];
+                a = c[1];
+                c = c[2];
+                e = Number(e);
+                a = Number(a);
+                c = Number(c);
+                if (isNaN(e) || e < 0 || e > 255 || isNaN(a) || a < 0 || a > 255 || isNaN(c) || c < 0 || c > 255) h(Error('"(' + e + "," + a + "," + c + '") is not a valid RGB color'));
+                e = we(e.toString(16));
+                a = we(a.toString(16));
+                c = we(c.toString(16));
+                b.Ta = "#" + e + a + c;
+                b.type = "rgb";
+                return b
+            } else if (se) if (c = se[a.toLowerCase()]) {
+                b.Ta = c;
+                b.type = "named";
+                return b
+            }
+        }
+        h(Error(a + " is not a valid color string"))
+    },
+        ye = /#(.)(.)(.)/,
+        ue = function (a) {
+            te.test(a) || h(Error("'" + a + "' is not a valid hex color"));
+            if (a.length == 4) a = a.replace(ye, "#$1$1$2$2$3$3");
+            return a.toLowerCase()
+        },
+        te = /^#(?:[0-9a-f]{3}){1,2}$/i,
+        ve = /^(?:rgb)?\((0|[1-9]\d{0,2}),\s?(0|[1-9]\d{0,2}),\s?(0|[1-9]\d{0,2})\)$/i,
+        we = function (a) {
+            return a.length == 1 ? "0" + a : a
+        };
+    var ze = function (a) {
+        this.Qc = a
+    };L(ze, Lb);
+    var Ae = new V(0, 100),
+        Be = [],
+        Ce = function (a) {
+            if (a.f) {
+                for (var b in a.f) {
+                    Yc(b);
+                    delete a.f[b]
+                }
+                Cc(Ae, a.f);
+                a.f = m
+            } else a.fa && Yc(a.fa)
+        };ze.prototype.d = function () {
+        ze.l.d.call(this);
+        Ce(this)
+    };ze.prototype.handleEvent = function () {
+        h(Error("EventHandler.handleEvent not implemented"))
+    };
+    var De = function (a) {
+        if (typeof a == "number") a = Math.round(a) + "px";
+        return a
+    };
+    var Ee = function () {};
+    (function (a) {
+        a.Sb = function () {
+            return a.Uc || (a.Uc = new a)
+        }
+    })(Ee);Ee.prototype.Yc = 0;Ee.Sb();
+    var Ge = function (a) {
+        this.Ma = a || nc();
+        this.ld = Fe
+    };L(Ge, ie);Ge.prototype.Sc = Ee.Sb();
+    var Fe = m;r = Ge.prototype;r.A = m;r.N = o;r.v = m;r.ld = m;r.Xc = m;r.n = m;r.G = m;r.J = m;r.wd = o;
+    var He = function (a) {
+        return a.A || (a.A = ":" + (a.Sc.Yc++).toString(36))
+    };r = Ge.prototype;r.H = function () {
+        return this.v
+    };r.getParent = function () {
+        return this.n
+    };r.gb = function (a) {
+        this.n && this.n != a && h(Error("Method not supported"));
+        Ge.l.gb.call(this, a)
+    };r.Rb = function () {
+        return this.Ma
+    };r.Ja = function () {
+        this.v = this.Ma.createElement("div")
+    };r.bb = function (a) {
+        this.Ba(a)
+    };
+    r.Ba = function (a, b) {
+        this.N && h(Error("Component already rendered"));
+        this.v || this.Ja();
+        a ? a.insertBefore(this.v, b || m) : this.Ma.K.body.appendChild(this.v);
+        if (!this.n || this.n.N) this.qa()
+    };r.qa = function () {
+        this.N = j;
+        Ie(this, function (a) {
+            !a.N && a.H() && a.qa()
+        })
+    };
+    var Je = function (a) {
+        Ie(a, function (b) {
+            b.N && Je(b)
+        });
+        a.ta && Ce(a.ta);
+        a.N = o
+    };
+    Ge.prototype.d = function () {
+        Ge.l.d.call(this);
+        this.N && Je(this);
+        if (this.ta) {
+            this.ta.u();
+            delete this.ta
+        }
+        Ie(this, function (a) {
+            a.u()
+        });
+        !this.wd && this.v && uc(this.v);
+        this.n = this.Xc = this.v = this.J = this.G = m
+    };
+    var Ie = function (a, b) {
+        a.G && Pa(a.G, b, void 0)
+    };
+    Ge.prototype.removeChild = function (a, b) {
+        if (a) {
+            var c = C(a) ? a : He(a),
+                d;
+            if (this.J && c) {
+                d = this.J;
+                d = c in d ? d[c] : void 0;
+                d = d || m
+            } else d = m;
+            a = d;
+            if (c && a) {
+                d = this.J;
+                c in d && delete d[c];
+                Sa(this.G, a);
+                if (b) {
+                    Je(a);
+                    a.v && uc(a.v)
+                }
+                c = a;
+                c == m && h(Error("Unable to set parent component"));
+                c.n = m;
+                Ge.l.gb.call(c, m)
+            }
+        }
+        a || h(Error("Child is not in parent component"));
+        return a
+    };
+    var Ke = function (a, b) {
+        Ge.call(this, b);
+        this.Nc = a;
+        this.Na = new ze(this);
+        this.ra = new eb
+    };L(Ke, Ge);Ke.prototype.m = S("goog.ui.media.FlashObject");Ke.prototype.Ac = "window";Ke.prototype.ub = "#000000";Ke.prototype.ob = "sameDomain";
+    var Le = function (a, b, c) {
+        a.lb = C(b) ? b : Math.round(b) + "px";
+        a.Sa = C(c) ? c : Math.round(c) + "px";
+        if (a.H()) {
+            b = a.H() ? a.H().firstChild : m;
+            c = a.lb;
+            a = a.Sa;
+            if (c instanceof Kb) {
+                a = c.height;
+                c = c.width
+            } else a == undefined && h(Error("missing height argument"));
+            b.style.width = De(c);
+            b.style.height = De(a)
+        }
+    };
+    Ke.prototype.qa = function () {
+        Ke.l.qa.call(this);
+        var a = this.H(),
+            b;
+        b = U ? '<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" id="%s" name="%s" class="%s"><param name="movie" value="%s"/><param name="quality" value="high"/><param name="FlashVars" value="%s"/><param name="bgcolor" value="%s"/><param name="AllowScriptAccess" value="%s"/><param name="allowFullScreen" value="true"/><param name="SeamlessTabbing" value="false"/>%s</object>' : '<embed quality="high" id="%s" name="%s" class="%s" src="%s" FlashVars="%s" bgcolor="%s" AllowScriptAccess="%s" allowFullScreen="true" SeamlessTabbing="false" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer" %s></embed>';
+        var c = U ? '<param name="wmode" value="%s"/>' : "wmode=%s";
+        c = ya(c, this.Ac);
+        for (var d = fb(this.ra), e = ib(this.ra), f = [], g = 0; g < d.length; g++) {
+            var k = Aa(d[g]),
+                q = Aa(e[g]);
+            f.push(k + "=" + q)
+        }
+        b = ya(b, He(this), He(this), "goog-ui-media-flash-object", Ha(this.Nc), Ha(f.join("&")), this.ub, this.ob, c);
+        a.innerHTML = b;
+        this.lb && this.Sa && Le(this, this.lb, this.Sa);
+        a = this.Na;
+        b = this.H();
+        c = bb(zc);
+        if (!la(c)) {
+            Be[0] = c;
+            c = Be
+        }
+        for (d = 0; d < c.length; d++) {
+            e = a;
+            f = Vc(b, c[d], yc || a, o, a.Qc || a);
+            if (e.f) e.f[f] = j;
+            else if (e.fa) {
+                e.f = Ae.getObject();
+                e.f[e.fa] =
+                j;
+                e.fa = m;
+                e.f[f] = j
+            } else e.fa = f
+        }
+    };Ke.prototype.Ja = function () {
+        if (this.cb != m && !(Ka(qe, this.cb) >= 0)) {
+            yb(this.m, "Required flash version not found:" + this.cb);
+            h(Error("Method not supported"))
+        }
+        var a = this.Rb().createElement("div");
+        a.className = "goog-ui-media-flash";
+        this.v = a
+    };Ke.prototype.d = function () {
+        Ke.l.d.call(this);
+        this.ra = m;
+        this.Na.u();
+        this.Na = m
+    };
+    var Me = function (a, b, c, d) {
+        this.i = a;
+        this.h = b;
+        this.c = c;
+        this.g = d
+    };Me.prototype.Fa = function () {
+        return [this.i, this.h, this.c, this.g]
+    };
+    var Ne = function (a) {
+        return new Me(a[0], a[1], a[2], a[3])
+    };
+    var Oe = function (a, b, c, d) {
+        d || (d = c);
+        a.beginPath();
+        Z(a, 0, 0, c.i, d.i, "top");
+        Z(a, b.width - c.h * 2, 0, c.h, d.h, "top");
+        Z(a, b.width - c.c * 2, b.height - d.c * 2, c.c, d.c, "bottom");
+        Z(a, 0, b.height - d.g * 2, c.g, d.g, "bottom");
+        a.rect(c.i, 0, b.width - c.i - c.h, b.height / 2);
+        a.rect(b.width / 2, d.h, b.width / 2, b.height - d.h - d.c);
+        a.rect(c.g, b.height / 2, b.width - c.g - c.c, b.height / 2);
+        a.rect(0, d.i, b.width / 2, b.height - d.i - d.g);
+        a.clip()
+    },
+        Z = function (a, b, c, d, e, f) {
+            if (d && e) {
+                var g = 0,
+                    k = 2 * Math.PI;
+                if ("top" == f) {
+                    g = Math.PI;
+                    a.moveTo(b, c + e)
+                } else {
+                    if ("bottom" == f) k =
+                    Math.PI;
+                    a.moveTo(b + d * 2, c + e)
+                }
+                a.save();
+                a.translate(b + d, c + e);
+                a.scale(d, e);
+                a.arc(0, 0, 1, g, k, o);
+                a.restore()
+            }
+        };
+    var Pe = [{
+        x: 0,
+        y: 0,
+        width: 12,
+        height: 12
+    }, {
+        x: 12,
+        y: 0,
+        width: 12,
+        height: 12
+    }, {
+        x: 24,
+        y: 0,
+        width: 12,
+        height: 12
+    }, {
+        x: 36,
+        y: 0,
+        width: 12,
+        height: 12
+    }, {
+        x: 0,
+        y: 12,
+        width: 13,
+        height: 13
+    }, {
+        x: 13,
+        y: 12,
+        width: 13,
+        height: 13
+    }, {
+        x: 26,
+        y: 12,
+        width: 13,
+        height: 13
+    }, {
+        x: 39,
+        y: 12,
+        width: 13,
+        height: 13
+    }];
+    var Qe = function () {};Qe.prototype.da = ja;
+    var Re = function (a) {
+        a.ya("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADQAAAAZCAYAAAB+Sg0DAAAIZklEQVRYhd2YW2hc1xWGv33O2eecueliaWY0ska2JUtWNJLSxHFTB2NhhQZSWhKnhRAXSltICbSBPrsvhkJfCknoQwNJSd9kKAl2oDTkAiFpmktlta4uNoputqOR5qIZyaMZae6nD/Icz2gkxyqlD11wmDOz/3/t/e+19l6LEZZlWQClUonJqSlmZ2dZWVkBIBAI0NPTw+DAAKqqUm37xZfLZaLRKKurq/ZvQghaWlrw+/0oilLvf3Jyd/+Dg3X+bZ+WZVnpdJrLb7+Nz+ej68gR/H4/ANFolIXFRWKxGE8/9RRutxuA/eKz2Szz8/NomobT6SSbzaIoCqZpkk6nKRaLdHd3Y5rmXf+XL+Pz+XjkkUdwuVwAZDIZrly5su3/6adt/zWCisWiNXrxIkcOH6a/P8TM3CJrt1MAtDQ30tN9mGvT0yzeuMG5554DoBo/PnGdsakvAXh0qJeHBh+owQshmJ6epqGhAZfLxcbGBqVSCSEEUko8Hg+pVIpUKkUoFMKyLEZHRxkeHsbr9RKNRolGowD4/X78fj/xeJyPPvqIc+fO1UVKPfvMMxeEEIQGBvl8/F8IRaGxsRGXy0WpWCS8HCHU38fGxgaZTIZYLEYF/8abf+E3f3iL1GaOq9dmufjOXzFVweOnT9p4gK2tLRoaGkilUiiKgq7rSClRFIVCoYDH4yGXy1EoFFhYWEAIwbFjx5ienmZ8fJxCoUA8Hmd2dhZVVTl06BDJZJJMJkNbW1utoJEzZy6EQiG+CkdRVEmDx4PUNJymQWODG11KMpk0Pq+XqclJEokEoVCI67M3+fVrf+IXL77AD3/yI+JHu7n64aeMT1zn248OcDAQYGpyEpfLRVNTE/l8HlVVkVKiqiq6rmMYBqqqUi6XMU2TWCzGzMwMp06dIplMMjY2xokTJxgaGkJVVZaXl4lGowSDQTo7OxkbGyMUCtUIUiLRKD6fj7Xbt2ls8GAaEo/LpNHtwONy4G09QLFYwufzEYlGqeA/+ecUbkPB6j7E77+6wYc3Sqjf+Tn59G0+vTpj4wHy+TyAHRnDMOx30zRrLoRIJILL5WJ5eRlN0zAMg4WFBdbW1ujo6KBQKLCysoLL5SISidSdIa3yYkiJ02HgMHQcpo6u6wghsCxwuZyUSiUURaFcLgMgVY1IJMLv3rtJucFFtgBbeQsnYBq6jQdQFMVenKqqqKqKoig14xW/duqoKul0mvn5eXu8VCptL1rTsCyr7mYEUHw+H/F4nNaWZsrFgi1GSomUEssq43G7SSaTtLa2UsGfPjGI7m4icflV1pY32YhtUn73VQx3EyMnH7bxAKZp2qlWOTsVUZXFVw63z+djc3OT9vZ2pJTcvHmTfD5PoVAgHA6j6zrBYJCtrS3bf81G/Or8+Qvh5WX6entJJBLohm6nQalUolgs4nA4mJyaojMYpLWlhfDyMg8OhGhtcPDF+CTK9PuYMx/j1jVeOf8CD/YdtfEej4dsNktjYyO5XA4pJZq2nRiWZZHP59F1nWg0SlNTE6ZpMjc3R19fH6ZpsrKywvr6OqlUCk3TOH36NF6vl88++4zOzk4CgUBtyg0NDTF68SLXr19jcHCI1EaKdDqD1CVS287xq1evEolEGDlzBsDGP/u9J/jWwwNMz95C1VSOh3rxtzbX4IUQXLt2jY2NDZqamuy0ge3Cqus6q6urZLNZurq68Pl8jI6Osrq6yrFjxwgEAiSTSYQQ+P1+nE4nkUhk2//ISF2E7MJ66fJl2traOHL4sK06EomwsLhIJBLhbFUh2y8+m80yNzeHYRi0tLTY6WZZFtFolFwux9GjR2sK66VLl2hra+P48eM1846Pj2/7P3t298Ja3fpMTEwwNz/P0tISAAfb2+np6bGvzWrbL77S+iQSCe5MCUBra+uerc/ExARzc3N3/R88uKd/W9BLL79s7TryX7burq7/xTTb1/bPnn/+vgmvvf46X8fRNA0hBKVSiXK5bHOGh4d3xQsh6p4PPvjgP+LYdei9D/+2J1FKFUNqnPzm8Zqx3TgHA36mZtf5cjHO88+dJOBr3lP4Xgv7OqvgwuEw6XSa/v5+e0yrBgY7OmqIUlORUkOX223HblbNEUJwpPMgL73xJon1DCM3Vmn3H9iXmL0E7Sy8mqYRi8XI5/M1HG0nEUBRBFLT0HVtW9Sd516mKIKW5iY+/vsCyfUMR4ItDPW11S3kLv5ul7DfCGmaRiKRIJ/P43a7ay6UGkHbFVxBUxUMXUOXGpqmoioKui53de50mjgdJpubWxxobuDSu++jKArPfvch0pk0Hs/dq7WyWCHErkJ2E7OTY1kWqqoSDodRFIVgMFjDs6VpmoppSJymjttp4nE5cDkdmIZxp4l01E3m97WS3oRPrnxFm+8An//jJvFEhmB7M6dOdJHP5WvwlZanupervO8lrILJZrPEYjGklKytrZHP53E6nXi93hqOHSH9jqDtyEi796pYpehVW8Dfyit//IKZ+RgDve289c4EiiL4/pPfoFwuY+zg7Fx0RUj1eHWNqubcunXL7jaWlpYQQtRFpy5CutSQmlazi5VPKeuP29raOr/86TBCCM7/9s8sRdbxtXg481gP5XK5jlOJSuW5n/NSwfb29qIoCpOTk2xtbWEYBl6vt24DbEG6rJwZrSYlKjsptXpBuVwOt8vg8VO9CLZ38qknBhFYu3L2Sqvq73uNSSnt/y4AOjo66lIVqlLONHTi8VUMw0DqEl3X7QKJBapaL0hTFdaTcX7w5BACC01TGXmsh410Gqts1XH2c5Pt5Oi6Tk9PD5ZlIYSw+8edvuwZ+x/ou+9JdnKEELz442Esy6JUKmEaxj0Xt/O3+xFUsd7e3nty/u96uX8DCcGDs1HPnxoAAAAASUVORK5CYII=")
+    },
+        Se = function (a, b, c) {
+            b = Pe[b];
+            a.jb("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADQAAAAZCAYAAAB+Sg0DAAAIZklEQVRYhd2YW2hc1xWGv33O2eecueliaWY0ska2JUtWNJLSxHFTB2NhhQZSWhKnhRAXSltICbSBPrsvhkJfCknoQwNJSd9kKAl2oDTkAiFpmktlta4uNoputqOR5qIZyaMZae6nD/Icz2gkxyqlD11wmDOz/3/t/e+19l6LEZZlWQClUonJqSlmZ2dZWVkBIBAI0NPTw+DAAKqqUm37xZfLZaLRKKurq/ZvQghaWlrw+/0oilLvf3Jyd/+Dg3X+bZ+WZVnpdJrLb7+Nz+ej68gR/H4/ANFolIXFRWKxGE8/9RRutxuA/eKz2Szz8/NomobT6SSbzaIoCqZpkk6nKRaLdHd3Y5rmXf+XL+Pz+XjkkUdwuVwAZDIZrly5su3/6adt/zWCisWiNXrxIkcOH6a/P8TM3CJrt1MAtDQ30tN9mGvT0yzeuMG5554DoBo/PnGdsakvAXh0qJeHBh+owQshmJ6epqGhAZfLxcbGBqVSCSEEUko8Hg+pVIpUKkUoFMKyLEZHRxkeHsbr9RKNRolGowD4/X78fj/xeJyPPvqIc+fO1UVKPfvMMxeEEIQGBvl8/F8IRaGxsRGXy0WpWCS8HCHU38fGxgaZTIZYLEYF/8abf+E3f3iL1GaOq9dmufjOXzFVweOnT9p4gK2tLRoaGkilUiiKgq7rSClRFIVCoYDH4yGXy1EoFFhYWEAIwbFjx5ienmZ8fJxCoUA8Hmd2dhZVVTl06BDJZJJMJkNbW1utoJEzZy6EQiG+CkdRVEmDx4PUNJymQWODG11KMpk0Pq+XqclJEokEoVCI67M3+fVrf+IXL77AD3/yI+JHu7n64aeMT1zn248OcDAQYGpyEpfLRVNTE/l8HlVVkVKiqiq6rmMYBqqqUi6XMU2TWCzGzMwMp06dIplMMjY2xokTJxgaGkJVVZaXl4lGowSDQTo7OxkbGyMUCtUIUiLRKD6fj7Xbt2ls8GAaEo/LpNHtwONy4G09QLFYwufzEYlGqeA/+ecUbkPB6j7E77+6wYc3Sqjf+Tn59G0+vTpj4wHy+TyAHRnDMOx30zRrLoRIJILL5WJ5eRlN0zAMg4WFBdbW1ujo6KBQKLCysoLL5SISidSdIa3yYkiJ02HgMHQcpo6u6wghsCxwuZyUSiUURaFcLgMgVY1IJMLv3rtJucFFtgBbeQsnYBq6jQdQFMVenKqqqKqKoig14xW/duqoKul0mvn5eXu8VCptL1rTsCyr7mYEUHw+H/F4nNaWZsrFgi1GSomUEssq43G7SSaTtLa2UsGfPjGI7m4icflV1pY32YhtUn73VQx3EyMnH7bxAKZp2qlWOTsVUZXFVw63z+djc3OT9vZ2pJTcvHmTfD5PoVAgHA6j6zrBYJCtrS3bf81G/Or8+Qvh5WX6entJJBLohm6nQalUolgs4nA4mJyaojMYpLWlhfDyMg8OhGhtcPDF+CTK9PuYMx/j1jVeOf8CD/YdtfEej4dsNktjYyO5XA4pJZq2nRiWZZHP59F1nWg0SlNTE6ZpMjc3R19fH6ZpsrKywvr6OqlUCk3TOH36NF6vl88++4zOzk4CgUBtyg0NDTF68SLXr19jcHCI1EaKdDqD1CVS287xq1evEolEGDlzBsDGP/u9J/jWwwNMz95C1VSOh3rxtzbX4IUQXLt2jY2NDZqamuy0ge3Cqus6q6urZLNZurq68Pl8jI6Osrq6yrFjxwgEAiSTSYQQ+P1+nE4nkUhk2//ISF2E7MJ66fJl2traOHL4sK06EomwsLhIJBLhbFUh2y8+m80yNzeHYRi0tLTY6WZZFtFolFwux9GjR2sK66VLl2hra+P48eM1846Pj2/7P3t298Ja3fpMTEwwNz/P0tISAAfb2+np6bGvzWrbL77S+iQSCe5MCUBra+uerc/ExARzc3N3/R88uKd/W9BLL79s7TryX7burq7/xTTb1/bPnn/+vgmvvf46X8fRNA0hBKVSiXK5bHOGh4d3xQsh6p4PPvjgP+LYdei9D/+2J1FKFUNqnPzm8Zqx3TgHA36mZtf5cjHO88+dJOBr3lP4Xgv7OqvgwuEw6XSa/v5+e0yrBgY7OmqIUlORUkOX223HblbNEUJwpPMgL73xJon1DCM3Vmn3H9iXmL0E7Sy8mqYRi8XI5/M1HG0nEUBRBFLT0HVtW9Sd516mKIKW5iY+/vsCyfUMR4ItDPW11S3kLv5ul7DfCGmaRiKRIJ/P43a7ay6UGkHbFVxBUxUMXUOXGpqmoioKui53de50mjgdJpubWxxobuDSu++jKArPfvch0pk0Hs/dq7WyWCHErkJ2E7OTY1kWqqoSDodRFIVgMFjDs6VpmoppSJymjttp4nE5cDkdmIZxp4l01E3m97WS3oRPrnxFm+8An//jJvFEhmB7M6dOdJHP5WvwlZanupervO8lrILJZrPEYjGklKytrZHP53E6nXi93hqOHSH9jqDtyEi796pYpehVW8Dfyit//IKZ+RgDve289c4EiiL4/pPfoFwuY+zg7Fx0RUj1eHWNqubcunXL7jaWlpYQQtRFpy5CutSQmlazi5VPKeuP29raOr/86TBCCM7/9s8sRdbxtXg481gP5XK5jlOJSuW5n/NSwfb29qIoCpOTk2xtbWEYBl6vt24DbEG6rJwZrSYlKjsptXpBuVwOt8vg8VO9CLZ38qknBhFYu3L2Sqvq73uNSSnt/y4AOjo66lIVqlLONHTi8VUMw0DqEl3X7QKJBapaL0hTFdaTcX7w5BACC01TGXmsh410Gqts1XH2c5Pt5Oi6Tk9PD5ZlIYSw+8edvuwZ+x/ou+9JdnKEELz442Esy6JUKmEaxj0Xt/O3+xFUsd7e3nty/u96uX8DCcGDs1HPnxoAAAAASUVORK5CYII=", new T(c.x, c.y, b.width, b.height), -b.x + "px " + -b.y + "px", o, o)
+        };
+    var Te = function (a, b, c) {
+        this.m = S("userfeedback.render.canvas.FlashCanvas");
+        this.ma = !! c;
+        if (!("GF_SCREENSHOT_RESOURCES_BASE_URL" in z)) {
+            this.m.info("GF_SCREENSHOT_RESOURCES_BASE_URL not set");
+            h(Error("GF_SCREENSHOT_RESOURCES_BASE_URL not set"))
+        }
+        var d = z.GF_SCREENSHOT_RESOURCES_BASE_URL + "/FlashCanvas.swf";
+        this.A = Ia().replace(/-/g, "_");
+        this.m.info("Creating Flash Canvas " + this.A + " thumbnailMode=" + this.ma + ", src=" + d);
+        this.aa = new Kb(a, b);
+        this.U = m;
+        d = this.z = new Ke(d);
+        var e = "GOOGLE_FEEDBACK_FLASH_CANVAS_" + this.A;
+        if (d.n && d.n.J) {
+            var f = d.n.J,
+                g = d.A;
+            g in f && delete f[g];
+            f = d.n.J;
+            e in f && h(Error('The object already contains the key "' + e + '"'));
+            f[e] = d
+        }
+        d.A = e;
+        this.z.ob = this.ma ? "never" : "sameDomain";
+        this.z.Ac = this.ma ? "opaque" : "transparent";
+        Le(this.z, a, b);
+        this.z.cb = "9";
+        this.z.ub = "#ffffff";
+        this.ma && this.z.ra.$("src", c);
+        this.j = m
+    };L(Te, Qe);r = Te.prototype;
+    r.create = function (a, b, c) {
+        this.m.info("create() called");
+        a = me(a);
+        if (!b) {
+            this.U = window.location.href.indexOf("GfVisibleFlash") != -1 ? rc("div", {
+                style: "width:100px;height:100px;border:2px dotted yellow;"
+            }) : rc("div", {
+                style: "position:absolute;top:0;left:0;"
+            });
+            document.body.appendChild(this.U);
+            b = this.U
+        }
+        c = c || 1E4;
+        var d = c != -1;
+        this.z.bb(b);
+        this.j = C("GOOGLE_FEEDBACK_FLASH_CANVAS_" + this.A) ? document.getElementById("GOOGLE_FEEDBACK_FLASH_CANVAS_" + this.A) : "GOOGLE_FEEDBACK_FLASH_CANVAS_" + this.A;
+        this.ma ? a(this) : ne(E(this.Xb, this), E(function (e) {
+            if (e) {
+                Re(this);
+                a(this)
+            } else {
+                this.m.info("Timed out while waiting for FlashCanvas");
+                this.da();
+                a(m, "Timed out while waiting for FlashCanvas")
+            }
+        }, this), d ? c : undefined)
+    };r.Xb = function () {
+        try {
+            if (this.j.flashCanvasIsReady && !this.Lc) {
+                this.Lc = j;
+                this.m.info("Flash object ready method exists")
+            }
+            var a = this.j.flashCanvasIsReady();
+            if (a && !this.Mc) {
+                this.Mc = j;
+                this.m.info("Flash object ready method returns true")
+            }
+            return a
+        } catch (b) {
+            return o
+        }
+    };
+    r.da = function () {
+        this.m.info("destroy() called");
+        try {
+            this.j.flashCanvasDestroy()
+        } catch (a) {
+            this.m.info("exception in flashCanvasDestroy", a)
+        }
+        if (this.U) {
+            try {
+                document.body.removeChild(this.U)
+            } catch (b) {
+                this.m.info("exception when removing div", b)
+            }
+            this.U = m
+        }
+        this.z = this.j = m
+    };r.ya = function (a) {
+        this.j.flashCanvasPreloadImage(a)
+    };r.Wb = function (a) {
+        return this.j.flashCanvasIsImageReady(a)
+    };r.jb = function (a, b, c, d, e) {
+        this.j.flashCanvasTileImage(a, b.left, b.top, b.width, b.height, c, d, e)
+    };
+    r.ib = function (a, b) {
+        this.j.flashCanvasStretchImage(a, b.left, b.top, b.width, b.height)
+    };r.Mb = function (a, b, c, d, e) {
+        if ("transparent" != e) {
+            e = Ue(e);
+            this.j.flashCanvasStrokeRect(a, b, c, d, e)
+        }
+    };r.Kb = function (a, b, c) {
+        this.fillRect(a, c[0])
+    };
+    r.Ib = function (a, b, c, d, e) {
+        d.top && this.fillRect(new T(a.left - d.left, a.top - d.top, a.width + d.left + d.right, d.top), e[0]);
+        d.right && this.fillRect(new T(a.left + a.width, a.top - d.top, d.right, a.height + d.top + d.bottom), e[1]);
+        d.bottom && this.fillRect(new T(a.left - d.left, a.top + a.height, a.width + d.left + d.right, d.bottom), e[2]);
+        d.left && this.fillRect(new T(a.left - d.left, a.top - d.top, d.left, a.height + d.top + d.bottom), e[3])
+    };
+    r.fillRect = function (a, b) {
+        if ("transparent" != b) {
+            var c = Ue(b);
+            this.j.flashCanvasFillRect(a.left, a.top, a.width, a.height, c)
+        }
+    };r.Nb = function (a, b, c, d, e, f, g, k, q, p) {
+        if ("transparent" != g) {
+            g = Ue(g);
+            this.j.flashCanvasDrawText(a, b, c, d, e, f, g, k == "bold" || parseInt(k, 10) >= 550, q, p)
+        }
+    };r.Jb = function (a, b, c) {
+        Se(this, a, new Ib(b, c))
+    };r.Lb = function (a) {
+        this.j.flashCanvasBeginHighlights();
+        Pa(a, function (b) {
+            this.j.flashCanvasAddHighlight(b.left, b.top, b.width, b.height)
+        }, this);
+        this.j.flashCanvasEndHighlights()
+    };r.jc = function () {};
+    r.Aa = function (a, b, c, d) {
+        this.j.flashCanvasPushClip(a, b, c, d)
+    };r.hc = function () {
+        this.j.flashCanvasPopClip()
+    };r.gc = function () {
+        this.j.flashCanvasPopAllClips()
+    };r.clear = function () {
+        this.j.flashCanvasClear()
+    };r.toDataURL = function (a) {
+        a = me(a);
+        ne(E(this.Xb, this), E(function (b) {
+            if (b) {
+                var c;
+                try {
+                    c = this.j.flashCanvasToDataUrl(this.aa.width, this.aa.height)
+                } catch (d) {
+                    return a(m, d)
+                }
+                return a(c)
+            }
+            return a(m, "flashCanvasToDataUrl timed out")
+        }, this), 1E4)
+    };r.Ca = function (a) {
+        this.aa = a;
+        Le(this.z, a.width, a.height)
+    };
+    var Ue = function (a) {
+        try {
+            var b = xe(a)
+        } catch (c) {
+            return 16711680
+        }
+        a = b.Ta;
+        a = ue(a);
+        a = [parseInt(a.substr(1, 2), 16), parseInt(a.substr(3, 2), 16), parseInt(a.substr(5, 2), 16)];
+        return (a[0] << 16) + (a[1] << 8) + a[2]
+    },
+        Ve = S("FlashCanvas.swf"),
+        We = function (a) {
+            Ve.info(a)
+        },
+        Xe = "GoogleFeedbackFlashCanvasLog".split("."),
+        Ye = z;!(Xe[0] in Ye) && Ye.execScript && Ye.execScript("var " + Xe[0]);
+    for (var Ze; Xe.length && (Ze = Xe.shift());) if (!Xe.length && We !== undefined) Ye[Ze] = We;
+    else Ye = Ye[Ze] ? Ye[Ze] : Ye[Ze] = {};
+    var $e = function (a, b, c) {
+        this.Q = a;
+        this.ja = (this.ia = b) || c || m
+    };
+    $e.prototype.bb = function (a, b, c) {
+        a.save();
+        a.translate(this.Q.left, this.Q.top);
+        Oe(a, this.Q, this.ia, this.ja);
+        var d = c[0];
+        if (b.top) {
+            a.save();
+            var e = this.Q,
+                f = this.ia,
+                g = this.ja;
+            a.beginPath();
+            a.moveTo(-1, 0);
+            a.lineTo(b.left + f.i - 1, b.top + g.i);
+            a.lineTo(e.width - b.right - f.h, b.top + g.h);
+            a.lineTo(e.width, 0);
+            a.closePath();
+            a.clip();
+            a.fillStyle = d;
+            a.fillRect(f.i, 0, e.width - f.h, b.top);
+            a.beginPath();
+            a.rect(0, 0, f.i, g.i);
+            a.rect(e.width - f.h, 0, f.h, g.h);
+            a.clip();
+            a.beginPath();
+            Z(a, 0, 0, f.i, g.i, "top");
+            Z(a, e.width - f.h * 2, 0, f.h, g.h, "top");
+            a.lineWidth = b.top * 2;
+            a.strokeStyle = d;
+            a.stroke();
+            a.restore()
+        }
+        d = c[1];
+        if (b.right) {
+            a.save();
+            e = this.Q;
+            f = this.ia;
+            g = this.ja;
+            a.beginPath();
+            a.moveTo(e.width, -1);
+            a.lineTo(e.width - b.right - f.h, b.top + g.h - 1);
+            a.lineTo(e.width - b.right - f.c, e.height - b.bottom - g.c);
+            a.lineTo(e.width, e.height);
+            a.closePath();
+            a.clip();
+            a.fillStyle = d;
+            a.fillRect(e.width - b.right, g.h, b.right, e.height - g.c);
+            a.beginPath();
+            a.rect(e.width - f.h, 0, f.h, g.h);
+            a.rect(e.width - f.c, e.height - g.c, f.c, g.c);
+            a.clip();
+            a.beginPath();
+            Z(a, e.width - f.h * 2, 0, f.h, g.h, "top");
+            Z(a, e.width - f.c * 2, e.height - g.c * 2, f.c, g.c, "bottom");
+            a.lineWidth = b.right * 2;
+            a.strokeStyle = d;
+            a.stroke();
+            a.restore()
+        }
+        d = c[2];
+        if (b.bottom) {
+            a.save();
+            e = this.Q;
+            f = this.ia;
+            g = this.ja;
+            a.beginPath();
+            a.moveTo(e.width + 1, e.height);
+            a.lineTo(e.width - b.right - f.c + 1, e.height - b.bottom - g.c);
+            a.lineTo(b.left + f.g, e.height - b.bottom - g.g);
+            a.lineTo(0, e.height);
+            a.closePath();
+            a.clip();
+            a.fillStyle = d;
+            a.fillRect(f.g, e.height - b.bottom, e.width - f.c, b.bottom);
+            a.beginPath();
+            a.rect(0, e.height - g.g, f.g, g.g + b.bottom);
+            a.rect(e.width - f.c, e.height - f.c, f.c, g.c);
+            a.lineWidth = 1;
+            a.clip();
+            a.beginPath();
+            Z(a, e.width - f.c * 2, e.height - g.c * 2, f.c, g.c, "bottom");
+            Z(a, 0, e.height - g.g * 2, f.g, g.g, "bottom");
+            a.lineWidth = b.bottom * 2;
+            a.strokeStyle = d;
+            a.stroke();
+            a.restore()
+        }
+        c = c[3];
+        if (b.left) {
+            a.save();
+            d = this.Q;
+            e = this.ia;
+            f = this.ja;
+            a.beginPath();
+            a.moveTo(0, 0);
+            a.lineTo(b.left + e.i, b.top + f.i);
+            a.lineTo(b.left + e.g, d.height - b.bottom - f.g + 1);
+            a.lineTo(0, d.height + 1);
+            a.closePath();
+            a.clip();
+            a.fillStyle = c;
+            a.fillRect(0, f.i, b.left, d.height - f.g);
+            a.beginPath();
+            a.rect(0, 0, e.i, f.i);
+            a.rect(0, d.height - f.g, e.g, f.g + b.left);
+            a.clip();
+            a.beginPath();
+            Z(a, 0, 0, e.i, f.i, "top");
+            Z(a, 0, d.height - f.g * 2, e.g, f.g, "bottom");
+            a.lineWidth = b.left * 2;
+            a.strokeStyle = c;
+            a.stroke();
+            a.restore()
+        }
+        a.restore()
+    };
+    var af = function (a, b) {
+        this.canvas = document.createElement("canvas");
+        this.b = this.canvas.getContext("2d");
+        this.S = 0;
+        this.ua = new eb;
+        this.Ca(new Kb(a, b));
+        Re(this)
+    };L(af, Qe);r = af.prototype;r.ya = function (a) {
+        var b = new Image;
+        b.onload = E(function () {
+            b.width && this.ua.$(a, b)
+        }, this);
+        b.src = a
+    };r.Wb = function (a) {
+        return Object.prototype.hasOwnProperty.call(this.ua.F, a)
+    };
+    r.jb = function (a, b, c, d, e) {
+        if (a = this.ua.get(a)) {
+            var f = c.split(" ");
+            c = parseInt(f[0], 10);
+            var g = parseInt(f[1], 10);
+            if (f[0].indexOf("%") != -1) {
+                c *= 0.01;
+                c = Math.round(b.width * c - a.width * c)
+            }
+            if (f[1].indexOf("%") != -1) {
+                g *= 0.01;
+                g = Math.round(b.height * g - a.height * g)
+            }
+            this.b.save();
+            this.b.beginPath();
+            this.b.rect(b.left, b.top, b.width, b.height);
+            this.b.clip();
+            this.b.beginPath();
+            f = "no-repeat";
+            if (d && e) {
+                f = "repeat";
+                this.b.rect(b.left, b.top, b.width, b.height)
+            } else if (d) {
+                f = "repeat-x";
+                this.b.rect(b.left, b.top + g, b.width, a.height)
+            } else if (e) {
+                f = "repeat-y";
+                this.b.rect(b.left + c, b.top, a.width, b.height)
+            } else this.b.rect(b.left + c, b.top + g, a.width, a.height);
+            this.b.clip();
+            try {
+                this.b.fillStyle = this.b.createPattern(a, f);
+                this.b.translate(b.left + c, b.top + g);
+                this.b.fillRect(-c, -g, b.width, b.height)
+            } finally {
+                this.b.restore()
+            }
+        }
+    };r.ib = function (a, b) {
+        var c = this.ua.get(a);
+        c && this.b.drawImage(c, b.left, b.top, b.width, b.height)
+    };r.Mb = function (a, b, c, d, e) {
+        this.b.strokeStyle = e;
+        this.b.strokeRect(Math.floor(a), Math.floor(b), c, d)
+    };
+    r.Kb = function (a, b, c) {
+        var d = this.b.createLinearGradient(b.left, b.top, b.width, b.height),
+            e = 1 / (c.length - 1);
+        Pa(c, function (f, g) {
+            d.addColorStop(g * e, f)
+        });
+        this.b.fillStyle = d;
+        this.b.fillRect(Math.floor(a.left), Math.floor(a.top), a.width, a.height)
+    };r.Ib = function (a, b, c, d, e) {
+        a.left -= d.left;
+        a.top -= d.top;
+        a.width += d.left + d.right;
+        a.height += d.top + d.bottom;
+        (new $e(a, b, c)).bb(this.b, d, e)
+    };r.fillRect = function (a, b) {
+        this.b.fillStyle = b;
+        this.b.fillRect(Math.floor(a.left), Math.floor(a.top), a.width, a.height)
+    };
+    r.Nb = function (a, b, c, d, e, f, g, k, q, p) {
+        if (Wb) c = Math.round(c + e / 5);
+        this.b.fillStyle = g;
+        this.b.font = k + (q ? " italic " : " ") + e + "px " + d;
+        this.b.fillText(a, b, c);
+        if (p) {
+            a = Wb ? -1.5 : 1.5 - (e >> 5);
+            this.b.beginPath();
+            this.b.moveTo(b, c + e + a);
+            this.b.lineTo(b + f, c + e + a);
+            this.b.strokeStyle = g;
+            this.b.stroke()
+        }
+    };r.Jb = function (a, b, c) {
+        Se(this, a, new Ib(b, c))
+    };
+    r.Lb = function (a) {
+        this.b.save();
+        this.b.beginPath();
+        this.b.moveTo(0, 0);
+        this.b.lineTo(0, this.canvas.height);
+        this.b.lineTo(this.canvas.width, this.canvas.height);
+        this.b.lineTo(this.canvas.width, 0);
+        this.b.lineTo(0, 0);
+        Pa(a, function (b) {
+            this.b.moveTo(b.left, b.top);
+            this.b.lineTo(b.left + b.width, b.top);
+            this.b.lineTo(b.left + b.width, b.top + b.height);
+            this.b.lineTo(b.left, b.top + b.height);
+            this.b.lineTo(b.left, b.top)
+        }, this);
+        this.b.clip();
+        this.b.fillStyle = "rgba(0, 0, 0, 0.4)";
+        this.b.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.b.restore()
+    };r.jc = function (a, b, c) {
+        this.b.save();
+        this.b.translate(a.left, a.top);
+        Oe(this.b, a, b, c);
+        this.b.translate(-a.left, -a.top);
+        this.S++
+    };r.Aa = function (a, b, c, d) {
+        this.b.save();
+        this.b.beginPath();
+        this.b.rect(a, b, c, d);
+        this.b.clip();
+        this.S++
+    };r.hc = function () {
+        this.b.restore();
+        this.S--
+    };r.gc = function () {
+        for (; this.S;) {
+            this.b.restore();
+            this.S--
+        }
+    };r.toDataURL = function (a) {
+        a = me(a);
+        try {
+            var b = this.canvas.toDataURL("image/png");
+            a(b)
+        } catch (c) {
+            a(m, c)
+        }
+    };
+    r.Ca = function (a) {
+        this.canvas.width = a.width;
+        this.canvas.height = a.height;
+        this.b.fillStyle = "white";
+        this.b.fillRect(0, 0, a.width, a.height);
+        this.b.textBaseline = "top"
+    };r.clear = function () {
+        var a = new Kb(this.canvas.width, this.canvas.height);
+        this.canvas = document.createElement("canvas");
+        this.b = this.canvas.getContext("2d");
+        this.S = 0;
+        this.Ca(a)
+    };r.da = function () {
+        this.canvas = this.b = m
+    };
+    var cf = function (a) {
+        bf.info("Canvas size: 100 x 100");
+        a = me(a);
+        if ("CANVAS" == re) {
+            bf.info("Using HTML5 canvas");
+            a: {
+                var b = a,
+                    c;
+                try {
+                    c = new af(100, 100)
+                } catch (d) {
+                    b(m, d);
+                    break a
+                }
+                b(c)
+            }
+        } else if ("FLASH" == re) {
+            bf.info("Using FlashCanvas");
+            a: {
+                c = a;
+                try {
+                    b = new Te(100, 100)
+                } catch (e) {
+                    c(m, e);
+                    break a
+                }
+                b.create(c)
+            }
+        } else a(m, "Cannot create canvas for RenderingStrategy NONE")
+    },
+        bf = S("userfeedback.render.canvas");
+    var df;df = o;
+    var ef = Sb();
+    if (ef) if (ef.indexOf("Firefox") != -1) df = j;
+    var ff = df;
+    var gf = m,
+        hf = Wb || Xb || Vb || typeof z.atob == "function";
+/*
+
+ Copyright (c) 2008, Adobe Systems Incorporated
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are
+ met:
+
+ Redistributions of source code must retain the above copyright notice,
+ this list of conditions and the following disclaimer.
+
+ Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+
+ Neither the name of Adobe Systems Incorporated nor the names of its
+ contributors may be used to endorse or promote products derived from
+ this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+ IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+ JPEG encoder ported to JavaScript and optimized by Andreas Ritter, www.bytestrom.eu, 11/2009
+
+ Basic GUI blocking jpeg encoder
+
+ v 0.9
+*/
+    var jf = function () {
+        var a = 20;
+
+        function b(i, w) {
+            for (var l = 0, n = 0, G = [], ga = 1; ga <= 16; ga++) {
+                for (var Ga = 1; Ga <= i[ga]; Ga++) {
+                    G[w[n]] = [];
+                    G[w[n]][0] = l;
+                    G[w[n]][1] = ga;
+                    n++;
+                    l++
+                }
+                l *= 2
+            }
+            return G
+        }
+        function c(i) {
+            var w = i[0];
+            for (i = i[1] - 1; i >= 0;) {
+                if (w & 1 << i) Ua |= 1 << na;
+                i--;
+                na--;
+                if (na < 0) {
+                    if (Ua == 255) {
+                        d(255);
+                        d(0)
+                    } else d(Ua);
+                    na = 7;
+                    Ua = 0
+                }
+            }
+        }
+        function d(i) {
+            Mb.push(Vd[i])
+        }
+        function e(i) {
+            d(i >> 8 & 255);
+            d(i & 255)
+        }
+        function f(i, w, l, n, G) {
+            var ga = G[0],
+                Ga = G[240],
+                A, y, H, x, F, s, D, I, M, t = 0;
+            for (A = 0; A < 8; ++A) {
+                y = i[t];
+                H = i[t + 1];
+                x = i[t + 2];
+                F = i[t + 3];
+                s = i[t + 4];
+                D = i[t + 5];
+                I =
+                i[t + 6];
+                M = i[t + 7];
+                var da = y + M;
+                y -= M;
+                M = H + I;
+                H -= I;
+                I = x + D;
+                x -= D;
+                D = F + s;
+                F -= s;
+                s = da + D;
+                da -= D;
+                D = M + I;
+                M -= I;
+                i[t] = s + D;
+                i[t + 4] = s - D;
+                s = (M + da) * 0.707106781;
+                i[t + 2] = da + s;
+                i[t + 6] = da - s;
+                s = F + x;
+                D = x + H;
+                M = H + y;
+                x = (s - M) * 0.382683433;
+                F = 0.5411961 * s + x;
+                s = 1.306562965 * M + x;
+                D *= 0.707106781;
+                x = y + D;
+                y -= D;
+                i[t + 5] = y + F;
+                i[t + 3] = y - F;
+                i[t + 1] = x + s;
+                i[t + 7] = x - s;
+                t += 8
+            }
+            for (A = t = 0; A < 8; ++A) {
+                y = i[t];
+                H = i[t + 8];
+                x = i[t + 16];
+                F = i[t + 24];
+                s = i[t + 32];
+                D = i[t + 40];
+                I = i[t + 48];
+                M = i[t + 56];
+                da = y + M;
+                y -= M;
+                M = H + I;
+                H -= I;
+                I = x + D;
+                x -= D;
+                D = F + s;
+                F -= s;
+                s = da + D;
+                da -= D;
+                D = M + I;
+                M -= I;
+                i[t] = s + D;
+                i[t + 32] = s - D;
+                s = (M + da) * 0.707106781;
+                i[t + 16] = da + s;
+                i[t + 48] = da - s;
+                s = F + x;
+                D = x + H;
+                M = H + y;
+                x = (s - M) * 0.382683433;
+                F = 0.5411961 * s + x;
+                s = 1.306562965 * M + x;
+                D *= 0.707106781;
+                x = y + D;
+                y -= D;
+                i[t + 40] = y + F;
+                i[t + 24] = y - F;
+                i[t + 8] = x + s;
+                i[t + 56] = x - s;
+                t++
+            }
+            for (A = 0; A < 64; ++A) {
+                t = i[A] * w[A];
+                Wd[A] = t > 0 ? t + 0.5 | 0 : t - 0.5 | 0
+            }
+            i = Wd;
+            for (w = 0; w < 64; ++w) Va[gb[w]] = i[w];
+            i = Va[0] - l;
+            l = Va[0];
+            if (i == 0) c(n[0]);
+            else {
+                A = 32767 + i;
+                c(n[Nb[A]]);
+                c(wa[A])
+            }
+            for (n = 63; n > 0 && Va[n] == 0; n--);
+            if (n == 0) {
+                c(ga);
+                return l
+            }
+            for (i = 1; i <= n;) {
+                for (w = i; Va[i] == 0 && i <= n; ++i);
+                w = i - w;
+                if (w >= 16) {
+                    A = w >> 4;
+                    for (t = 1; t <= A; ++t) c(Ga);
+                    w &= 15
+                }
+                A = 32767 + Va[i];
+                c(G[(w << 4) + Nb[A]]);
+                c(wa[A]);
+                i++
+            }
+            n != 63 && c(ga);
+            return l
+        }
+        function g(i) {
+            if (i <= 0) i = 1;
+            if (i > 100) i = 100;
+            if (Xd != i) {
+                var w = 0;
+                w = i < 50 ? Math.floor(5E3 / i) : Math.floor(200 - i * 2);
+                for (var l = [16, 11, 10, 16, 24, 40, 51, 61, 12, 12, 14, 19, 26, 58, 60, 55, 14, 13, 16, 24, 40, 57, 69, 56, 14, 17, 22, 29, 51, 87, 80, 62, 18, 22, 37, 56, 68, 109, 103, 77, 24, 35, 55, 64, 81, 104, 113, 92, 49, 64, 78, 87, 103, 121, 120, 101, 72, 92, 95, 98, 112, 100, 103, 99], n = 0; n < 64; n++) {
+                    var G = k((l[n] * w + 50) / 100);
+                    if (G < 1) G = 1;
+                    else if (G > 255) G = 255;
+                    q[gb[n]] = G
+                }
+                l = [17, 18, 24, 47, 99, 99, 99, 99, 18, 21, 26, 66, 99, 99, 99, 99, 24, 26, 56, 99, 99, 99, 99, 99, 47, 66, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99];
+                for (n = 0; n < 64; n++) {
+                    G = k((l[n] * w + 50) / 100);
+                    if (G < 1) G = 1;
+                    else if (G > 255) G = 255;
+                    p[gb[n]] = G
+                }
+                w = [1, 1.387039845, 1.306562965, 1.175875602, 1, 0.785694958, 0.5411961, 0.275899379];
+                for (n = l = 0; n < 8; n++) for (G = 0; G < 8; G++) {
+                    u[l] = 1 / (q[gb[l]] * w[n] * w[G] * 8);
+                    v[l] = 1 / (p[gb[l]] * w[n] * w[G] * 8);
+                    l++
+                }
+                Xd = i
+            }
+        }
+        var k = Math.floor,
+            q = Array(64),
+            p = Array(64),
+            u = Array(64),
+            v = Array(64),
+            B, J, Wa, hb, wa = Array(65535),
+            Nb = Array(65535),
+            Wd = Array(64),
+            Va = Array(64),
+            Mb = [],
+            Ua = 0,
+            na = 7,
+            Yd = Array(64),
+            Zd = Array(64),
+            $d = Array(64),
+            Vd = Array(256),
+            O = Array(2048),
+            Xd, gb = [0, 1, 5, 6, 14, 15, 27, 28, 2, 4, 7, 13, 16, 26, 29, 42, 3, 8, 12, 17, 25, 30, 41, 43, 9, 11, 18, 24, 31, 40, 44, 53, 10, 19, 23, 32, 39, 45, 52, 54, 20, 22, 33, 38, 46, 51, 55, 60, 21, 34, 37, 47, 50, 56, 59, 61, 35, 36, 48, 49, 57, 58, 62, 63],
+            ae = [0, 0, 1, 5, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+            be = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+            ce = [0, 0, 2, 1, 3, 3, 2, 4, 3, 5, 5, 4, 4, 0, 0, 1, 125],
+            de = [1, 2, 3, 0, 4, 17, 5, 18, 33, 49, 65, 6, 19, 81, 97, 7, 34, 113, 20, 50, 129, 145, 161, 8, 35, 66, 177, 193, 21, 82, 209, 240, 36, 51, 98, 114, 130, 9, 10, 22, 23, 24, 25, 26, 37, 38, 39, 40, 41, 42, 52, 53, 54, 55, 56, 57, 58, 67, 68, 69, 70, 71, 72, 73, 74, 83, 84, 85, 86, 87, 88, 89, 90, 99, 100, 101, 102, 103, 104, 105, 106, 115, 116, 117, 118, 119, 120, 121, 122, 131, 132, 133, 134, 135, 136, 137, 138, 146, 147, 148, 149, 150, 151, 152, 153, 154, 162, 163, 164, 165, 166, 167, 168, 169, 170, 178, 179, 180, 181, 182, 183, 184, 185, 186, 194, 195, 196, 197, 198, 199, 200, 201, 202, 210, 211, 212, 213, 214, 215, 216, 217, 218, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250],
+            ee = [0, 0, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+            fe = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+            ge = [0, 0, 2, 1, 2, 4, 4, 3, 4, 7, 5, 4, 4, 0, 1, 2, 119],
+            he = [0, 1, 2, 3, 17, 4, 5, 33, 49, 6, 18, 65, 81, 7, 97, 113, 19, 34, 50, 129, 8, 20, 66, 145, 161, 177, 193, 9, 35, 51, 82, 240, 21, 98, 114, 209, 10, 22, 36, 52, 225, 37, 241, 23, 24, 25, 26, 38, 39, 40, 41, 42, 53, 54, 55, 56, 57, 58, 67, 68, 69, 70, 71, 72, 73, 74, 83, 84, 85, 86, 87, 88, 89, 90, 99, 100, 101, 102, 103, 104, 105, 106, 115, 116, 117, 118, 119, 120, 121, 122, 130, 131, 132, 133, 134, 135, 136, 137, 138, 146, 147, 148, 149, 150, 151, 152, 153, 154, 162, 163, 164, 165, 166, 167, 168, 169, 170, 178, 179, 180, 181, 182, 183, 184, 185, 186, 194, 195, 196, 197, 198, 199, 200, 201, 202, 210, 211, 212, 213, 214, 215, 216, 217, 218, 226, 227, 228, 229, 230, 231, 232, 233, 234, 242, 243, 244, 245, 246, 247, 248, 249, 250];
+        this.Ob = function (i, w) {
+            w && g(w);
+            Mb = [];
+            Ua = 0;
+            na = 7;
+            e(65496);
+            e(65504);
+            e(16);
+            d(74);
+            d(70);
+            d(73);
+            d(70);
+            d(0);
+            d(1);
+            d(1);
+            d(0);
+            e(1);
+            e(1);
+            d(0);
+            d(0);
+            e(65499);
+            e(132);
+            d(0);
+            for (var l = 0; l < 64; l++) d(q[l]);
+            d(1);
+            for (l = 0; l < 64; l++) d(p[l]);
+            l = i.width;
+            var n = i.height;
+            e(65472);
+            e(17);
+            d(8);
+            e(n);
+            e(l);
+            d(3);
+            d(1);
+            d(17);
+            d(0);
+            d(2);
+            d(17);
+            d(1);
+            d(3);
+            d(17);
+            d(1);
+            e(65476);
+            e(418);
+            d(0);
+            for (l = 0; l < 16; l++) d(ae[l + 1]);
+            for (l = 0; l <= 11; l++) d(be[l]);
+            d(16);
+            for (l = 0; l < 16; l++) d(ce[l + 1]);
+            for (l = 0; l <= 161; l++) d(de[l]);
+            d(1);
+            for (l = 0; l < 16; l++) d(ee[l + 1]);
+            for (l = 0; l <= 11; l++) d(fe[l]);
+            d(17);
+            for (l = 0; l < 16; l++) d(ge[l + 1]);
+            for (l = 0; l <= 161; l++) d(he[l]);
+            e(65498);
+            e(12);
+            d(3);
+            d(1);
+            d(0);
+            d(2);
+            d(17);
+            d(3);
+            d(17);
+            d(0);
+            d(63);
+            d(0);
+            var G = 0,
+                ga = 0,
+                Ga = 0;
+            Ua = 0;
+            na = 7;
+            this.Ob.se = "_encode_";
+            l = i.data;
+            n = i.height;
+            for (var A = i.width * 4, y, H = 0, x, F, s, D, I; H < n;) {
+                for (y = 0; y < A;) {
+                    D = A * H + y;
+                    for (I = 0; I < 64; I++) {
+                        F = I >> 3;
+                        x = (I & 7) * 4;
+                        s = D + F * A + x;
+                        if (H + F >= n) s -= A * (H + 1 + F - n);
+                        if (y + x >= A) s -= y + x - A + 4;
+                        x = l[s++];
+                        F = l[s++];
+                        s = l[s++];
+                        Yd[I] = (O[x] + O[F + 256 >> 0] + O[s + 512 >> 0] >> 16) - 128;
+                        Zd[I] = (O[x + 768 >> 0] + O[F + 1024 >> 0] + O[s + 1280 >> 0] >> 16) - 128;
+                        $d[I] = (O[x + 1280 >> 0] + O[F + 1536 >> 0] + O[s + 1792 >> 0] >> 16) - 128
+                    }
+                    G = f(Yd, u, G, B, Wa);
+                    ga = f(Zd, v, ga, J, hb);
+                    Ga = f($d, v, Ga, J, hb);
+                    y += 32
+                }
+                H += 8
+            }
+            if (na >= 0) {
+                l = [];
+                l[1] = na + 1;
+                l[0] = (1 << na + 1) - 1;
+                c(l)
+            }
+            e(65497);
+            n = Mb.join("");
+            if (hf) l = z.btoa(n);
+            else {
+                l = [];
+                for (y = A = 0; y < n.length; y++) {
+                    for (H = n.charCodeAt(y); H > 255;) {
+                        l[A++] = H & 255;
+                        H >>= 8
+                    }
+                    l[A++] = H
+                }
+                ma(l) || h(Error("encodeByteArray takes an array as a parameter"));
+                if (!gf) {
+                    gf = {};
+                    for (n = 0; n < 65; n++) gf[n] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".charAt(n)
+                }
+                n = gf;
+                A = [];
+                for (y = 0; y < l.length; y += 3) {
+                    x = l[y];
+                    F = (H = y + 1 < l.length) ? l[y + 1] : 0;
+                    s = (D = y + 2 < l.length) ? l[y + 2] : 0;
+                    I = x >> 2;
+                    x = (x & 3) << 4 | F >> 4;
+                    F = (F & 15) << 2 | s >> 6;
+                    s &= 63;
+                    if (!D) {
+                        s = 64;
+                        H || (F = 64)
+                    }
+                    A.push(n[I], n[x], n[F], n[s])
+                }
+                l = A.join("")
+            }
+            Mb = [];
+            return "data:image/jpeg;base64," + l
+        };
+        a || (a = 50);
+        (function () {
+            for (var i = String.fromCharCode, w = 0; w < 256; w++) Vd[w] = i(w)
+        })();
+        B = b(ae, be);
+        J = b(ee, fe);
+        Wa = b(ce, de);
+        hb = b(ge, he);
+        (function () {
+            for (var i =
+            1, w = 2, l = 1; l <= 15; l++) {
+                for (var n = i; n < w; n++) {
+                    Nb[32767 + n] = l;
+                    wa[32767 + n] = [];
+                    wa[32767 + n][1] = l;
+                    wa[32767 + n][0] = n
+                }
+                for (n = -(w - 1); n <= -i; n++) {
+                    Nb[32767 + n] = l;
+                    wa[32767 + n] = [];
+                    wa[32767 + n][1] = l;
+                    wa[32767 + n][0] = w - 1 + n
+                }
+                i <<= 1;
+                w <<= 1
+            }
+        })();
+        (function () {
+            for (var i = 0; i < 256; i++) {
+                O[i] = 19595 * i;
+                O[i + 256 >> 0] = 38470 * i;
+                O[i + 512 >> 0] = 7471 * i + 32768;
+                O[i + 768 >> 0] = -11059 * i;
+                O[i + 1024 >> 0] = -21709 * i;
+                O[i + 1280 >> 0] = 32768 * i + 8421375;
+                O[i + 1536 >> 0] = -27439 * i;
+                O[i + 1792 >> 0] = -5329 * i
+            }
+        })();
+        g(a)
+    };
+    var $ = S("userfeedback.render.blackouts.shrink"),
+        lf = function (a) {
+            if (a.width * a.height > 1E7) {
+                $.info("ERROR: Image too big pixel-wise.");
+                return ""
+            }
+            var b, c;
+            try {
+                $.info("Trying toDataURL()...");
+                b = a.toDataURL();
+                if (kf(b)) return b
+            } catch (d) {
+                $.info("Exception: ", d)
+            }
+            try {
+                $.info("Trying toDataURL(jpeg)...");
+                c = a.toDataURL("image/jpeg");
+                if (kf(c)) return c
+            } catch (e) {
+                $.info("Exception: ", e)
+            }
+            if (ff) try {
+                $.info("Trying 5M limit, we are on Firefox and cannot use JpegEncoder...");
+                var f = b.length,
+                    g = c.length,
+                    k = Math.min(f, g);
+                if (k < 5E6) {
+                    $.info("fits: true (Firefox), " + k);
+                    return f < g ? b : c
+                }
+            } catch (q) {
+                $.info("Exception: ", q)
+            } else
+            try {
+                $.info("Trying JpegEncoder...");
+                var p = a.getContext("2d").getImageData(0, 0, a.width, a.height);
+                b = (new jf).Ob(p);
+                if (kf(b)) return b
+            } catch (u) {
+                $.info("Exception: ", u)
+            }
+            $.info("ERROR: Nothing fits.");
+            return ""
+        },
+        kf = function (a) {
+            var b = a.length;
+            $.info("Checking if data URL fits: " + b + ", " + a.substr(0, 80) + "...");
+            a = b < 5E5;
+            $.info("fits: " + a);
+            return a
+        };
+    var of = function (a, b, c, d, e, f) {
+        mf.info("renderAnnotations");
+        e = me(e);
+        if ("NONE" == re) {
+            mf.info("ERROR: Rendering Strategy is NONE");
+            e("")
+        } else {
+            try {
+                f.ya(b)
+            } catch (g) {
+                nf("preloadImage failed", g, e);
+                return
+            }
+            ne(function () {
+                return f.Wb(b)
+            }, function (k, q) {
+                mf.info("waitFor(isImageReady) done");
+                if (q) return nf("isImageReady failed", q, e);
+                if (!k) return nf("isImageReady timed out", "condition was never true", e);
+                try {
+                    f.ib(b, new T(0, 0, a.width, a.height));
+                    if (d.length != 0) {
+                        f.Aa(0, 0, a.width, a.height);
+                        f.Lb(d)
+                    }
+                    f.Aa(0, 0, a.width, a.height);
+                    Pa(c, function (u) {
+                        f.fillRect(u, "black")
+                    });
+                    f.toDataURL(function (u, v) {
+                        if (v) return nf("canvas.toDataURL failed", v, e);
+                        if (f instanceof af) u = lf(f.canvas);
+                        return e(u)
+                    })
+                } catch (p) {
+                    return nf("Exception while rendering annotations", p, e)
+                }
+            }, 1E4)
+        }
+    },
+        mf = S("userfeedback.render.annotate"),
+        nf = function (a, b, c) {
+            C(b) ? mf.info(a + ": " + b) : mf.info(a, b);
+            c("")
+        };
+    var pf = function (a, b, c) {
+        var d = {
+            tileImage: function (k, q, p, u, v, B, J, Wa) {
+                a.jb(k, new T(q, p, u, v), B, J, Wa)
+            },
+            stretchImage: function (k, q, p, u, v) {
+                a.ib(k, new T(q, p, u, v))
+            },
+            drawRect: a.Mb,
+            fillRect: function (k, q, p, u, v) {
+                a.fillRect(new T(k, q, p, u), v)
+            },
+            drawBorder: function (k, q, p, u, v) {
+                a.Ib(new T(k[0], k[1], k[2], k[3]), Ne(q), Ne(p), new Jb(u[0], u[1], u[2], u[3]), v)
+            },
+            drawGradient: function (k, q, p, u, v, B, J, Wa, hb) {
+                a.Kb(new T(k, q, p, u), new T(v, B, J, Wa), hb)
+            },
+            drawText: a.Nb,
+            drawBuiltin: a.Jb,
+            pushElipticalClip: function (k, q, p) {
+                a.jc(new T(k[0], k[1], k[2], k[3]), Ne(q), Ne(p))
+            },
+            pushClip: a.Aa,
+            popClip: a.hc,
+            popAllClips: a.gc
+        },
+            e = S("userfeedback.render.canvas.commands.run"),
+            f = b.length;
+        e.info("Rendering commands count: " + f);
+        var g = 0;
+        Pa(b, function (k) {
+            d[k.type].apply(a, k.args);
+            (k = Math.floor(10 * (g + 1) / f) - Math.floor(10 * g / f)) && c(k);
+            g++
+        })
+    };
+    var rf = function (a, b) {
+        var c = S("userfeedback.web.main.RenderFrameContent");
+        ab(a, function (d, e) {
+            oa(d) && ab(b, function (f, g) {
+                if (f === d) a[e] = qf(a, g, f, c)
+            })
+        })
+    },
+        qf = function (a, b, c, d) {
+            return function () {
+                var e = K();
+                d.info(b + " called");
+                try {
+                    c.apply(a, arguments)
+                } finally {
+                    d.info(b + " finished in " + (K() - e) + "ms")
+                }
+            }
+        };
+    var tf = function (a) {
+        var b = Ya(arguments, 1);
+        b.push($c);
+        b = va(sf, a, b);
+        Vc(window, "unload", b)
+    },
+        sf = function (a, b) {
+            Pa(b, function (c) {
+                try {
+                    c.apply(a)
+                } catch (d) {
+                    uf.info("Cleanup threw exception: " + c, d)
+                }
+            })
+        },
+        uf = S("userfeedback.util.cleanup");
+    var vf = function () {
+        this.nc = K()
+    },
+        wf = new vf;vf.prototype.$ = function (a) {
+        this.nc = a
+    };vf.prototype.reset = function () {
+        this.$(K())
+    };vf.prototype.get = function () {
+        return this.nc
+    };
+    var xf = function (a) {
+        this.ad = a || "";
+        this.ud = wf
+    };r = xf.prototype;r.wc = j;r.yc = j;r.sd = j;r.xc = o;r.td = o;
+    var yf = function (a) {
+        if (a < 10) return "0" + a;
+        return String(a)
+    },
+        zf = function (a, b) {
+            var c = (a.zc - b) / 1E3,
+                d = c.toFixed(3),
+                e = 0;
+            if (c < 1) e = 2;
+            else
+            for (; c < 100;) {
+                e++;
+                c *= 10
+            }
+            for (; e-- > 0;) d = " " + d;
+            return d
+        },
+        Af = function (a) {
+            xf.call(this, a)
+        };L(Af, xf);
+    var Bf = function (a) {
+        this.a = a;
+        this.ed = E(this.Cc, this);
+        this.sa = new Af;
+        this.sa.wc = o;
+        this.sa.yc = j;
+        this.sa.xc = j;
+        this.Ua = o;
+        this.La = [];
+        this.Va = o
+    },
+        Cf = function (a, b) {
+            if (b != a.Va) {
+                if (!b) {
+                    Pa(a.La, function (c) {
+                        this.a.send("log", c)
+                    }, a);
+                    a.La = []
+                }
+                a.Va = b
+            }
+        };
+    Bf.prototype.Cc = function (a) {
+        if (!this.Ua) {
+            this.Ua = j;
+            try {
+                var b, c = this.sa,
+                    d = [];
+                d.push(c.ad, " ");
+                if (c.wc) {
+                    var e = new Date(a.zc);
+                    d.push("[", yf(e.getFullYear() - 2E3) + yf(e.getMonth() + 1) + yf(e.getDate()) + " " + yf(e.getHours()) + ":" + yf(e.getMinutes()) + ":" + yf(e.getSeconds()) + "." + yf(Math.floor(e.getMilliseconds() / 10)), "] ")
+                }
+                c.yc && d.push("[", zf(a, c.ud.get()), "s] ");
+                c.sd && d.push("[", a.Wc, "] ");
+                c.td && d.push("[", a.Qa().name, "] ");
+                d.push(a.ac, "\n");
+                c.xc && a.Pa && d.push(a.Oa, "\n");
+                b = d.join("");
+                b = b.replace(/\n$/, "");
+                var f = [a.Qa().toString(), b];
+                this.Va ? this.La.push(f) : this.a.send("log", f)
+            } finally {
+                this.Ua = o
+            }
+        }
+    };
+    var Df = function () {
+        var a;
+        a = document.location.href;
+        var b = a.indexOf("#");
+        a = b < 0 ? m : a.substr(b + 1);
+        this.a = new Rd(Cb(a && decodeURIComponent(a)));
+        this.sc = o;
+        this.m = S("userfeedback.web.main.RenderFrameContent");
+        rf(this, {
+            checkCanvas_: this.yb,
+            connectXpc_: this.Cb,
+            createCanvas_: this.Db,
+            installCleanup_: this.Ub,
+            render_: this.Ba,
+            runAnnotateCommands_: this.pc,
+            runBlackoutCommands_: this.qc,
+            runRenderingCommands_: this.rc,
+            sendScreenshot_: this.eb,
+            setCommands_: this.uc
+        });
+        a = this.mb = new Bf(this.a);
+        if (j != a.Vc) {
+            Bb();
+            b = Ab;
+            var c = a.ed;
+            if (!b.ea) b.ea = [];
+            b.ea.push(c);
+            a.Vc = j
+        }
+        Cf(this.mb, j)
+    };r = Df.prototype;r.start = function () {
+        oe(this, function (a) {
+            this.Ub();
+            ke(a, 100)
+        }, function (a) {
+            this.Db(a)
+        }, function () {
+            this.Cb()
+        })
+    };r.Ub = function () {
+        tf(this, function () {
+            this.r.da()
+        }, function () {
+            this.a.close()
+        })
+    };r.Db = function (a) {
+        cf(E(function (b, c) {
+            if (c) C(c) ? this.m.info("createCanvas failed: " + c) : this.m.info("createCanvas failed", c);
+            else this.r = b;
+            a()
+        }, this))
+    };
+    r.Cb = function () {
+        this.a.la.images = {
+            Ia: E(this.bd, this),
+            Xa: o
+        };
+        this.a.la.render = {
+            Ia: E(this.Ba, this),
+            Xa: o
+        };
+        this.a.B()
+    };r.bd = function (a) {
+        a = window.JSON ? window.JSON.parse(a) : Cb(a);
+        this.r && Pa(a, E(this.r.ya, this.r))
+    };r.Ba = function (a) {
+        oe(this, function (b) {
+            this.yb(b)
+        }, function (b) {
+            this.uc(a);
+            this.a.send("progress", "");
+            ke(b)
+        }, function (b) {
+            this.a.send("progress", "");
+            this.rc(b)
+        }, function (b) {
+            this.a.send("progress", "");
+            this.pc(b)
+        }, function (b) {
+            this.a.send("progress", "");
+            this.qc(b)
+        }, function () {
+            this.eb()
+        })
+    };
+    r.yb = function (a) {
+        Cf(this.mb, o);
+        this.r ? a() : Ef(this, "Canvas could not be created")
+    };r.uc = function (a) {
+        a = window.JSON ? window.JSON.parse(a) : Cb(a);
+        this.hd = a.render;
+        this.wb = a.blackout;
+        this.Rc = a.highlight;
+        this.aa = new Kb(a.width, a.height);
+        this.r.Ca(this.aa)
+    };r.rc = function (a) {
+        pf(this.r, this.hd, E(function (b) {
+            this.a.send("progress", "" + b)
+        }, this));
+        this.r.toDataURL(E(function (b, c) {
+            if (c) Ef(this, c);
+            else {
+                this.od = b;
+                a()
+            }
+        }, this))
+    };
+    r.pc = function (a) {
+        Ff(this, this.wb, this.Rc, E(function (b) {
+            if (b) {
+                this.md = b;
+                a()
+            } else Ef(this, "ERROR rendering blackouts + highlights")
+        }, this))
+    };r.qc = function (a) {
+        Ff(this, this.wb, [], E(function (b) {
+            if (b) {
+                this.nd = b;
+                a()
+            } else Ef(this, "ERROR rendering blackouts")
+        }, this))
+    };
+    var Ef = function (a, b) {
+        C(b) ? a.m.info(b) : a.m.info("ERROR", b);
+        a.sc = j;
+        a.eb()
+    };Df.prototype.eb = function () {
+        this.r && this.r.da();
+        this.a.send("done", pe([this.nd, this.md, this.sc]))
+    };
+    var Gf = function (a, b) {
+        return Ra(b, function (c) {
+            return new T(c.left, c.top, c.width, c.height)
+        })
+    },
+        Ff = function (a, b, c, d) {
+            b = Gf(a, b);
+            c = Gf(a, c);
+            a.r.clear();
+            of(a.aa, a.od, b, c, d, a.r)
+        };
+    (new Df).start();
+})();

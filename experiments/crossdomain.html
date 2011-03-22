@@ -1,0 +1,14 @@
+<body>
+<iframe id='xd_frame'></iframe>
+<script type='text/javascript' src='jquery-1.5.1.min.js'></script>
+
+<script>
+src = 'http://localhost/~brian/html2canvas/crossdomain2.html#' + encodeURIComponent(document.location.href);
+document.getElementById("xd_frame").src = src;
+
+function send(msg) {
+    XD.postMessage(msg, src, frames[0]);
+    return false;
+}
+</script>
+</body>
