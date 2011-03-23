@@ -7,9 +7,30 @@
     <script src="../jquery-1.5.1.min.js"></script>
     <script src="../html2canvas.js"></script>
     <script>
-    	$(function() {
-    		log(parent);
-    	});
+    log = function() {console.log(arguments)};
+    function getQueryString() {
+  		var result = {}, queryString = location.search.substring(1),
+      	re = /([^&=]+)=([^&]*)/g, m;
+
+  		while (m = re.exec(queryString)) {
+  		  result[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+  		}
+  		
+  		return result;
+	} 		
+	var base = getQueryString()["base"];
+  		
+  	function recieve(msg) {
+  	    
+  	    log(msg);
+  	    
+	    html2canvas(msg, function(canvas) {
+	    
+	    });
+  	}
+    $(function() {
+        log(parent);
+    });
     </script>
   </body>
 </html>

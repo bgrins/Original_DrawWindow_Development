@@ -1,2 +1,18 @@
 regardable.com/load.js
-render.regardable.com/?url=http://www.google.com/image
+regardable.com/load?url=http://www.google.com/image
+
+Feedback frame: Form for submission.
+	regardable.com/feeback
+	* Handles cross domain communication
+
+Screenshot frame: 'sanitized html'
+	* Runnning on current domain
+	
+Overlay frame: allows for highlighting, drawing, etc
+
+Render frame: running on our domain
+	* Recieves page's HTML
+	* Messages the sanitized HTML back
+	* Does the html2canvas processing
+	* Returns the images toDataURL();
+	

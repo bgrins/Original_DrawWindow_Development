@@ -57,7 +57,7 @@ $(function() {
 			"</label><br />"
 		);
 	});
-	$("#testsToRun").html(inputs.join('')).find("input").eq(10).attr("checked", "checked");
+	$("#testsToRun").html(inputs.join('')).find("input").eq(0).attr("checked", "checked");
 	
 	$("#selectAll").click(function() {
 		var allInputs = $("#testsToRun input");

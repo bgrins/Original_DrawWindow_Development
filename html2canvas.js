@@ -124,16 +124,16 @@ $.fn.splitTextNodes = function(wrapper) {
 	var trimMultiple = /^[\s]+|[\s]+/g;
 	
 	var all = this.add(this.find("*"));
-	
-	var skip = "style, script, .h2c";
+	var skip = "style, script, h2c";
 	
 	for (var i = 0; i < all.length; i++) {
 		var element = $(all[i]);
-		if (element.is(skip)) { return; }
+		
+		
+		if (element.is(skip)) { continue; }
 		var hasTextNodes = false;
 		var hasOtherNodes = false;
 		var textNodes = [];
-		
 		element.contents().each(function() {
 			if (this.nodeType == 3) {
 				hasTextNodes = true;
@@ -160,15 +160,14 @@ $.fn.splitTextNodes = function(wrapper) {
 				//else { space = ''; }
 				
 				space = (j == 0) ? '' : ' ';// '<span class="h2c"> </span>';
-				newHtml.push(space+'<span class="h2c">'+words[j]+'</span>');
+				newHtml.push(space+'<h2c>'+words[j]+'</h2c>');
 			}
-			
 			element.html(newHtml.join(''));
 		}
 		else if (hasTextNodes && hasOtherNodes) {
 			// Wrap each node, then push it onto list for processing (splitting up spaces)
 			for (var j = 0; j < textNodes.length; j++) {
-				var newElement = $(textNodes[j]).wrap('<span class="h2c-holder"></span>').parent();
+				var newElement = $(textNodes[j]).wrap('<h2c></h2c>');
 				all = all.add(newElement);
 			}
 		}
@@ -180,7 +179,10 @@ $.fn.cloneDocument = function() {
 	log(doc.doctype, document.doctype);
 	
 	doc.head = doc.head || doc.getElementsByTagName('head')[0];
-	var clonedHead = $("<head />").html(doc.head.innerHTML);
+	
+	// This might be needed, but it causes extra HTTP requests
+	// var clonedHead = $("<head />").html(doc.head.innerHTML);
+	var clonedHead = $(doc.head.cloneNode(true));
 	var clonedBody = $(doc.body).clone();
 	
 	clonedHead.find("script").remove();
@@ -272,6 +274,7 @@ function html2canvas(body, width, cb) {
 		$(body).width(width);
 	}
 	
+	/*
 	if (!body.ownerDocument.getElementById('h2c-styles')) {
 		var style = $("<style type='text/css' id='h2c-styles' />", body.ownerDocument).appendTo(body);
 		if ($.browser.msie) {
@@ -280,11 +283,30 @@ function html2canvas(body, width, cb) {
     	else {
     	    style.html(h2cStyles);
     	}
-	}
+	}*/
+	
+	cloneTree(body);
 	
 	var el = new element(body, function(canvas) {
 		cb(canvas);
 	});
+}
+
+function cloneTree(body) {
+	$(body).splitTextNodes();
+	return;
+	processTree(body);
+	
+	function processTree(element) {
+		$(element).contents().each(function() {
+			if (this.nodeType == 3) {
+				$(this).wrap("<h2c />")
+			}
+			else if (this.nodeType == 1) {
+				processTree(this);
+			}
+		});		
+	}
 }
 
 function createCanvas() {
@@ -311,7 +333,7 @@ function element(DOMElement, onready) {
 	this.nodeType = this._domElement.nodeType;
 	this.tagName = this._domElement.tagName.toLowerCase();
 	this.isBody = this.tagName == "body";
-	this.isTextPlaceholder = this.jq.is("span.h2c");
+	this.isTextPlaceholder = this.jq.is("h2c");
 	this.readyChildren = 0;
 	this.ready = false;
 	this.onready = onready || function() { };
@@ -321,7 +343,6 @@ function element(DOMElement, onready) {
 		this.body = this;
 		this.outputCanvas = createCanvas();
 		this.outputCanvas._el = this;
-		this.jq.splitTextNodes("<span class='h2c'></span>");
 	}
 	else {
 		this.parent = this._domElement.parentNode._element;
@@ -369,8 +390,8 @@ element.prototype.signalReady = function() {
 	var body = this.body;
 	body.readyChildren++;
 	if (body.readyChildren == body.totalChildren) {	
-	    body.outputCanvas.width = body.css.outerWidthMargins;
-	    body.outputCanvas.height = body.css.outerHeightMargins;
+	    body.outputCanvas.width = body.scrollWidth; //body.css.outerWidthMargins;
+	    body.outputCanvas.height = body.scrollHeight; //body.css.outerHeightMargins;
 	    body.onready(body.outputCanvas);
 	    body.copyToCanvas(body.outputCanvas);
 	}
@@ -559,6 +580,7 @@ element.prototype.copyDOM = function() {
 	this.y = this.offsetRenderBox.top;
 	this.width = this.css.outerWidthMargins;
 	this.height = this.css.outerHeightMargins;
+	
 	this.css.outlineOffset = {
 		left: this.x + this.css.marginLeft - (this.css.outlineWidth / 2),
 		top: this.y + this.css.marginTop - (this.css.outlineWidth / 2),
@@ -594,10 +616,12 @@ element.prototype.copyDOM = function() {
 	}
 	
 	var childNodes = this._domElement.childNodes;
-	this.hasOnlyTextNodes = (childNodes.length > 0); // img, hr, etc shouldn't show up as text nodes
-	for (var i = 0; i < childNodes.length; i++) {
-		if (childNodes[i].nodeType != 3) { this.hasOnlyTextNodes = false; }
-	}
+	this.hasOnlyTextNodes = childNodes.length > 0 && this.isTextPlaceholder;
+	
+	//this.hasOnlyTextNodes = (childNodes.length > 0); // img, hr, etc shouldn't show up as text nodes
+	//for (var i = 0; i < childNodes.length; i++) {
+	//	if (childNodes[i].nodeType != 3) { this.hasOnlyTextNodes = false; }
+	//}
 	
 
 	// Is a span h2c
@@ -613,7 +637,11 @@ element.prototype.copyDOM = function() {
 	}
 	
 	if (css.display == "inline" && !this.hasOnlyTextNodes && this.tagName != "img") {
+		/*
+		Only rendering nodes text if they are an h2c element
 		var oldHtml = el.html();
+		
+		log("Would be processing", el[0].tagName, oldHtml);
 		var newHtml = "<span id='measure' class='h2c'>x</span>";
 		el[0].innerHTML = newHtml;
 		var measured = el.html(newHtml).find("#measure");
@@ -628,6 +656,7 @@ element.prototype.copyDOM = function() {
 			top: textStart.top - this.position.top,
 			left: textStart.left - this.position.left
 		};
+		*/
 	}
 	
 };
@@ -792,7 +821,7 @@ element.prototype.renderBackground = function(ctx, cb) {
 	var backgroundImage = css.backgroundImage;
 	var backgroundRepeat = css.backgroundRepeat;
 	var innerOffset = this.css.innerOffset;
-	
+	var tagName = this.tagName;
 	if (this.tagName == "span" && this.text == "community") {
 		log("HEREEEE", backgroundColor);
 	}
@@ -838,6 +867,7 @@ element.prototype.renderBackground = function(ctx, cb) {
 				ctx.fillRect(offsetLeft, offsetTop, outerWidth, outerHeight);
 			}
 			else {
+				log("Rendering", ctx.canvas.width, img.src, outerWidth, tagName )
         		ctx.fillStyle = ctx.createPattern(img, backgroundRepeat);
 				ctx.fillRect(offsetLeft, offsetTop, outerWidth, outerHeight);
 			}

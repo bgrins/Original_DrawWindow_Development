@@ -42,7 +42,7 @@ window.h2c = {
 		feedback.className = "busy";
 		feedback.onload = window.h2c.load;
 		
-		render = h2c.createFrame("h2c-render", "http://localhost/~brian/html2canvas/form/render.html");
+		render = h2c.createFrame("h2c-render", "http://localhost/~brian/html2canvas/form/render.html?base=http://localhost/~/brian/html2canvas/form/index.html");
 		
 		document.body.appendChild(feedback);
 		document.body.appendChild(render);
@@ -53,6 +53,9 @@ window.h2c = {
 		feedback.className = "";
 		
 		console.log("Loaded", arguments);
+	},
+	receive: function(msg) {
+		log("Receive)
 	}
 };
 </script>
