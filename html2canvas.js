@@ -938,15 +938,10 @@ function retrieveImage(src, cb, ownerDocument) {
 	    		}
 	    	});
 	    	/*
-	    	loadImageDirectly = false;
-	    	PROXY.message(src, function(dataURI) {
-	    		if (dataURI) {
-	    			makeImage(dataURI);
-	    		}
-	    		else {
-	    			sendError();
-	    		}
-	    	});
+			CSSHttpRequest.get(
+    		    "http://localhost/~brian/html2canvas/form/csshttp?url=http://www.google.com/images/logos/ps_logo2.png",
+    		    function(response) { log(response); }
+    		);
 	    	*/
 	    }
 	}
