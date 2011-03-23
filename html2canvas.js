@@ -197,6 +197,8 @@ $.fn.cloneDocument = function() {
 	allOldImages.each(function(i) {
 		allNewImages.eq(i).width($(this).width()).height($(this).height());
 	});
+	// Prevent images from loading by default
+	allNewImages.attr("data-src", function() { return $(this).attr("src"); }).attr("src", "javascript:");
 	
 	clonedHead.find("script").remove();
 	clonedBody.find("script, iframe.h2cframe").remove();
@@ -625,7 +627,7 @@ element.prototype.copyDOM = function() {
 
 
 	if (this.tagName == "img") {
-		this.src = el.attr("src");
+		this.src = el.attr("data-src");
 	}
 	
 	var childNodes = this._domElement.childNodes;
