@@ -1,29 +1,44 @@
-<html>
-  <head>
-    <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
-  </head>
-  <body>
-    {% for greeting in greetings %}
-      {% if greeting.author %}
-        <b>{{ greeting.author.nickname }}</b> wrote:
-      {% else %}
-        An anonymous person wrote:
-      {% endif %}
-      <blockquote>{{ greeting.content|escape }}</blockquote>
-    {% endfor %}
+{% extends "master.html" %}
 
-    <form action="/sign" method="post">
-      <div><textarea name="content" rows="3" cols="60"></textarea></div>
-      <div><input type="submit" value="Sign Guestbook"></div>
-    </form>
-    
-    <form action="/send" method="post">
-      <div><input name="message" type='text' /></div>
-      <div><textarea name="image" rows="3" cols="60"></textarea></div>
-      <div><input type="submit" value="Sign Guestbook"></div>
-    </form>
+{% block title %}Dashbord{% endblock %}
 
-    <a href="{{ url }}">{{ url_linktext }}</a>
+{% block content %}
+If you are logged in, 
+<ul>
+{% for shot in screenshots %}
+    <li>
+    	<pre>{{shot.details}}</pre>
+    	<pre>{{shot.message}}</pre>
+    	<pre>{{shot.key}}</pre>
+        <img src="{{ shot.imagesrc }}" alt='Taken on {{ shot.date }}' />
+    </li>
+{% endfor %}
+</ul>
 
-  </body>
-</html>
+{% endblock %}
+
+{% block sidebar %}
+Featurelist
+{% endblock %}
+
+{% block marketing %}
+{% if not isloggedin %}
+  <h2 class="alt">Get instant feedback</h2> 
+  <hr> 
+  <div class="span-7 colborder"> 
+    <h6>Instant</h6> 
+    <p>We have technology that blah blah blah</p> 
+  </div> 
+  <div class="span-8 colborder"> 
+    <h6>Reliable</h6> 
+    <p>blah blah blah</p> 
+  </div> 
+  <div class="span-7 last"> 
+    <h6>Feedback</h6> 
+    <p>Allow users to engage with your system blah blah blah</p> 
+  </div> 
+  <hr> 
+  <hr class="space"> 
+{% endif %}
+
+{% endblock %}
