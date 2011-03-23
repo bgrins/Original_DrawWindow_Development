@@ -22,6 +22,9 @@ var settings = html2canvas.settings = {
 	logLevel: html2canvas.logLevels.RELEASE
 };
 
+function postValues() {
+	window.open("http://localhost:8080/preview");
+}
 
 function log() { if (window.console) { console.log(Array.prototype.slice.apply(arguments)); } }
 function log1() { if (settings.logLevel >= 1) { log.apply(this, arguments); } }

@@ -1,5 +1,5 @@
 <?php
-
+/*http://nb.io/hacks/csshttprequest*/
 define('PREFIX', "data:,");
 define('LENGTH', 2000 - strlen(PREFIX)); 
 

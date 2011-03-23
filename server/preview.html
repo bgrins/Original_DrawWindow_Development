@@ -1,0 +1,19 @@
+
+<div class='message'>Thank you for sending feedback to {{app}}.</div>
+
+<form action="/send" method="post">
+  <div><textarea name="message" rows="3" cols="60">{{message}}</textarea></div>
+  <div><textarea name="details" readonly="readonly" rows="3" cols="60">{{details}}</textarea></div>
+  <div><input type="hidden" name="image" value="{{image}}"></div>
+  <div><input type="submit" value="Send Feedback"></div>
+  <div><input type="button" onclick='cancel();' value="Cancel"></div>
+</form>
+
+<div id='preview'>
+<img src='{{imagesrc}}' />
+</div>
+<script type='text/javascript'>
+function cancel() {
+
+}
+</script>
