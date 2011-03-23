@@ -1,8 +1,67 @@
+var XD = function(){
+
+    var interval_id,
+    last_hash,
+    cache_bust = 1,
+    attached_callback,
+    window = this;
+
+    return {
+        postMessage : function(message, target_url, target) {
+            if (!target_url) {
+                return;
+            }
+            target = target || parent;  // default to parent
+            if (window['postMessage']) {
+                // the browser supports window.postMessage, so call it with a targetOrigin
+                // set appropriately, based on the target_url parameter.
+                target['postMessage'](message, target_url.replace( /([^:]+:\/\/[^\/]+).*/, '$1'));
+            } else if (target_url) {
+                // the browser does not support window.postMessage, so use the window.location.hash fragment hack
+                target.location = target_url.replace(/#.*$/, '') + '#' + (+new Date) + (cache_bust++) + '&' + message;
+            }
+        },
+        receiveMessage : function(callback, source_origin) {
+            // browser supports window.postMessage
+            if (window['postMessage']) {
+                // bind the callback to the actual event associated with window.postMessage
+                if (callback) {
+                    attached_callback = function(e) {
+                        if ((typeof source_origin === 'string' && e.origin !== source_origin)
+                        || (Object.prototype.toString.call(source_origin) === "[object Function]" && source_origin(e.origin) === !1)) {
+                             return !1;
+                         }
+                         callback(e);
+                     };
+                 }
+                 if (window['addEventListener']) {
+                     window[callback ? 'addEventListener' : 'removeEventListener']('message', attached_callback, !1);
+                 } else {
+                     window[callback ? 'attachEvent' : 'detachEvent']('onmessage', attached_callback);
+                 }
+             } else {
+                 // a polling loop is started & callback is called whenever the location.hash changes
+                 interval_id && clearInterval(interval_id);
+                 interval_id = null;
+                 if (callback) {
+                     interval_id = setInterval(function() {
+                         var hash = document.location.hash,
+                         re = /^#?\d+&/;
+                         if (hash !== last_hash && re.test(hash)) {
+                             last_hash = hash;
+                             callback({data: hash.replace(re, '')});
+                         }
+                     }, 100);
+                 }
+             }
+         }
+    };
+}();
 
 
 // html5shiv MIT @rem remysharp.com/html5-enabling-script
 // iepp v1.6.2 MIT @jon_neal iecss.com/print-protector
-/*@cc_on(function(m,c){var z="abbr|article|aside|audio|canvas|details|figcaption|figure|footer|header|hgroup|mark|meter|nav|output|progress|section|summary|time|video|h2c";function n(d){for(var a=-1;++a<o;)d.createElement(i[a])}function p(d,a){for(var e=-1,b=d.length,j,q=[];++e<b;){j=d[e];if((a=j.media||a)!="screen")q.push(p(j.imports,a),j.cssText)}return q.join("")}var g=c.createElement("div");g.innerHTML="<z>i</z>";if(g.childNodes.length!==1){var i=z.split("|"),o=i.length,s=RegExp("(^|\\s)("+z+")",
+/*@cc_on(function(m,c){var z="abbr|article|aside|audio|canvas|details|figcaption|figure|footer|header|hgroup|mark|meter|nav|output|progress|section|summary|time|video";function n(d){for(var a=-1;++a<o;)d.createElement(i[a])}function p(d,a){for(var e=-1,b=d.length,j,q=[];++e<b;){j=d[e];if((a=j.media||a)!="screen")q.push(p(j.imports,a),j.cssText)}return q.join("")}var g=c.createElement("div");g.innerHTML="<z>i</z>";if(g.childNodes.length!==1){var i=z.split("|"),o=i.length,s=RegExp("(^|\\s)("+z+")",
 "gi"),t=RegExp("<(/*)("+z+")","gi"),u=RegExp("(^|[^\\n]*?\\s)("+z+")([^\\n]*)({[\\n\\w\\W]*?})","gi"),r=c.createDocumentFragment(),k=c.documentElement;g=k.firstChild;var h=c.createElement("body"),l=c.createElement("style"),f;n(c);n(r);g.insertBefore(l,
 g.firstChild);l.media="print";m.attachEvent("onbeforeprint",function(){var d=-1,a=p(c.styleSheets,"all"),e=[],b;for(f=f||c.body;(b=u.exec(a))!=null;)e.push((b[1]+b[2]+b[3]).replace(s,"$1.iepp_$2")+b[4]);for(l.styleSheet.cssText=e.join("\n");++d<o;){a=c.getElementsByTagName(i[d]);e=a.length;for(b=-1;++b<e;)if(a[b].className.indexOf("iepp_")<0)a[b].className+=" iepp_"+i[d]}r.appendChild(f);k.appendChild(h);h.className=f.className;h.innerHTML=f.innerHTML.replace(t,"<$1font")});m.attachEvent("onafterprint",
 function(){h.innerHTML="";k.removeChild(h);k.appendChild(f);l.styleSheet.cssText=""})}})(this,document);@*/
@@ -369,6 +428,27 @@ function computedStyle(elem, styles) {
 	
 	return ret;
 }
+function getDoctypeString(doc) {
+	if ($.browser.msie) {
+		var doctype = doc.all[0].text;
+		return doctype || "";
+	}
+	else {
+		var doctype = doc.doctype;
+		if (!doctype) {
+			return "";
+		}
+		var publicID = doctype.publicId;
+		var systemID = doctype.systemId;
+		var name = doctype.name;
+		
+		if (!publicID) {
+			return "<!DOCTYPE " + name + ">"
+		}
+		
+		return "<!DOCTYPE " + name + " PUBLIC \"" + publicID + "\" \"" + systemID + "\">";
+	}
+}
 
 var getUniqueID = (function(id) { return function() { return id++; } })(0);
 var ignoreTags = { 'style':1, 'br': 1, 'script': 1, 'link': 1 };
@@ -418,16 +498,16 @@ $.fn.splitTextNodes = function(wrapper) {
 	var trimMultiple = /^[\s]+|[\s]+/g;
 	
 	var all = this.add(this.find("*"));
-	
-	var skip = "style, script, .h2c";
+	var skip = "style, script, h2c";
 	
 	for (var i = 0; i < all.length; i++) {
 		var element = $(all[i]);
-		if (element.is(skip)) { return; }
+		
+		
+		if (element.is(skip)) { continue; }
 		var hasTextNodes = false;
 		var hasOtherNodes = false;
 		var textNodes = [];
-		
 		element.contents().each(function() {
 			if (this.nodeType == 3) {
 				hasTextNodes = true;
@@ -454,36 +534,92 @@ $.fn.splitTextNodes = function(wrapper) {
 				//else { space = ''; }
 				
 				space = (j == 0) ? '' : ' ';// '<span class="h2c"> </span>';
-				newHtml.push(space+'<span class="h2c">'+words[j]+'</span>');
+				newHtml.push(space+'<h2c>'+words[j]+'</h2c>');
 			}
-			
 			element.html(newHtml.join(''));
 		}
 		else if (hasTextNodes && hasOtherNodes) {
 			// Wrap each node, then push it onto list for processing (splitting up spaces)
 			for (var j = 0; j < textNodes.length; j++) {
-				var newElement = $(textNodes[j]).wrap('<span class="h2c-holder"></span>').parent();
+				var newElement = $(textNodes[j]).wrap('<h2c></h2c>');
 				all = all.add(newElement);
 			}
 		}
 	}
 };
-
+function assert() {
+}
 $.fn.cloneDocument = function() {
-	// TODO: This isn't compatible cross browser
+	var doc = this[0];
+	log(doc.doctype, document.doctype);
+	
+	doc.head = doc.head || doc.getElementsByTagName('head')[0];
+	
+	// This might be needed, but it causes extra HTTP requests
+	// var clonedHead = $("<head />").html(doc.head.innerHTML);
+	var clonedHead = $(doc.head.cloneNode(true));
+	var clonedBody = $(doc.body).clone();
+	
+	// Set image width and height, to lock it in place even if it is still
+	// loading when we initally process.
+	var allOldImages = $(doc.body).find("img");
+	var allNewImages = clonedBody.find("img");
+	
+	assert(allOldImages.length == allNewImages.length, 
+		"Cloned body does not match");
+	
+	allOldImages.each(function(i) {
+		allNewImages.eq(i).width($(this).width()).height($(this).height());
+	});
+	
+	clonedHead.find("script").remove();
+	clonedBody.find("script, iframe.h2cframe").remove();
+	clonedBody.find("iframe").attr("src", "javascript:");
+	
+	if (clonedHead.find("base").length == 0) {
+		clonedHead.prepend(
+			'<base href="'+doc.location.origin+doc.location.pathname+'" />'
+		);
+	}
+	
+	var b = $(doc.body);
+	var bodyWidth = b.outerWidth(true);
+	var bodyHeight = b.outerHeight(true);
+	var styles = 'position:absolute; top: -'+(bodyHeight*2)+'px; left:-'+(bodyWidth*2)+'px';
+	var iframe = $("<iframe class='h2cframe' style='"+styles+"' src='about:blank' />").appendTo(b).width(bodyWidth).height(bodyHeight);
+	
+	// TODO: Fix relative URI for resources in case the original doc is inside an iframe (such as the test harness)
+	var docType = getDoctypeString(doc);
+	var d = iframe.contents()[0];
+	d.h2cLocation = doc.location;
+	log(doc.location)
+	d.open();
+	d.write(docType + "<html><head>"+clonedHead.html()+"</head><body>"+clonedBody.html()+"</body>");
+	d.close();
+	return d;
+	
+	/*
+	//log(clonedHead.html(), clonedBody.html(), b.width(), $(d.body).width());
+	//var html = $("<html>" + originalDocument.documentElement.innerHTML + "</html>");
+	//log(originalDocument.documentElement.innerHTML, originalDocument.head, html.html());
+	
 	var b = $(this[0].body);
-	log("CLONING", this);
+	//log("CLONING", this, b, b.html());
 	var clonedBody = b.clone();
 	clonedBody.find("script, iframe.h2cframe").remove();
 	clonedBody.find("iframe").attr("src", "javascript:");
+	log(this[0].head, this[0].head.innerHTML);
 	var clonedHead = $(this[0].head).clone();
 	clonedHead.find("script").remove();
-	
+	//log(clonedHead, clonedHead[0].innerHTML, clonedBody.html())
 	//var originalFrames = b.find("iframe");
 	
-	//var iframe = $("<iframe class='h2cframe' src='javascript:' />").appendTo(b).width(b.width())
-	//var d = iframe[0].contentDocument;
-	//return d;
+	//$(d.head).html(clonedHead.html());
+	//$(d.body).html(clonedBody.html()).width(bodyWidth).height(bodyHeight);
+	
+	return d;
+	
+	
 	var d = window.open().document;
 	//iframe.remove(); // wasn't working in firefox
 	
@@ -498,16 +634,23 @@ $.fn.cloneDocument = function() {
 	//});
 
 	return d;
+	*/
 };
+
 
 function html2canvas(body, width, cb) {
 	
 	if ((typeof body) == "string") {
 		var iframe = $("<iframe src='javascript:'></iframe>").appendTo("body");
-		body = iframe.contents().find("body").html(body)[0];
+		var doc = iframe.contents()[0];
+		doc.open();
+		doc.write(body);
+		doc.close();
+		
+		body = doc.body;
 	}
 	else {
-		//body = $(body.ownerDocument).cloneDocument().body;
+		body = $(body.ownerDocument).cloneDocument().body;
 	}
 	
 	if ($.isFunction(width)) {
@@ -518,6 +661,7 @@ function html2canvas(body, width, cb) {
 		$(body).width(width);
 	}
 	
+	/*
 	if (!body.ownerDocument.getElementById('h2c-styles')) {
 		var style = $("<style type='text/css' id='h2c-styles' />", body.ownerDocument).appendTo(body);
 		if ($.browser.msie) {
@@ -526,11 +670,30 @@ function html2canvas(body, width, cb) {
     	else {
     	    style.html(h2cStyles);
     	}
-	}
+	}*/
+	
+	cloneTree(body);
 	
 	var el = new element(body, function(canvas) {
 		cb(canvas);
 	});
+}
+
+function cloneTree(body) {
+	$(body).splitTextNodes();
+	return;
+	processTree(body);
+	
+	function processTree(element) {
+		$(element).contents().each(function() {
+			if (this.nodeType == 3) {
+				$(this).wrap("<h2c />")
+			}
+			else if (this.nodeType == 1) {
+				processTree(this);
+			}
+		});		
+	}
 }
 
 function createCanvas() {
@@ -557,17 +720,18 @@ function element(DOMElement, onready) {
 	this.nodeType = this._domElement.nodeType;
 	this.tagName = this._domElement.tagName.toLowerCase();
 	this.isBody = this.tagName == "body";
-	this.isTextPlaceholder = this.jq.is("span.h2c");
+	this.isTextPlaceholder = this.jq.is("h2c");
 	this.readyChildren = 0;
 	this.ready = false;
 	this.onready = onready || function() { };
-	
+	if (this.tagName == "img") {
+		log("Found image", this.jq.attr("src"), this.jq.width(), this.jq.height(), shouldProcess(this))
+	}
 	if (this.isBody) {
 		this.totalChildren = 0;
 		this.body = this;
 		this.outputCanvas = createCanvas();
 		this.outputCanvas._el = this;
-		this.jq.splitTextNodes("<span class='h2c'></span>");
 	}
 	else {
 		this.parent = this._domElement.parentNode._element;
@@ -615,7 +779,7 @@ element.prototype.signalReady = function() {
 	var body = this.body;
 	body.readyChildren++;
 	if (body.readyChildren == body.totalChildren) {	
-	    body.outputCanvas.width = body.css.outerWidthMargins;
+	    body.outputCanvas.width = body.scrollWidth; //body.css.outerWidthMargins;
 	    body.outputCanvas.height = body.css.outerHeightMargins;
 	    body.onready(body.outputCanvas);
 	    body.copyToCanvas(body.outputCanvas);
@@ -795,7 +959,7 @@ element.prototype.copyDOM = function() {
 		this.css.paddingLeft + 
 		this.css.paddingRight;
 	
-	this.shouldRender = (this.css.outerWidthMargins > 0 && this.css.outerHeightMargins > 0);
+	this.shouldRender = (this._domElement.offsetWidth > 0 && this._domElement.offsetHeight > 0);
 	
 	this.offsetRenderBox = { 
 		top:  Math.floor(Math.max(0, this.offset.top - this.css.marginTop + bodyBorderTopWidth)), 
@@ -805,6 +969,7 @@ element.prototype.copyDOM = function() {
 	this.y = this.offsetRenderBox.top;
 	this.width = this.css.outerWidthMargins;
 	this.height = this.css.outerHeightMargins;
+	
 	this.css.outlineOffset = {
 		left: this.x + this.css.marginLeft - (this.css.outlineWidth / 2),
 		top: this.y + this.css.marginTop - (this.css.outlineWidth / 2),
@@ -840,10 +1005,12 @@ element.prototype.copyDOM = function() {
 	}
 	
 	var childNodes = this._domElement.childNodes;
-	this.hasOnlyTextNodes = (childNodes.length > 0); // img, hr, etc shouldn't show up as text nodes
-	for (var i = 0; i < childNodes.length; i++) {
-		if (childNodes[i].nodeType != 3) { this.hasOnlyTextNodes = false; }
-	}
+	this.hasOnlyTextNodes = childNodes.length > 0 && this.isTextPlaceholder;
+	
+	//this.hasOnlyTextNodes = (childNodes.length > 0); // img, hr, etc shouldn't show up as text nodes
+	//for (var i = 0; i < childNodes.length; i++) {
+	//	if (childNodes[i].nodeType != 3) { this.hasOnlyTextNodes = false; }
+	//}
 	
 
 	// Is a span h2c
@@ -859,7 +1026,11 @@ element.prototype.copyDOM = function() {
 	}
 	
 	if (css.display == "inline" && !this.hasOnlyTextNodes && this.tagName != "img") {
+		/*
+		Only rendering nodes text if they are an h2c element
 		var oldHtml = el.html();
+		
+		log("Would be processing", el[0].tagName, oldHtml);
 		var newHtml = "<span id='measure' class='h2c'>x</span>";
 		el[0].innerHTML = newHtml;
 		var measured = el.html(newHtml).find("#measure");
@@ -874,6 +1045,7 @@ element.prototype.copyDOM = function() {
 			top: textStart.top - this.position.top,
 			left: textStart.left - this.position.left
 		};
+		*/
 	}
 	
 };
@@ -1038,7 +1210,7 @@ element.prototype.renderBackground = function(ctx, cb) {
 	var backgroundImage = css.backgroundImage;
 	var backgroundRepeat = css.backgroundRepeat;
 	var innerOffset = this.css.innerOffset;
-	
+	var tagName = this.tagName;
 	if (this.tagName == "span" && this.text == "community") {
 		log("HEREEEE", backgroundColor);
 	}
@@ -1067,8 +1239,10 @@ element.prototype.renderBackground = function(ctx, cb) {
 				// Draw the 'broken' image if the image couldn't load
 				// This image needs to be centered on the ctx (at least in Chrome)
 				// taking into account the margins
-				var centerX = innerOffset.left + (outerWidth / 2) - (broken.width);
-				var centerY = innerOffset.top + (outerHeight / 2) - (broken.height);
+				var centerX = innerOffset.left + 
+					(outerWidth / 2) - (broken.width);
+				var centerY = innerOffset.top + 
+					(outerHeight / 2) - (broken.height);
 	    		ctx.drawImage(broken, centerX, centerY, broken.width, broken.height);
 			}
 			else {
@@ -1084,6 +1258,7 @@ element.prototype.renderBackground = function(ctx, cb) {
 				ctx.fillRect(offsetLeft, offsetTop, outerWidth, outerHeight);
 			}
 			else {
+				log("Rendering", ctx.canvas.width, img.src, outerWidth, tagName )
         		ctx.fillStyle = ctx.createPattern(img, backgroundRepeat);
 				ctx.fillRect(offsetLeft, offsetTop, outerWidth, outerHeight);
 			}
@@ -1095,16 +1270,19 @@ element.prototype.renderBackground = function(ctx, cb) {
 	}
 };
 
+// retrieveImage: a method to interface with image loading, errors, and proxy
 retrieveImage.cache = { };
 function retrieveImage(src, cb, ownerDocument) {
 	if (!$.isFunction(cb)) {
 		cb = function() { };
 	}
-	
+	log("Retrieving", src);
 	if (retrieveImage.cache[src]) {
 		log("Cache hit", src, retrieveImage.cache[src]);
 		return cb(retrieveImage.cache[src]);	
 	}
+	
+	var loadImageDirectly = true;
 	
 	if (src.indexOf("data:") == -1) {
 	    var url = new RegExp(/url\((.*)\)/);
@@ -1117,33 +1295,60 @@ function retrieveImage(src, cb, ownerDocument) {
 	    // Convert a relative path into absolute.
 	    var original = new URI(src);
 	    var authority = original.getAuthority();
-	    
+	    log(src, authority)
 	    if (!authority) {
 	    	var root = new URI((ownerDocument || document).location.href);
 	   		src = original.resolve(root).toString();
 	    }
 	    else if (authority != document.location.host) {
-	    	
-	    	//src = document.location.host + document.location.pathname + 
-	    	//	"flashcanvaspro/proxy.php?url=" + src;	
-	    	//log("didn't match host", authority, src);
+	    	loadImageDirectly = false;
+	    	var proxy = "http://localhost/~brian/html2canvas/form/proxy.php?url=" + src;
+	    	log("HERE WE ARE", proxy);
+	    	// TODO: Don't use JSONP, use some kind of cross frame communication instead, since it gives more reliable error handling
+	    	$.ajax(proxy, {
+	    		dataType: "jsonp",
+	    		success: function(data) {
+	    			log("Proxied", data);
+	    			makeImage(data);
+	    		}
+	    	});
+	    	/*
+	    	loadImageDirectly = false;
+	    	PROXY.message(src, function(dataURI) {
+	    		if (dataURI) {
+	    			makeImage(dataURI);
+	    		}
+	    		else {
+	    			sendError();
+	    		}
+	    	});
+	    	*/
 	    }
 	}
 	
-	var img = new Image();
-	img.onload = function() {
-	    retrieveImage.cache[src] = img;
-	    cb(img);
-	};
-	img.onerror = function() {
-		// Todo: draw 'broken' image
+	if (loadImageDirectly) {
+		makeImage(src);
+	}
+	
+	function makeImage(src) {
+		var img = new Image();
+		img.onload = sendSuccess;
+		img.onerror = sendError;
+		img.src = src;
+	}
+	
+	function sendError() {
 		cb("error", 
 			retrieveImage.cache[retrieveImage.brokenImage],
 			retrieveImage.cache[retrieveImage.transparentImage]
 		);
-		
 	}
-	img.src = src;
+	
+	function sendSuccess() {
+		var i = this;
+	    retrieveImage.cache[src] = i;
+	    cb(i);
+	}
 }
 
 function wordWrap(ctx, phrase, maxWidth, initialOffset, isNewLine) {

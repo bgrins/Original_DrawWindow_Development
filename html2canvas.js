@@ -173,7 +173,8 @@ $.fn.splitTextNodes = function(wrapper) {
 		}
 	}
 };
-
+function assert() {
+}
 $.fn.cloneDocument = function() {
 	var doc = this[0];
 	log(doc.doctype, document.doctype);
@@ -184,6 +185,18 @@ $.fn.cloneDocument = function() {
 	// var clonedHead = $("<head />").html(doc.head.innerHTML);
 	var clonedHead = $(doc.head.cloneNode(true));
 	var clonedBody = $(doc.body).clone();
+	
+	// Set image width and height, to lock it in place even if it is still
+	// loading when we initally process.
+	var allOldImages = $(doc.body).find("img");
+	var allNewImages = clonedBody.find("img");
+	
+	assert(allOldImages.length == allNewImages.length, 
+		"Cloned body does not match");
+	
+	allOldImages.each(function(i) {
+		allNewImages.eq(i).width($(this).width()).height($(this).height());
+	});
 	
 	clonedHead.find("script").remove();
 	clonedBody.find("script, iframe.h2cframe").remove();
@@ -391,7 +404,7 @@ element.prototype.signalReady = function() {
 	body.readyChildren++;
 	if (body.readyChildren == body.totalChildren) {	
 	    body.outputCanvas.width = body.scrollWidth; //body.css.outerWidthMargins;
-	    body.outputCanvas.height = body.scrollHeight; //body.css.outerHeightMargins;
+	    body.outputCanvas.height = body.css.outerHeightMargins;
 	    body.onready(body.outputCanvas);
 	    body.copyToCanvas(body.outputCanvas);
 	}
@@ -850,8 +863,10 @@ element.prototype.renderBackground = function(ctx, cb) {
 				// Draw the 'broken' image if the image couldn't load
 				// This image needs to be centered on the ctx (at least in Chrome)
 				// taking into account the margins
-				var centerX = innerOffset.left + (outerWidth / 2) - (broken.width);
-				var centerY = innerOffset.top + (outerHeight / 2) - (broken.height);
+				var centerX = innerOffset.left + 
+					(outerWidth / 2) - (broken.width);
+				var centerY = innerOffset.top + 
+					(outerHeight / 2) - (broken.height);
 	    		ctx.drawImage(broken, centerX, centerY, broken.width, broken.height);
 			}
 			else {
@@ -910,7 +925,16 @@ function retrieveImage(src, cb, ownerDocument) {
 	   		src = original.resolve(root).toString();
 	    }
 	    else if (authority != document.location.host) {
+	    	loadImageDirectly = false;
+	    	var proxy = "http://localhost/~brian/html2canvas/form/proxy.php?url=" + src;
 	    	
+	    	// TODO: Don't use JSONP, use some kind of cross frame communication instead, since it gives more reliable error handling
+	    	$.ajax(proxy, {
+	    		dataType: "jsonp",
+	    		success: function(data) {
+	    			makeImage(data);
+	    		}
+	    	});
 	    	/*
 	    	loadImageDirectly = false;
 	    	PROXY.message(src, function(dataURI) {
@@ -922,9 +946,6 @@ function retrieveImage(src, cb, ownerDocument) {
 	    		}
 	    	});
 	    	*/
-	    	//src = document.location.host + document.location.pathname + 
-	    	//	"flashcanvaspro/proxy.php?url=" + src;	
-	    	//log("didn't match host", authority, src);
 	    }
 	}
 	
