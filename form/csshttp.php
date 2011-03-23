@@ -1,7 +1,7 @@
 <?php
 
 define('PREFIX', "data:,");
-define('LENGTH', 2000 - strlen(PREFIX)); # Internet Explorer 2KB URI limit (http://support.microsoft.com/kb/208427)
+define('LENGTH', 2000 - strlen(PREFIX)); 
 
 function encode($string) {
 	$quoted = rawurlencode($string);
@@ -33,6 +33,6 @@ $response = curl_exec($session);
 $type = curl_getinfo($session, CURLINFO_CONTENT_TYPE);
 $base64 = base64_encode($response);
 
-echo encode($type . ";base64," . $base64)
+echo encode("data: " . $type . ";base64," . $base64)
 
 ?>

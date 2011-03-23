@@ -929,20 +929,21 @@ function retrieveImage(src, cb, ownerDocument) {
 	    else if (authority != document.location.host) {
 	    	loadImageDirectly = false;
 	    	var proxy = "http://localhost/~brian/html2canvas/form/proxy.php?url=" + src;
+	    	var cssHTTP = "http://localhost/~brian/html2canvas/form/csshttp?url=" + src;
 	    	
 	    	// TODO: Don't use JSONP, use some kind of cross frame communication instead, since it gives more reliable error handling
-	    	$.ajax(proxy, {
+	    	/*$.ajax(proxy, {
 	    		dataType: "jsonp",
 	    		success: function(data) {
 	    			makeImage(data);
 	    		}
-	    	});
-	    	/*
+	    	});*/
+	    	
 			CSSHttpRequest.get(
-    		    "http://localhost/~brian/html2canvas/form/csshttp?url=http://www.google.com/images/logos/ps_logo2.png",
-    		    function(response) { log(response); }
+    		    cssHTTP,
+    		    function(response) { log(response); makeImage(response); }
     		);
-	    	*/
+	    	
 	    }
 	}
 	
