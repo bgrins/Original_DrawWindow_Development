@@ -184,19 +184,24 @@ $.fn.splitTextNodes = function(wrapper) {
 	}
 };
 $.fn.cloneDocument = function() {
-	var doc = this[0];
-	log(doc.doctype, document.doctype);
+	var $doc = this,
+		doc = $doc[0],
+		originalBody = $(doc.body),
+		docWidth = $doc.width(),
+		docHeight = $doc.height();
+	
+	//log(doc.doctype, document.doctype);
 	
 	doc.head = doc.head || doc.getElementsByTagName('head')[0];
 	
 	// This might be needed, but it causes extra HTTP requests
 	// var clonedHead = $("<head />").html(doc.head.innerHTML);
 	var clonedHead = $(doc.head.cloneNode(true));
-	var clonedBody = $(doc.body).clone();
+	var clonedBody = originalBody.clone();
 	
 	// Set image width and height, to lock it in place even if it is still
 	// loading when we initally process.
-	var allOldImages = $(doc.body).find("img");
+	var allOldImages = originalBody.find("img");
 	var allNewImages = clonedBody.find("img");
 	
 	assert(allOldImages.length == allNewImages.length, 
@@ -218,13 +223,15 @@ $.fn.cloneDocument = function() {
 		);
 	}
 	
-	var b = $(doc.body);
-	var bodyWidth = $(doc).width(); //b.outerWidth(true);
-	var bodyHeight = $(doc).height(); //b.outerHeight(true);
+	// todo: include attributes on the head and body tags (such as classname)
+	var clonedHeadHtml = clonedHead.html();
+	var clonedBodyHtml = clonedBody.html();
 	
-	//var styles = 'position:absolute; top: -'+(bodyHeight*2)+'px; left:-'+(bodyWidth*2)+'px';
+	// Overlay for now to test that it isn't messing it up when splitting text nodes.
+	// This renderer frame will be probably need to be hidden 
 	var styles = 'position:absolute; top: 0; left:0; opacity:.5; border:none; padding:0; margin:0;';
-	var iframe = $("<iframe frameborder='0' class='h2cframe' style='"+styles+"' src='about:blank' />").appendTo(b).width(bodyWidth).height(bodyHeight);
+	//var styles = 'position:absolute; top: -'+(bodyHeight*2)+'px; left:-'+(bodyWidth*2)+'px';
+	var iframe = $("<iframe frameborder='0' class='h2cframe' style='"+styles+"' src='about:blank' />").appendTo(doc.body).width(docWidth).height(docHeight);
 	
 	// TODO: Fix relative URI for resources in case the original doc is inside an iframe (such as the test harness)
 	var docType = getDoctypeString(doc);
@@ -232,7 +239,7 @@ $.fn.cloneDocument = function() {
 	d.h2cLocation = doc.location;
 	log(doc.location)
 	d.open();
-	d.write(docType + "<html><head>"+clonedHead.html()+"</head><body>"+clonedBody.html()+"</body>");
+	d.write(docType + "<html><head>"+clonedHeadHtml+"</head><body>"+clonedBodyHtml+"</body>");
 	d.close();
 	return d;
 	
