@@ -1075,25 +1075,30 @@ element.prototype.renderTextNoLines = function(ctx) {
 element.prototype.renderText = function(ctx) {
 	log("rendering text", this.childTextNodes);
   	
+  	if (this.childTextNodes.length == 0) {
+  		return;	
+  	}
+  	
   	ctx.font = this.css.font;
   	ctx.fillStyle = this.css.color;
 	ctx.textBaseline = "bottom";
-	
-	var thisOffsetTop = this._domElement.offsetTop - this.css.innerOffset.top;
-	var thisOffsetLeft = this._domElement.offsetLeft - this.css.innerOffset.left;
-	var thisInnerHeight = this.css.innerHeight;
+	var textTop = this.offset.top - this.css.innerOffset.top;
+	var textLeft = this.offset.left - this.css.innerOffset.left;
 	
 	for (var i = 0, len = this.childTextNodes.length; i < len; i++) {
 		var node = this.childTextNodes[i];
-		var text = node.innerText; //node.childNodes[0].data;
-		var top =  node.offsetTop - thisOffsetTop + thisInnerHeight;
-		var left = node.offsetLeft - thisOffsetLeft;
+		var text = node.innerText; // node.childNodes[0].data;
+		var top =  node.offsetTop - textTop + node.offsetHeight;
+		var left = node.offsetLeft - textLeft;
 		
-		log(text, top, left, this.css);
+		//log(text, top, left, this.css);
 		ctx.fillText(text, left, top);
 		
 	}
-	return;
+};
+
+element.prototype.oldRenderText = function() {
+
 	if (this.hasOnlyTextNodes) {
 		
 		// Time to print out some text, don't have to worry about any more elements changing styles
@@ -1150,7 +1155,8 @@ element.prototype.renderText = function(ctx) {
 		    startX = this.css.innerOffset.left;
 		}
 	}
-};
+
+}
 
 element.prototype.renderBorders = function(ctx) {
 	
