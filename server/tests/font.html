@@ -1,0 +1,245 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>Font tests</title>
+  <script type='text/javascript' src='../scripts/loader.js'></script>
+</head>
+
+<body>
+  <div class="content">
+    <h2>Better CSS Font Stacks</h2>
+
+	<a onclick='return window.h2c.loader();' href='#'>Render</a>
+    <ul class="meta">
+      <li>by <a href="http://unitinteractive.com/unit-info.php">Nathan Ford</a> 2 years
+      ago</li>
+
+      <li><a href="#comments">304 Comments</a></li>
+    </ul>
+
+    <p>One aspect of designing for the web that almost immediately offends designers is
+    the lack of fonts that are considered safe to use. While it is true that there are
+    only a handful of web safe fonts, the ones we do have at our disposal can be quite
+    powerful and diversely useful. On top of that, CSS gives us a nice little thing
+    called a <a href="http://www.w3schools.com/CSS/pr_font_font-family.asp">font
+    stack</a>.</p>
+
+    <h4>Font stacks give you freedom.</h4>
+
+    <p>You want to use Gill Sans? Go right ahead. Nothing should stop you. Font stacks
+    are prioritized lists of fonts, defined in the CSS font-family attribute, that the
+    browser will cycle through until it finds a font that is installed on the
+    user&acirc;&euro;&trade;s system. This means that you can use Gill Sans, and if your
+    users don&rsquo;t have it, you can give them an adequate substitute that will not
+    diminish their experience. As <a href=
+    "http://24ways.org/2007/increase-your-font-stacks-with-font-matrix">Mr. Richard
+    Rutter has already illustrated</a>, there are quite an array of typefaces that may be
+    sitting on your user&acirc;&euro;&trade;s machine ready to serve your design
+    needs.</p>
+
+    <p>Unfortunately, common web practices and/or technologies are not fully utilizing
+    this functionality. There seems to be a lack of consideration for the process of
+    creating these stacks. For example, Dreamweaver&acirc;&euro;&trade;s defaults look
+    like so:</p>
+
+    <ul>
+      <li>Arial, Helvetica, sans-serif</li>
+
+      <li>Courier New, Courier, monospace</li>
+
+      <li>Times New Roman, Times, serif</li>
+
+      <li>Georgia, Times New Roman, Times, serif</li>
+
+      <li>Verdana, Arial, Helvetica, sans-serif</li>
+
+      <li>Geneva, Arial, Helvetica, sans-serif</li>
+    </ul>
+
+    <p>As you can see, there are not a whole lot of options, and the substitutes are
+    often not appropriate. This is an example of how lax typographic standards on the web
+    are leading to poor design decision making. I am not going to speculate, here, as to
+    whose fault it is that <a href="http://webtypography.net/sxsw2007/">typography on the
+    web leaves much to be desired</a>&hellip; there are probably as many culprits as
+    there are offenses. I will say, though, that font stack are ultimately design
+    factors, and should be scrutinized as such.</p>
+
+    <h4>All in the Family</h4>
+
+    <p>When creating a stack, first consider the context of the text. Is it going to be a
+    headline, sub-head, or body copy? This can determine the appropriate order of a
+    stack, considering certain fonts work well for setting blocks of copy, while others
+    work better at larger sizes. For example, Helvetica&acirc;&euro;&trade;s nuances work
+    well on screen, when the text is large enough, while Helvetica
+    Neue&acirc;&euro;&trade;s slightly wider letter forms read better at smaller sizes on
+    screen. Arial reads slightly better than Helvetica at smaller sizes on the screen, as
+    well. Therefore, your font stack for Helvetica may need to be different depending on
+    whether it is used for body copy or a page title.</p>
+
+    <p>Once context is considered, there are few more things to consider when building a
+    stack. First, select your ideal candidate (more on that later). From there, the path
+    of your choices may fork depending on the context.</p>
+
+    <h4>Titles <em>[ greater than 12px ]</em>:</h4>
+
+    <h5>font-family: Ideal, Alternative, Common, Generic;</h5>
+
+    <ol>
+      <li><strong>Ideal</strong> &ndash; Your selection need not be bound by what is
+      considered universally &ldquo;web safe&rdquo;. There are many more fonts that have
+      a fairly high market penetration that you can choose from. Just don&rsquo;t pick
+      anything too obscure, or you will be the only one seeing it.</li>
+
+      <li><strong>Alternative</strong> &ndash; When selecting headline and title fonts,
+      remember that the nuances will be more noticeable, and therefore you need to select
+      an alternative that is closer in spirit than size or relative value. To find a
+      spiritual cousin, you may want to look within the same <a href=
+      "http://www.adobe.com/type/browser/classifications.html">type classification</a>,
+      or look for something created by the same <a href=
+      "http://en.wikipedia.org/wiki/Type_designer">type designer</a>. Mainly, look for
+      similarities in the letter forms.</li>
+
+      <li><strong>Common</strong> &ndash; At this point, you just need something similar
+      that is not going to break your layout.</li>
+
+      <li><strong>Generic</strong> &ndash; Cap it off with the generic classification,
+      for those zealots that don&rsquo;t believe in installing fonts.</li>
+    </ol>
+
+    <h4>Paragraphs <em>[ less than or equal to 12px ]</em>:</h4>
+
+    <h5>font-family: Ideal, Fit, Common, Generic;</h5>
+
+    <ol>
+      <li><strong>Ideal</strong> &ndash; Even if you intend this copy to match the
+      titles, you may want to consider the readability of the typeface over the span of a
+      few paragraphs. For example: Helvetica Neue and Arial are better suited to be read
+      small and on screen than Helvetica.</li>
+
+      <li><strong>Fit</strong> &ndash; Find something that is well represented,
+      cross-platform that will not wreck your layout. For example: There is about 2 pts
+      difference between the width of Times New Roman and Georgia. Multiply that by the
+      number of characters in your copy blocks, and you could spell disaster for your
+      otherwise-nicely-considered design.</li>
+
+      <li><strong>Common</strong> &ndash; Something similar in flavor and
+      well-represented.</li>
+
+      <li><strong>Generic</strong> &ndash; Again, finish with the generic
+      classification.</li>
+    </ol>
+
+    <p>Keep in mind that if your ideal font is only well represented on Macs, for
+    example, you may want use an alternative that is more prevalent on Windows machines.
+    For more information on the prevalence of certain typeface on certain operating
+    systems, take a look at <a href=
+    "http://codestyle.org/css/font-family/">codestyle.org/css/font-family/</a>.</p>
+
+    <h4>Stack Your Deck</h4>
+
+    <p>Now, using these guidelines, and building on the experience of <a href=
+    "http://www.amazon.com/Elements-Typographic-Style-Robert-Bringhurst/dp/0881791326">much
+    more knowledgeable type gurus</a>, I have compiled a list of font stacks that will
+    both open up more font possibilities for web designers, and hopefully offer more
+    appropriate substitutes:</p>
+
+    <p><em>p &ndash; balanced for paragraphs or body copy</em><br />
+    <em>t &ndash; balanced for headlines or titles</em></p>
+
+    <ul class="noPlus moreSpace">
+      <li>Arial, &ldquo;Helvetica Neue&rdquo;, Helvetica, sans-serif <em>- p, t</em></li>
+
+      <li>Baskerville, &ldquo;Times New Roman&rdquo;, Times, serif <em>- p</em><br />
+      Baskerville, Times, &ldquo;Times New Roman&rdquo;, serif <em>- t</em></li>
+
+      <li>Cambria, Georgia, Times, &ldquo;Times New Roman&rdquo;, serif <em>- p,
+      t</em></li>
+
+      <li>&ldquo;Century Gothic&rdquo;, &ldquo;Apple Gothic&rdquo;, sans-serif <em>- p,
+      t</em></li>
+
+      <li>Consolas, &ldquo;Lucida Console&rdquo;, Monaco, monospace <em>- p, t</em></li>
+
+      <li>&ldquo;Copperplate Light&rdquo;, &ldquo;Copperplate Gothic Light&rdquo;, serif
+      <em>- p, t</em></li>
+
+      <li>&ldquo;Courier New&rdquo;, Courier, monospace <em>- p, t</em></li>
+
+      <li>&ldquo;Franklin Gothic Medium&rdquo;, &ldquo;Arial Narrow Bold&rdquo;, Arial,
+      sans-serif <em>- p, t</em></li>
+
+      <li>Futura, &ldquo;Century Gothic&rdquo;, AppleGothic, sans-serif <em>- p,
+      t</em></li>
+
+      <li>Garamond, &ldquo;Hoefler Text&rdquo;, Times New Roman, Times, serif <em>-
+      p</em><br />
+      Garamond, &ldquo;Hoefler Text&rdquo;, Palatino, &ldquo;Palatino Linotype&rdquo;,
+      serif <em>- t</em></li>
+
+      <li>Geneva, &ldquo;Lucida Sans&rdquo;, &ldquo;Lucida Grande&rdquo;, &ldquo;Lucida
+      Sans Unicode&rdquo;, Verdana, sans-serif <em>- p</em><br />
+      Geneva, Verdana, &ldquo;Lucida Sans&rdquo;, &ldquo;Lucida Grande&rdquo;,
+      &ldquo;Lucida Sans Unicode&rdquo;, sans-serif <em>- t</em></li>
+
+      <li>Georgia, Palatino,&rdquo; Palatino Linotype&rdquo;, Times, &ldquo;Times New
+      Roman&rdquo;, serif <em>- p</em><br />
+      Georgia, Times, &ldquo;Times New Roman&rdquo;, serif <em>- t</em></li>
+
+      <li>&ldquo;Gill Sans&rdquo;, Calibri, &ldquo;Trebuchet MS&rdquo;, sans-serif <em>-
+      p</em><br />
+      &ldquo;Gill Sans&rdquo;, &ldquo;Trebuchet MS&rdquo;, Calibri, sans-serif <em>-
+      t</em></li>
+
+      <li>&ldquo;Helvetica Neue&rdquo;, Arial, Helvetica, sans-serif <em>- p</em><br />
+      Helvetica, &ldquo;Helvetica Neue&rdquo;, Arial, sans-serif <em>- t</em></li>
+
+      <li>Impact, Haettenschweiler, &ldquo;Arial Narrow Bold&rdquo;, sans-serif <em>- p,
+      t</em></li>
+
+      <li>&ldquo;Lucida Sans&rdquo;, &ldquo;Lucida Grande&rdquo;, &ldquo;Lucida Sans
+      Unicode&rdquo;, sans-serif <em>- p, t</em></li>
+
+      <li>Palatino, &ldquo;Palatino Linotype&rdquo;, Georgia, Times, &ldquo;Times New
+      Roman&rdquo;, serif <em>- p</em><br />
+      Palatino, &ldquo;Palatino Linotype&rdquo;, &ldquo;Hoefler Text&rdquo;, Times,
+      &ldquo;Times New Roman&rdquo;, serif <em>- t</em></li>
+
+      <li>Tahoma, Geneva, Verdana <em>- p</em><br />
+      Tahoma, Verdana, Geneva <em>- t</em></li>
+
+      <li>Times, &ldquo;Times New Roman&rdquo;, Georgia, serif <em>- p, t</em></li>
+
+      <li>&ldquo;Trebuchet MS&rdquo;, &ldquo;Lucida Sans Unicode&rdquo;, &ldquo;Lucida
+      Grande&rdquo;,&rdquo; Lucida Sans&rdquo;, Arial, sans-serif <em>- p</em><br />
+      &ldquo;Trebuchet MS&rdquo;, Tahoma, Arial, sans-serif <em>- t</em></li>
+
+      <li>Verdana, Geneva, Tahoma, sans-serif <em>- p</em><br />
+      Verdana, Tahoma, Geneva, sans-serif <em>- t</em></li>
+    </ul>
+
+    <p>I did deliberately leave out some fonts, *cough* <a href=
+    "http://bancomicsans.com/home.html">Comic Sans</a> *cough*, because I do not
+    particularly see the use in them, and I don&acirc;&euro;&trade;t believe that these
+    examples will solve every typographic purpose, but hopefully it&acirc;&euro;&trade;s
+    a start. Feel free to apply the above rules and create some stacks of your own.</p>
+
+    <p>If you&acirc;&euro;&trade;re interested in a more comprehensive comparison,
+    <a href="http://unitinteractive.com/blog/blog-images/BetterFontStacks.pdf">download
+    the pdf <em>[13.1 mb]</em></a>. In it, you will find examples of both titles and
+    copy, set in the different font stacks.</p>
+
+    <p>Now, font stacks help us open up a few more typographic options to create a more
+    engaging online communication, but how do we choose which specific face to use? And
+    which of these web safe fonts will work as a good compliment? More on that in my next
+    post.</p>
+
+    <p>* * *</p>
+
+    <p>This article is available in <a href=
+    "http://pc.de/pages/better-css-font-stacks-be">Belorussian</a> provided by <a href=
+    "http://pc.de/">Patricia Clausnitzer</a> .</p>
+  </div>
+</body>
+</html>
