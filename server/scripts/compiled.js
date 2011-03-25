@@ -343,11 +343,17 @@ html2canvas.logLevels = { RELEASE: 0, NORMAL: 1, VERBOSE: 2 };
 var settings = html2canvas.settings = {
 	enabled: true, // temporarily true to test flashcanvas !!document.createElement('canvas').getContext,
 	drawBoundingBox: false,
-	logLevel: html2canvas.logLevels.RELEASE
+	logLevel: html2canvas.logLevels.RELEASE,
+	isDevelopment: true
 };
 
 function postValues() {
 	window.open("http://localhost:8080/preview");
+}
+function assert(isTrue) {
+	if (!isTrue) {
+		
+	}
 }
 
 function log() { if (window.console) { console.log(Array.prototype.slice.apply(arguments)); } }
@@ -452,7 +458,7 @@ $.fn.splitTextNodes = function(wrapper) {
 	
 	var all = this.add(this.find("*"));
 	var skip = "style, script, h2c";
-	
+	log("Pocessing", all, all.length);
 	for (var i = 0; i < all.length; i++) {
 		var element = $(all[i]);
 		
@@ -481,6 +487,7 @@ $.fn.splitTextNodes = function(wrapper) {
 			var words = singleSpaces.split(" ");
 			var newHtml = [];
 			var space = '';
+			log(words, words.join(' '))
 			for (var j = 0, wordLength = words.length; j < wordLength; j++) {
 				// There was a space before this unless if it is the first word.
 				//if (j == ' ') { space = ' '; }
@@ -500,8 +507,6 @@ $.fn.splitTextNodes = function(wrapper) {
 		}
 	}
 };
-function assert() {
-}
 $.fn.cloneDocument = function() {
 	var doc = this[0];
 	log(doc.doctype, document.doctype);
@@ -538,10 +543,12 @@ $.fn.cloneDocument = function() {
 	}
 	
 	var b = $(doc.body);
-	var bodyWidth = b.outerWidth(true);
-	var bodyHeight = b.outerHeight(true);
-	var styles = 'position:absolute; top: -'+(bodyHeight*2)+'px; left:-'+(bodyWidth*2)+'px';
-	var iframe = $("<iframe class='h2cframe' style='"+styles+"' src='about:blank' />").appendTo(b).width(bodyWidth).height(bodyHeight);
+	var bodyWidth = $(doc).width(); //b.outerWidth(true);
+	var bodyHeight = $(doc).height(); //b.outerHeight(true);
+	
+	//var styles = 'position:absolute; top: -'+(bodyHeight*2)+'px; left:-'+(bodyWidth*2)+'px';
+	var styles = 'position:absolute; top: 0; left:0; opacity:.5; border:none; padding:0; margin:0;';
+	var iframe = $("<iframe frameborder='0' class='h2cframe' style='"+styles+"' src='about:blank' />").appendTo(b).width(bodyWidth).height(bodyHeight);
 	
 	// TODO: Fix relative URI for resources in case the original doc is inside an iframe (such as the test harness)
 	var docType = getDoctypeString(doc);
