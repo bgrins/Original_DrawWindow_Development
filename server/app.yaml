@@ -7,6 +7,12 @@ handlers:
 - url: /stylesheets
   static_dir: stylesheets
 
+- url: /scripts
+  static_dir: scripts
+  
+- url: /tests
+  static_dir: tests
+  
 - url: /.*
   script: main.py
   

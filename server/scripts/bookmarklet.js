@@ -1,62 +1,12 @@
-var XD = function(){
-
-    var interval_id,
-    last_hash,
-    cache_bust = 1,
-    attached_callback,
-    window = this;
-
-    return {
-        postMessage : function(message, target_url, target) {
-            if (!target_url) {
-                return;
-            }
-            target = target || parent;  // default to parent
-            if (window['postMessage']) {
-                // the browser supports window.postMessage, so call it with a targetOrigin
-                // set appropriately, based on the target_url parameter.
-                target['postMessage'](message, target_url.replace( /([^:]+:\/\/[^\/]+).*/, '$1'));
-            } else if (target_url) {
-                // the browser does not support window.postMessage, so use the window.location.hash fragment hack
-                target.location = target_url.replace(/#.*$/, '') + '#' + (+new Date) + (cache_bust++) + '&' + message;
-            }
-        },
-        receiveMessage : function(callback, source_origin) {
-            // browser supports window.postMessage
-            if (window['postMessage']) {
-                // bind the callback to the actual event associated with window.postMessage
-                if (callback) {
-                    attached_callback = function(e) {
-                        if ((typeof source_origin === 'string' && e.origin !== source_origin)
-                        || (Object.prototype.toString.call(source_origin) === "[object Function]" && source_origin(e.origin) === !1)) {
-                             return !1;
-                         }
-                         callback(e);
-                     };
-                 }
-                 if (window['addEventListener']) {
-                     window[callback ? 'addEventListener' : 'removeEventListener']('message', attached_callback, !1);
-                 } else {
-                     window[callback ? 'attachEvent' : 'detachEvent']('onmessage', attached_callback);
-                 }
-             } else {
-                 // a polling loop is started & callback is called whenever the location.hash changes
-                 interval_id && clearInterval(interval_id);
-                 interval_id = null;
-                 if (callback) {
-                     interval_id = setInterval(function() {
-                         var hash = document.location.hash,
-                         re = /^#?\d+&/;
-                         if (hash !== last_hash && re.test(hash)) {
-                             last_hash = hash;
-                             callback({data: hash.replace(re, '')});
-                         }
-                     }, 100);
-                 }
-             }
-         }
-    };
-}();
+/* 
+CSSHttpRequest
+Copyright 2008 nb.io - http://nb.io/
+Licensed under Apache License, Version 2.0 - http://www.apache.org/licenses/LICENSE-2.0.html
+*/
+(function(){var chr=window.CSSHttpRequest={};chr.id=0;chr.requests={};chr.MATCH_ORDINAL=/#c(\d+)/;chr.MATCH_URL=/url\("?data\:[^,]*,([^")]+)"?\)/;chr.get=function(url,callback){var id=++chr.id;var iframe=document.createElement("iframe");iframe.style.position="absolute";iframe.style.left=iframe.style.top="-1000px";iframe.style.width=iframe.style.height=0;document.documentElement.appendChild(iframe);var r=chr.requests[id]={id:id,iframe:iframe,document:iframe.contentDocument||iframe.contentWindow.document,callback:callback};r.document.open("text/html",false);r.document.write("<html><head>");r.document.write("<link rel='stylesheet' type='text/css' media='print, csshttprequest' href='"+chr.escapeHTML(url)+"' />");r.document.write("</head><body>");r.document.write("<script type='text/javascript'>");r.document.write("(function(){var w = window; var p = w.parent; p.CSSHttpRequest.sandbox(w); w.onload = function(){p.CSSHttpRequest.callback('"+id+"');};})();");r.document.write("</script>");r.document.write("</body></html>");r.document.close();};chr.sandbox=function(w){};chr.callback=function(id){var r=chr.requests[id];var data=chr.parse(r);r.callback(data);window.setTimeout(function(){var r=chr.requests[id];try{r.iframe.parentElement.removeChild(r.iframe);}catch(e){};delete chr.requests[id];},0);};chr.parse=function(r){var data=[];try{var rules=r.document.styleSheets[0].cssRules||r.document.styleSheets[0].rules;for(var i=0;i<rules.length;i++){try{var r=rules.item?rules.item(i):rules[i];var ord=r.selectorText.match(chr.MATCH_ORDINAL)[1];var val=r.style.backgroundImage.match(chr.MATCH_URL)[1];data[ord]=val;}catch(e){}}}
+catch(e){r.document.getElementsByTagName("link")[0].setAttribute("media","screen");var x=r.document.createElement("div");x.innerHTML="foo";r.document.body.appendChild(x);var ord=0;try{while(1){x.id="c"+ord;var style=r.document.defaultView.getComputedStyle(x,null);var bg=style["background-image"]||style.backgroundImage||style.getPropertyValue("background-image");var val=bg.match(chr.MATCH_URL)[1];data[ord]=val;ord++;}}catch(e){}}
+return decodeURIComponent(data.join(""));};chr.escapeHTML=function(s){return s.replace(/([<>&""''])/g,function(m,c){switch(c){case"<":return"&lt;";case">":return"&gt;";case"&":return"&amp;";case'"':return"&quot;";case"'":return"&apos;";}
+return c;});};})();
 
 
 // html5shiv MIT @rem remysharp.com/html5-enabling-script
@@ -396,6 +346,9 @@ var settings = html2canvas.settings = {
 	logLevel: html2canvas.logLevels.RELEASE
 };
 
+function postValues() {
+	window.open("http://localhost:8080/preview");
+}
 
 function log() { if (window.console) { console.log(Array.prototype.slice.apply(arguments)); } }
 function log1() { if (settings.logLevel >= 1) { log.apply(this, arguments); } }
@@ -571,6 +524,8 @@ $.fn.cloneDocument = function() {
 	allOldImages.each(function(i) {
 		allNewImages.eq(i).width($(this).width()).height($(this).height());
 	});
+	// Prevent images from loading by default
+	allNewImages.attr("data-src", function() { return $(this).attr("src"); }).attr("src", "javascript:");
 	
 	clonedHead.find("script").remove();
 	clonedBody.find("script, iframe.h2cframe").remove();
@@ -724,9 +679,7 @@ function element(DOMElement, onready) {
 	this.readyChildren = 0;
 	this.ready = false;
 	this.onready = onready || function() { };
-	if (this.tagName == "img") {
-		log("Found image", this.jq.attr("src"), this.jq.width(), this.jq.height(), shouldProcess(this))
-	}
+	
 	if (this.isBody) {
 		this.totalChildren = 0;
 		this.body = this;
@@ -1001,7 +954,7 @@ element.prototype.copyDOM = function() {
 
 
 	if (this.tagName == "img") {
-		this.src = el.attr("src");
+		this.src = el.attr("data-src");
 	}
 	
 	var childNodes = this._domElement.childNodes;
@@ -1276,7 +1229,7 @@ function retrieveImage(src, cb, ownerDocument) {
 	if (!$.isFunction(cb)) {
 		cb = function() { };
 	}
-	log("Retrieving", src);
+	
 	if (retrieveImage.cache[src]) {
 		log("Cache hit", src, retrieveImage.cache[src]);
 		return cb(retrieveImage.cache[src]);	
@@ -1295,7 +1248,7 @@ function retrieveImage(src, cb, ownerDocument) {
 	    // Convert a relative path into absolute.
 	    var original = new URI(src);
 	    var authority = original.getAuthority();
-	    log(src, authority)
+	    
 	    if (!authority) {
 	    	var root = new URI((ownerDocument || document).location.href);
 	   		src = original.resolve(root).toString();
@@ -1303,26 +1256,21 @@ function retrieveImage(src, cb, ownerDocument) {
 	    else if (authority != document.location.host) {
 	    	loadImageDirectly = false;
 	    	var proxy = "http://localhost/~brian/html2canvas/form/proxy.php?url=" + src;
-	    	log("HERE WE ARE", proxy);
+	    	var cssHTTP = "http://localhost/~brian/html2canvas/form/csshttp?url=" + src;
+	    	
 	    	// TODO: Don't use JSONP, use some kind of cross frame communication instead, since it gives more reliable error handling
-	    	$.ajax(proxy, {
+	    	/*$.ajax(proxy, {
 	    		dataType: "jsonp",
 	    		success: function(data) {
-	    			log("Proxied", data);
 	    			makeImage(data);
 	    		}
-	    	});
-	    	/*
-	    	loadImageDirectly = false;
-	    	PROXY.message(src, function(dataURI) {
-	    		if (dataURI) {
-	    			makeImage(dataURI);
-	    		}
-	    		else {
-	    			sendError();
-	    		}
-	    	});
-	    	*/
+	    	});*/
+	    	
+			CSSHttpRequest.get(
+    		    cssHTTP,
+    		    function(response) { log(response); makeImage(response); }
+    		);
+	    	
 	    }
 	}
 	

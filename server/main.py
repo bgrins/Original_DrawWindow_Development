@@ -85,9 +85,9 @@ class GetScreenshot(BaseHandler):
 			
 class SaveScreenshot(BaseHandler):
 	def post(self):
-		dataUrlPattern = re.compile('data:image/(png|jpeg);base64,(.*)$')
 		screenshot = Screenshot()
 		imgdata = self.request.get('image')
+		dataUrlPattern = re.compile('data:image/(png|jpeg);base64,(.*)$')
 		matched = dataUrlPattern.match(imgdata)
 		imagetype = matched.group(1)
 		imgb64 = matched.group(2)
