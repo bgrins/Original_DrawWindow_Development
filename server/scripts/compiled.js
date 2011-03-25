@@ -352,7 +352,7 @@ function postValues() {
 }
 function assert(isTrue) {
 	if (!isTrue) {
-		
+		log("ASSERTION FAILURE - NEED TO REPORT SERIALIZED ERROR TO SERVER", arguments);
 	}
 }
 
@@ -479,6 +479,7 @@ $.fn.splitTextNodes = function(wrapper) {
 				hasOtherNodes = true;
 			}
 		});
+		//log("Inside", element.contents().length, element[0].tagName, hasTextNodes, hasOtherNodes);
 		
 		// If this only has text nodes, 
 		if (hasTextNodes && !hasOtherNodes) {
@@ -487,7 +488,7 @@ $.fn.splitTextNodes = function(wrapper) {
 			var words = singleSpaces.split(" ");
 			var newHtml = [];
 			var space = '';
-			log(words, words.join(' '))
+			//log(words, words.join(' '))
 			for (var j = 0, wordLength = words.length; j < wordLength; j++) {
 				// There was a space before this unless if it is the first word.
 				//if (j == ' ') { space = ' '; }
@@ -501,7 +502,8 @@ $.fn.splitTextNodes = function(wrapper) {
 		else if (hasTextNodes && hasOtherNodes) {
 			// Wrap each node, then push it onto list for processing (splitting up spaces)
 			for (var j = 0; j < textNodes.length; j++) {
-				var newElement = $(textNodes[j]).wrap('<h2c></h2c>');
+				var newElement = $(textNodes[j]).wrap('<h2ccontainer></h2ccontainer>').parent();
+				log(newElement);
 				all = all.add(newElement);
 			}
 		}
