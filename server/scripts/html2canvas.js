@@ -11,6 +11,10 @@ NEEDS MORE TESTING FOR:
   * IE
 */
 
+// TODO: Don't need wordWrap anymore, since we render each word / char seperately.
+// We should be able to optimize text rendering my preventing the need of an extra canvas for each node
+// Still need to look into <pre>s and <code> and whatnot before doing anything too drastic, though.
+//
 (function() {
 
 window.html2canvas = html2canvas;
