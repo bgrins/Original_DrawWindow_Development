@@ -1,0 +1,5 @@
+
+MYDIR=$(cd $(dirname "$0"); pwd)
+ROOTDIR=$MYDIR/
+
+cat $ROOTDIR/jquery-1.5.1.min.js $ROOTDIR/html2canvas.js > $ROOTDIR/compiled.js

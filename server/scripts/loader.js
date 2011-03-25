@@ -16,7 +16,7 @@ window.h2c = {
 		
 		var s = document.createElement("script");
 		s.setAttribute("type", "text/javascript");
-		s.setAttribute("src", window.h2c.base + "bookmarklet.js");
+		s.setAttribute("src", window.h2c.base + "compiled.js");
 		document.body.appendChild(s);
 		
 		return false;

@@ -628,7 +628,7 @@ function html2canvas(body, width, cb) {
 	}*/
 	
 	cloneTree(body);
-	
+	log(body.innerHTML);
 	var el = new element(body, function(canvas) {
 		cb(canvas);
 	});
