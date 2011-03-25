@@ -30,11 +30,9 @@ var settings = html2canvas.settings = {
 function postValues() {
 	window.open("http://localhost:8080/preview");
 }
-function assert(isTrue) {
-	if (!isTrue) {
-		log("ASSERTION FAILURE - NEED TO REPORT SERIALIZED ERROR TO SERVER", arguments);
-	}
-}
+function assert(isTrue) {if (!isTrue){
+	log("ASSERTION FAILURE - NEED TO REPORT SERIALIZED ERROR TO SERVER", arguments);
+}}
 
 function log() { if (window.console) { console.log(Array.prototype.slice.apply(arguments)); } }
 function log1() { if (settings.logLevel >= 1) { log.apply(this, arguments); } }
@@ -88,9 +86,8 @@ function getDoctypeString(doc) {
 		return "<!DOCTYPE " + name + " PUBLIC \"" + publicID + "\" \"" + systemID + "\">";
 	}
 }
-
 var getUniqueID = (function(id) { return function() { return id++; } })(0);
-var ignoreTags = { 'style':1, 'br': 1, 'script': 1, 'link': 1 };
+var ignoreTags = { 'style':1, 'br': 1, 'script': 1, 'link': 1, 'h2c': 1 };
 var styleAttributes = [
 	'border-top-style', 'border-top-color',
 	'border-right-style', 'border-right-color',
@@ -409,10 +406,14 @@ function element(DOMElement, onready) {
 	// Recursively instantiate all childNodes, filtering out non element nodes
 	this.childNodes = this._domElement.childNodes;
 	this.childElements = [];
+	this.childTextNodes = [];
 	for (var i = 0; i < this.childNodes.length; i++) {
 		var child = this.childNodes[i];
 		if (shouldProcess(child)) {
 	   		this.childElements.push(new element(child));
+	   	}
+	   	else if ($(child).is("h2c")) {
+	   		this.childTextNodes.push(child);
 	   	}
 	}
 	
@@ -746,7 +747,29 @@ element.prototype.renderTextNoLines = function(ctx) {
 		}
 	}
 }
+
 element.prototype.renderText = function(ctx) {
+	log("rendering text", this.childTextNodes);
+  	
+  	ctx.font = this.css.font;
+  	ctx.fillStyle = this.css.color;
+	ctx.textBaseline = "bottom";
+	
+	var textTop = this.css.offset.top - this.css.innerOffset.top;
+	var textLeft = this.css.offset.left - this.css.innerOffset.left;
+	var thisInnerHeight = this.css.innerHeight;
+	
+	for (var i = 0, len = this.childTextNodes.length; i < len; i++) {
+		var node = this.childTextNodes[i];
+		var text = node.innerText; //node.childNodes[0].data;
+		var top =  node.offsetTop - textTop + thisInnerHeight;
+		var left = node.offsetLeft - textLeft;
+		
+		//log(text, top, left, this.css);
+		ctx.fillText(text, left, top);
+		
+	}
+	return;
 	if (this.hasOnlyTextNodes) {
 		
 		// Time to print out some text, don't have to worry about any more elements changing styles

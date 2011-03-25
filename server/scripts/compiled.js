@@ -335,6 +335,10 @@ NEEDS MORE TESTING FOR:
   * IE
 */
 
+// TODO: Don't need wordWrap anymore, since we render each word / char seperately.
+// We should be able to optimize text rendering my preventing the need of an extra canvas for each node
+// Still need to look into <pre>s and <code> and whatnot before doing anything too drastic, though.
+//
 (function() {
 
 window.html2canvas = html2canvas;
@@ -350,11 +354,9 @@ var settings = html2canvas.settings = {
 function postValues() {
 	window.open("http://localhost:8080/preview");
 }
-function assert(isTrue) {
-	if (!isTrue) {
-		log("ASSERTION FAILURE - NEED TO REPORT SERIALIZED ERROR TO SERVER", arguments);
-	}
-}
+function assert(isTrue) {if (!isTrue){
+	log("ASSERTION FAILURE - NEED TO REPORT SERIALIZED ERROR TO SERVER", arguments);
+}}
 
 function log() { if (window.console) { console.log(Array.prototype.slice.apply(arguments)); } }
 function log1() { if (settings.logLevel >= 1) { log.apply(this, arguments); } }
@@ -408,9 +410,8 @@ function getDoctypeString(doc) {
 		return "<!DOCTYPE " + name + " PUBLIC \"" + publicID + "\" \"" + systemID + "\">";
 	}
 }
-
 var getUniqueID = (function(id) { return function() { return id++; } })(0);
-var ignoreTags = { 'style':1, 'br': 1, 'script': 1, 'link': 1 };
+var ignoreTags = { 'style':1, 'br': 1, 'script': 1, 'link': 1, 'h2c': 1 };
 var styleAttributes = [
 	'border-top-style', 'border-top-color',
 	'border-right-style', 'border-right-color',
@@ -458,7 +459,7 @@ $.fn.splitTextNodes = function(wrapper) {
 	
 	var all = this.add(this.find("*"));
 	var skip = "style, script, h2c";
-	log("Pocessing", all, all.length);
+	
 	for (var i = 0; i < all.length; i++) {
 		var element = $(all[i]);
 		
@@ -479,7 +480,6 @@ $.fn.splitTextNodes = function(wrapper) {
 				hasOtherNodes = true;
 			}
 		});
-		//log("Inside", element.contents().length, element[0].tagName, hasTextNodes, hasOtherNodes);
 		
 		// If this only has text nodes, 
 		if (hasTextNodes && !hasOtherNodes) {
@@ -488,7 +488,7 @@ $.fn.splitTextNodes = function(wrapper) {
 			var words = singleSpaces.split(" ");
 			var newHtml = [];
 			var space = '';
-			//log(words, words.join(' '))
+			
 			for (var j = 0, wordLength = words.length; j < wordLength; j++) {
 				// There was a space before this unless if it is the first word.
 				//if (j == ' ') { space = ' '; }
@@ -503,7 +503,6 @@ $.fn.splitTextNodes = function(wrapper) {
 			// Wrap each node, then push it onto list for processing (splitting up spaces)
 			for (var j = 0; j < textNodes.length; j++) {
 				var newElement = $(textNodes[j]).wrap('<h2ccontainer></h2ccontainer>').parent();
-				log(newElement);
 				all = all.add(newElement);
 			}
 		}
@@ -731,10 +730,14 @@ function element(DOMElement, onready) {
 	// Recursively instantiate all childNodes, filtering out non element nodes
 	this.childNodes = this._domElement.childNodes;
 	this.childElements = [];
+	this.childTextNodes = [];
 	for (var i = 0; i < this.childNodes.length; i++) {
 		var child = this.childNodes[i];
 		if (shouldProcess(child)) {
 	   		this.childElements.push(new element(child));
+	   	}
+	   	else if ($(child).is("h2c")) {
+	   		this.childTextNodes.push(child);
 	   	}
 	}
 	
@@ -1068,7 +1071,29 @@ element.prototype.renderTextNoLines = function(ctx) {
 		}
 	}
 }
+
 element.prototype.renderText = function(ctx) {
+	log("rendering text", this.childTextNodes);
+  	
+  	ctx.font = this.css.font;
+  	ctx.fillStyle = this.css.color;
+	ctx.textBaseline = "bottom";
+	
+	var thisOffsetTop = this._domElement.offsetTop - this.css.innerOffset.top;
+	var thisOffsetLeft = this._domElement.offsetLeft - this.css.innerOffset.left;
+	var thisInnerHeight = this.css.innerHeight;
+	
+	for (var i = 0, len = this.childTextNodes.length; i < len; i++) {
+		var node = this.childTextNodes[i];
+		var text = node.innerText; //node.childNodes[0].data;
+		var top =  node.offsetTop - thisOffsetTop + thisInnerHeight;
+		var left = node.offsetLeft - thisOffsetLeft;
+		
+		log(text, top, left, this.css);
+		ctx.fillText(text, left, top);
+		
+	}
+	return;
 	if (this.hasOnlyTextNodes) {
 		
 		// Time to print out some text, don't have to worry about any more elements changing styles
