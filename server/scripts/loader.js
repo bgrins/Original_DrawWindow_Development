@@ -5,7 +5,7 @@ window.h2c = {
 		
 		window.html2canvasProcessOnLoad = function(canvas) {
 			console.log(arguments);
-			
+			return;
 			$(canvas).css({
 				"position": "absolute",
 				"top": 0,

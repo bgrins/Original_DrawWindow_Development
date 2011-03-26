@@ -485,7 +485,10 @@ $.fn.splitTextNodes = function(wrapper) {
 		if (hasTextNodes && !hasOtherNodes) {
 			// Collapse all whitespace down to one space each
 			var singleSpaces = element.html().replace(trimMultiple," ");
-			var words = singleSpaces.split(" ");
+			var wordwrap = element.css("word-wrap");
+			var splitter = wordwrap == "break-word" ? "" : " ";
+			log(splitter, element.html());
+			var words = singleSpaces.split(splitter);
 			var newHtml = [];
 			var space = '';
 			
@@ -494,8 +497,20 @@ $.fn.splitTextNodes = function(wrapper) {
 				//if (j == ' ') { space = ' '; }
 				//else { space = ''; }
 				
-				space = (j == 0) ? '' : ' ';// '<span class="h2c"> </span>';
-				newHtml.push(space+'<h2c>'+words[j]+'</h2c>');
+				space = splitter;
+				if (j == 0) {
+					space = '';
+				}
+				var word = words[j];
+				if (word == "-") {
+					// TODO: Dashes mess up this word wrap strategy of wrapping each letter in a span
+					// Have to try out some other options to get the dash to actually render
+					word = "&shy;";
+					//word = "&#8203;";
+					//word = " ";
+				}
+				
+				newHtml.push(space+'<h2c>'+word+'</h2c>');
 			}
 			element.html(newHtml.join(''));
 		}
@@ -554,7 +569,7 @@ $.fn.cloneDocument = function() {
 	
 	// Overlay for now to test that it isn't messing it up when splitting text nodes.
 	// This renderer frame will be probably need to be hidden 
-	var styles = 'position:absolute; top: 0; left:0; opacity:.5; border:none; padding:0; margin:0;';
+	var styles = 'position:absolute; top: 0; left:0; opacity:.9; border:none; padding:0; margin:0;z-index:1000;';
 	//var styles = 'position:absolute; top: -'+(bodyHeight*2)+'px; left:-'+(bodyWidth*2)+'px';
 	var iframe = $("<iframe frameborder='0' class='h2cframe' style='"+styles+"' src='about:blank' />").appendTo(doc.body).width(docWidth).height(docHeight);
 	
@@ -1044,34 +1059,6 @@ element.prototype.renderCanvas = function() {
 	}
 };
 
-
-element.prototype.renderTextNoLines = function(ctx) {
-	if (this.hasOnlyTextNodes) {
-		// Time to print out some text, don't have to worry about any more elements changing styles
-  		ctx.font = this.css.font;
-  		ctx.fillStyle = this.css.color;
-		ctx.textBaseline = "bottom";
-		
-		
-		var startX = this.css.innerOffset.left;
-		var startY = this.css.innerOffset.top + this.css.textBaselinePx;
-		
-		
-		//log("Recieved lines", this.tagName, this.textStartsOnDifferentLine, this.text, this.css.innerOffset.left, this.css.marginLeft, this.css.paddingLeft, this.css.borderLeftWidth);
-		
-		ctx.fillText(this.text, startX, startY);
-		
-		if (this.css.textDecoration == 'underline') {
-			var width = ctx.measureText(this.text).width;
-		    ctx.moveTo(startX, this.css.fontSize);
-		    ctx.lineTo(startX + width, this.css.fontSize);
-		    ctx.strokeStyle = this.css.color;
-		    ctx.lineWidth = 1; //face.underlineThickness;
-		    ctx.stroke();
-		}
-	}
-}
-
 element.prototype.renderText = function(ctx) {
 	log("rendering text", this.childTextNodes);
   	
@@ -1096,67 +1083,6 @@ element.prototype.renderText = function(ctx) {
 		
 	}
 };
-
-element.prototype.oldRenderText = function() {
-
-	if (this.hasOnlyTextNodes) {
-		
-		// Time to print out some text, don't have to worry about any more elements changing styles
-  		ctx.font = this.css.font;
-  		ctx.fillStyle = this.css.color;
-		ctx.textBaseline = "bottom";
-		
-		
-		var startX = this.css.innerOffset.left;
-		var startY = this.css.innerOffset.top + this.css.textBaselinePx;		
-		var minimumTextY = this.css.outerHeightMargins - this.css.marginBottom - this.css.borderBottomWidth;
-		
-		if (this.textStartsOnDifferentLine) {
-			//startX = this.textStart.left;
-		}
-		var lines = wordWrap(ctx, this.text, this.overflowHiddenWidth, 
-			startX, !this.textStartsOnDifferentLine); 
-			
-		//log("Recieved lines", this.tagName, this.text, lines, startX, this.css, this.css.lineHeight, this.overflowHiddenWidth, this.css.outerWidthMargins);
-		
-		for (var j = 0; j < lines.length; j++) {
-		
-		    //log2("Rendering Text", lines[j], startX, offsetTop + lastY);
-		    
-		    // Push down to next line of printing
-		   // error(this.css.lineHeight + " " +  this.css.fontSize + " " + this.css.textBaselinePx);
-		    
-		    
-		    if (lines[j] != ' ') { 
-		    	
-		    	if (startY > minimumTextY) {
-		    		startY = minimumTextY;
-		    		log("ERROR", lines[j], startY, minimumTextY, lines, this.css.outerHeightMargins,
-		    			this.css.textBaselinePx, this.css.fontSize, this.css.lineHeight, this.css.innerOffset);
-		    		//error("Text parsing: '" + lines[j] + "' is too low (" + startY + ", " + minimumTextY + ")");
-		    	}
-		    	
-		    	var width = ctx.measureText(lines[j]).width;
-		    	ctx.fillText(lines[j], startX, startY);
-		    	
-				if (this.css.textDecoration == 'underline') {
-					
-					ctx.moveTo(startX, this.css.fontSize);
-					ctx.lineTo(startX + width, this.css.fontSize);
-					ctx.strokeStyle = this.css.color;
-					ctx.lineWidth = 1; //face.underlineThickness;
-					ctx.stroke();
-				}
-
-		    	startY = startY + this.css.lineHeight;
-		    }
-		    
-		    // reset in case this started at a different place (textStartsOnDifferentLine)
-		    startX = this.css.innerOffset.left;
-		}
-	}
-
-}
 
 element.prototype.renderBorders = function(ctx) {
 	
@@ -1346,6 +1272,7 @@ function retrieveImage(src, cb, ownerDocument) {
 	}
 }
 
+// Not needed anymore
 function wordWrap(ctx, phrase, maxWidth, initialOffset, isNewLine) {
 	var words = phrase.split(" ");
 	var lastLine = [];
