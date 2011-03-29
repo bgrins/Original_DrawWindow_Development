@@ -87,7 +87,7 @@ function getDoctypeString(doc) {
 	}
 }
 var getUniqueID = (function(id) { return function() { return id++; } })(0);
-var ignoreTags = { 'style':1, 'br': 1, 'script': 1, 'link': 1, 'h2c': 1 };
+var ignoreTags = { 'style':1, 'br': 1, 'script': 1, 'link': 1, 'h2c': 1, 'span.h2c': 1 };
 var styleAttributes = [
 	'border-top-style', 'border-top-color',
 	'border-right-style', 'border-right-color',
@@ -107,40 +107,19 @@ var styleAttributesPx = [
 	'top', 'bottom', 'left', 'right', 
 	'line-height', 'font-size'
 ];
-var h2cStyles = 'body span.h2c, body span.h2c-holder { background:transparent !important; display:inline !important; border: none !important; outline: none !important; text-decoration:inherit; font:inherit; } .h2c-clearfix:after { content: "."; display: block; height: 0; clear: both; visibility: hidden; } .h2c-clearfix { zoom:1; } .h2c-clear { clear:both; height:0; line-height:0; }';
 
-// Convert: <div>Hi <strong>there.</strong> <!-- some comment --></div>
-// Into: <div><span>Hi </span><strong>there.</strong></div>
-$.fn.wrapSiblingTextNodes = function(wrapper) {
-	return this.each(function() {
-		var element = $(this);
-		var children = element.children();
-		element.contents().each(function() {
-		    if (this.nodeType == 3) {
-		    	if ($.trim(this.data) == "") { $(this).remove(); }
-		    	if (children.length) {
-		    		$(this).wrap(wrapper);
-		    	}
-		    }
-		    else if (this.nodeType != 1) {
-		    	$(this).remove();
-		    }
-		});
-		//log(element.contents().filter(function() {return this.nodeType == 3; }));
-	});
-};
-$.fn.splitTextNodes = function(wrapper) {
+$.fn.splitTextNodes = function() {
 	
 	var trimMultiple = /^[\s]+|[\s]+/g;
 	
-	var all = this.add(this.find("*"));
-	var skip = "style, script, h2c";
+	var all = this.add(this.find("*")).toArray();
+	var skip = "style, script, h2c, span.h2c";
 	
 	for (var i = 0; i < all.length; i++) {
 		var element = $(all[i]);
 		
-		
 		if (element.is(skip)) { continue; }
+		
 		var hasTextNodes = false;
 		var hasOtherNodes = false;
 		var textNodes = [];
@@ -154,6 +133,7 @@ $.fn.splitTextNodes = function(wrapper) {
 			}
 			else {
 				hasOtherNodes = true;
+				//$(this).removeAttr("onload");
 			}
 		});
 		
@@ -185,15 +165,15 @@ $.fn.splitTextNodes = function(wrapper) {
 					word = " ";
 				}
 				
-				newHtml.push(space+'<h2c>'+word+'</h2c>');
+				newHtml.push(space+'<span class="h2c">'+word+'</span>');
 			}
 			element.html(newHtml.join(''));
 		}
 		else if (hasTextNodes && hasOtherNodes) {
 			// Wrap each node, then push it onto list for processing (splitting up spaces)
 			for (var j = 0; j < textNodes.length; j++) {
-				var newElement = $(textNodes[j]).wrap('<h2ccontainer></h2ccontainer>').parent();
-				all = all.add(newElement);
+				var newElement = $(textNodes[j]).wrap('<span class="h2ccontainer"></span>').parent();
+				all.push(newElement);
 			}
 		}
 	}
@@ -201,7 +181,6 @@ $.fn.splitTextNodes = function(wrapper) {
 $.fn.cloneDocument = function() {
 	var $doc = this,
 		doc = $doc[0],
-		originalBody = $(doc.body),
 		docWidth = $doc.width(),
 		docHeight = $doc.height();
 	
@@ -212,25 +191,25 @@ $.fn.cloneDocument = function() {
 	// This might be needed, but it causes extra HTTP requests
 	// var clonedHead = $("<head />").html(doc.head.innerHTML);
 	var clonedHead = $(doc.head.cloneNode(true));
-	var clonedBody = originalBody.clone();
+	var clonedBody = $(doc.body.cloneNode(true));
 	
 	// Set image width and height, to lock it in place even if it is still
 	// loading when we initally process.
-	var allOldImages = originalBody.find("img");
+	var allOldImages = $(doc.body).find("img");
 	var allNewImages = clonedBody.find("img");
 	
 	assert(allOldImages.length == allNewImages.length, 
 		"Cloned body does not match");
 	
 	allOldImages.each(function(i) {
-		allNewImages.eq(i).width($(this).width()).height($(this).height());
+		allNewImages.eq(i).width($(this).width()).height($(this).height()).
+			attr("data-src", function() { return $(this).attr("src"); }).
+			attr("src", "javascript:");
 	});
-	// Prevent images from loading by default
-	allNewImages.attr("data-src", function() { return $(this).attr("src"); }).attr("src", "javascript:");
 	
 	clonedHead.find("script").remove();
 	clonedBody.find("script, iframe.h2cframe").remove();
-	clonedBody.find("iframe").attr("src", "javascript:");
+	clonedBody.find("iframe").attr("src", "javascript:").remove();
 	
 	if (clonedHead.find("base").length == 0) {
 		clonedHead.prepend(
@@ -241,21 +220,22 @@ $.fn.cloneDocument = function() {
 	// todo: include attributes on the head and body tags (such as classname)
 	var clonedHeadHtml = clonedHead.html();
 	var clonedBodyHtml = clonedBody.html();
-	
 	// Overlay for now to test that it isn't messing it up when splitting text nodes.
 	// This renderer frame will be probably need to be hidden 
 	var styles = 'position:absolute; top: 0; left:0; opacity:.9; border:none; padding:0; margin:0;z-index:1000;';
-	//var styles = 'position:absolute; top: -'+(bodyHeight*2)+'px; left:-'+(bodyWidth*2)+'px';
-	var iframe = $("<iframe frameborder='0' class='h2cframe' style='"+styles+"' src='about:blank' />").appendTo(doc.body).width(docWidth).height(docHeight);
 	
-	// TODO: Fix relative URI for resources in case the original doc is inside an iframe (such as the test harness)
+	//var styles = 'position:absolute; top: -'+(bodyHeight*2)+'px; left:-'+(bodyWidth*2)+'px';
+	var iframe = $("<iframe frameborder='0' style='"+styles+"' src='javascript:' />").appendTo(doc.body).width(docWidth).height(docHeight);
+	
+	// TODO: Handle IE document domain things, or just do the processing here (since it may be running in iframe)
 	var docType = getDoctypeString(doc);
 	var d = iframe.contents()[0];
-	d.h2cLocation = doc.location;
-	log(doc.location)
+	
 	d.open();
 	d.write(docType + "<html><head>"+clonedHeadHtml+"</head><body>"+clonedBodyHtml+"</body>");
 	d.close();
+	
+	// TODO: Inline styles not working.
 	return d;
 	
 	/*
@@ -321,39 +301,13 @@ function html2canvas(body, width, cb) {
 		$(body).width(width);
 	}
 	
-	/*
-	if (!body.ownerDocument.getElementById('h2c-styles')) {
-		var style = $("<style type='text/css' id='h2c-styles' />", body.ownerDocument).appendTo(body);
-		if ($.browser.msie) {
-    	    style[0].styleSheet.cssText = h2cStyles;
-    	}
-    	else {
-    	    style.html(h2cStyles);
-    	}
-	}*/
-	
-	cloneTree(body);
-	log(body.innerHTML);
+	$(body).splitTextNodes();
+	cb("you");
+	return;
+	log(body.ownerDocument);
 	var el = new element(body, function(canvas) {
 		cb(canvas);
 	});
-}
-
-function cloneTree(body) {
-	$(body).splitTextNodes();
-	return;
-	processTree(body);
-	
-	function processTree(element) {
-		$(element).contents().each(function() {
-			if (this.nodeType == 3) {
-				$(this).wrap("<h2c />")
-			}
-			else if (this.nodeType == 1) {
-				processTree(this);
-			}
-		});		
-	}
 }
 
 function createCanvas() {
@@ -366,7 +320,7 @@ function createCanvas() {
 
 function element(DOMElement, onready) {
 
-	log1("initializing element", DOMElement, DOMElement.nodeType);
+	log("initializing element", DOMElement, DOMElement.nodeType);
 	
 	if (!shouldProcess(DOMElement)) {
 		return error("Invalid element passed for processing " + DOMElement.tagName);
@@ -380,7 +334,7 @@ function element(DOMElement, onready) {
 	this.nodeType = this._domElement.nodeType;
 	this.tagName = this._domElement.tagName.toLowerCase();
 	this.isBody = this.tagName == "body";
-	this.isTextPlaceholder = this.jq.is("h2c");
+	this.isTextPlaceholder = this.jq.is("span.h2c");
 	this.readyChildren = 0;
 	this.ready = false;
 	this.onready = onready || function() { };
@@ -396,8 +350,6 @@ function element(DOMElement, onready) {
 		this.body = this.parent.body;
 		this.closestBlock = (this.parent.isBlock) ? this.parent : this.parent.closestBlock;
 	}
-	
-	//this.jq.wrapTextNodes("<span class='h2c'></span>");
 	
 	this.copyDOM();
 	if (this.shouldRender) {
@@ -417,6 +369,7 @@ function element(DOMElement, onready) {
 		iframeElement.renderCanvas();
 	}
 	
+	
 	// Recursively instantiate all childNodes, filtering out non element nodes
 	this.childNodes = this._domElement.childNodes;
 	this.childElements = [];
@@ -426,7 +379,7 @@ function element(DOMElement, onready) {
 		if (shouldProcess(child)) {
 	   		this.childElements.push(new element(child));
 	   	}
-	   	else if ($(child).is("h2c")) {
+	   	else if ($(child).is("span.h2c")) {
 	   		this.childTextNodes.push(child);
 	   	}
 	}
@@ -508,6 +461,7 @@ element.prototype.copyDOM = function() {
 	var body = this.body;
 	var css = this.css = { };
 	
+	
 	var computedStyleNormal = computedStyle(el[0], styleAttributes);
 	for (var i in computedStyleNormal) {
 		css[i] = computedStyleNormal[i];
@@ -531,16 +485,17 @@ element.prototype.copyDOM = function() {
 		css.parentBackgroundColor = css.backgroundColor;
 	}
 	
-	this.offset = el.offset();
-	this.position = el.position();
+	log("props", this.isBody, "about to render1", this.document, el);
 	this.scrollHeight = el[0].scollHeight;
 	this.scrollWidth = el[0].scrollWidth;
 	
 	if (this.isBody) {
 		this.elementHeight = $(this.document).height() - this.css.marginTop - this.css.marginBottom;
+		this.offset = { top: 0, left: 0 };
 	}
 	else {
 		this.elementHeight = el.height();
+		this.offset = el.offset();
 	}
 	
 	//this.elementWidth = this.scrollWidth;
@@ -668,48 +623,6 @@ element.prototype.copyDOM = function() {
 	
 	var childNodes = this._domElement.childNodes;
 	this.hasOnlyTextNodes = childNodes.length > 0 && this.isTextPlaceholder;
-	
-	//this.hasOnlyTextNodes = (childNodes.length > 0); // img, hr, etc shouldn't show up as text nodes
-	//for (var i = 0; i < childNodes.length; i++) {
-	//	if (childNodes[i].nodeType != 3) { this.hasOnlyTextNodes = false; }
-	//}
-	
-
-	// Is a span h2c
-	if (this.hasOnlyTextNodes) {
-	
-		this.text = el.text();
-		if (!this.css.lineHeight) {
-			this.css.lineHeight = el.height();
-			//this.css.lineHeight = measured.height();
-		}
-		
-		this.css.textBaselinePx = (this.css.lineHeight) - ((this.css.lineHeight - this.css.fontSize) / 2);
-	}
-	
-	if (css.display == "inline" && !this.hasOnlyTextNodes && this.tagName != "img") {
-		/*
-		Only rendering nodes text if they are an h2c element
-		var oldHtml = el.html();
-		
-		log("Would be processing", el[0].tagName, oldHtml);
-		var newHtml = "<span id='measure' class='h2c'>x</span>";
-		el[0].innerHTML = newHtml;
-		var measured = el.html(newHtml).find("#measure");
-		var textStart = el.position();
-		el.html(oldHtml);
-		
-		this.textStartsOnDifferentLine = 
-			(textStart.left != this.position.left) ||  
-			(textStart.top != this.position.top);
-			
-		this.textStart = {
-			top: textStart.top - this.position.top,
-			left: textStart.left - this.position.left
-		};
-		*/
-	}
-	
 };
 
 element.prototype.renderCanvas = function() {
@@ -1016,6 +929,12 @@ retrieveImage(retrieveImage.transparentImage);
 
 if (window.html2canvasProcessOnLoad) {
 	html2canvas(document.body, window.html2canvasProcessOnLoad)
+}
+if (window.frameElement && window.frameElement.h2c && window.frameElement.h2c.processOnLoad) {
+	log("Matched", window.parent.document.body);
+	html2canvas(window.parent.document.body, function() {
+		log("DONE", arguments);
+	});
 }
 
 })();
