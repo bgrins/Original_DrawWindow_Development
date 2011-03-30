@@ -1249,13 +1249,26 @@ retrieveImage(retrieveImage.brokenImage);
 retrieveImage(retrieveImage.transparentImage);
 
 
+var feedbackStyles = "z-index: 1000004; border: 0px; width: 250px; height: 330px;" +
+	"display: block; position: fixed; right: 6px; bottom: 0px;";
 
 if (window.html2canvasProcessOnLoad) {
-	html2canvas(document.body, window.html2canvasProcessOnLoad)
+	html2canvas(document.body, window.html2canvasProcessOnLoad);
 }
 if (window.frameElement && window.frameElement.h2c && window.frameElement.h2c.processOnLoad) {
 	log("Matched", window.parent.document.body);
-	html2canvas(window.parent.document.body, function() {
+	
+	var parentDoc = window.parent.document;
+	
+	var frame = $("<iframe frameborder='0' style='"+feedbackStyles+"' src='javascript:' />", parentDoc);
+	
+	frame.appendTo(parentDoc.body);
+	var frameDoc = frame.contents()[0];
+	frameDoc.open();
+	frameDoc.write("Hey");
+	frameDoc.close();
+	log("Appended", frame);
+	html2canvas(window.parent.document.body, function(canvas) {
 		log("DONE", arguments);
 	});
 }

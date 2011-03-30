@@ -222,10 +222,10 @@ $.fn.cloneDocument = function() {
 	var clonedBodyHtml = clonedBody.html();
 	// Overlay for now to test that it isn't messing it up when splitting text nodes.
 	// This renderer frame will be probably need to be hidden 
-	var styles = 'position:absolute; top: 0; left:0; opacity:.9; border:none; padding:0; margin:0;z-index:1000;';
+	var styles = 'position:absolute; top: 0; left:0; opacity:.9; border:none; padding:0; margin:0;z-index:10000001;';
 	
 	//var styles = 'position:absolute; top: -'+(bodyHeight*2)+'px; left:-'+(bodyWidth*2)+'px';
-	var iframe = $("<iframe frameborder='0' style='"+styles+"' src='javascript:' />").appendTo(doc.body).width(docWidth).height(docHeight);
+	var iframe = $("<iframe scrolling='no' id='h2c-render-frame' frameborder='0' style='"+styles+"' src='javascript:' />").appendTo(doc.body).width(docWidth).height(docHeight);
 	
 	// TODO: Handle IE document domain things, or just do the processing here (since it may be running in iframe)
 	var docType = getDoctypeString(doc);
@@ -278,34 +278,13 @@ $.fn.cloneDocument = function() {
 };
 
 
-function html2canvas(body, width, cb) {
+function html2canvas(body, cb) {
 	
-	if ((typeof body) == "string") {
-		var iframe = $("<iframe src='javascript:'></iframe>").appendTo("body");
-		var doc = iframe.contents()[0];
-		doc.open();
-		doc.write(body);
-		doc.close();
-		
-		body = doc.body;
-	}
-	else {
-		body = $(body.ownerDocument).cloneDocument().body;
-	}
-	
-	if ($.isFunction(width)) {
-		cb = width;
-		width = false;
-	}
-	if (width) {
-		$(body).width(width);
-	}
+	body = $(body.ownerDocument).cloneDocument().body;
 	
 	$(body).splitTextNodes();
-	cb("you");
-	return;
-	log(body.ownerDocument);
-	var el = new element(body, function(canvas) {
+	
+	new element(body, function(canvas) {
 		cb(canvas);
 	});
 }
@@ -320,7 +299,7 @@ function createCanvas() {
 
 function element(DOMElement, onready) {
 
-	log("initializing element", DOMElement, DOMElement.nodeType);
+	log1("initializing element", DOMElement, DOMElement.nodeType);
 	
 	if (!shouldProcess(DOMElement)) {
 		return error("Invalid element passed for processing " + DOMElement.tagName);
@@ -485,7 +464,6 @@ element.prototype.copyDOM = function() {
 		css.parentBackgroundColor = css.backgroundColor;
 	}
 	
-	log("props", this.isBody, "about to render1", this.document, el);
 	this.scrollHeight = el[0].scollHeight;
 	this.scrollWidth = el[0].scrollWidth;
 	
@@ -648,7 +626,7 @@ element.prototype.renderCanvas = function() {
 };
 
 element.prototype.renderText = function(ctx) {
-	log("rendering text", this.childTextNodes);
+	//log("rendering text", this.childTextNodes);
   	
   	if (this.childTextNodes.length == 0) {
   		return;	
@@ -772,7 +750,7 @@ element.prototype.renderBackground = function(ctx, cb) {
 				ctx.fillRect(offsetLeft, offsetTop, outerWidth, outerHeight);
 			}
 			else {
-				log("Rendering", ctx.canvas.width, img.src, outerWidth, tagName )
+				//log("Rendering", ctx.canvas.width, img.src, outerWidth, tagName )
         		ctx.fillStyle = ctx.createPattern(img, backgroundRepeat);
 				ctx.fillRect(offsetLeft, offsetTop, outerWidth, outerHeight);
 			}
@@ -926,14 +904,55 @@ retrieveImage(retrieveImage.brokenImage);
 retrieveImage(retrieveImage.transparentImage);
 
 
+function getFeedbackFrameHtml() {
+	return "Welcome to my custom processing...";
+}
+
+function buildUI(container) {
+	
+	var doc = container.ownerDocument;
+	var feedbackStyles = "z-index: 100004; border: 0px; width: 250px; height: 200px;" +
+		"display: block; position: fixed; right: 6px; bottom: 0px; background:green;";
+	var frame = $("<iframe scrolling='no' frameborder='0' style='"+feedbackStyles+"' src='javascript:' />", 
+		doc);
+	
+	frame.appendTo(container);
+	var frameDoc = frame.contents()[0];
+	frameDoc.open();
+	frameDoc.write(getFeedbackFrameHtml());
+	frameDoc.close();
+	
+}
 
 if (window.html2canvasProcessOnLoad) {
-	html2canvas(document.body, window.html2canvasProcessOnLoad)
+	html2canvas(document.body, window.html2canvasProcessOnLoad);
 }
-if (window.frameElement && window.frameElement.h2c && window.frameElement.h2c.processOnLoad) {
-	log("Matched", window.parent.document.body);
-	html2canvas(window.parent.document.body, function() {
-		log("DONE", arguments);
+
+if (window.parent) {
+	var hasKey = window.parent.h2c && window.parent.h2c.key;
+	assert(hasKey, "No key provided");
+	
+	log("Frame has been loaded.  Key received.", window.parent.document.body, window.parent.h2c.key);
+	
+	
+		
+	var container = window.frameElement.parentNode;
+	buildUI(container);
+
+	
+	var parentDoc = window.parent.document;
+	
+	
+	html2canvas(parentDoc.body, function(canvas) {
+		//log("DONE", canvas.toDataURL());
+		log("Processing is finished...")
+		$(canvas).css({
+		    "position": "absolute",
+		    "top": 0,
+		    "left": 0,
+		    "z-index": 1001,
+		    "opacity": ".5"
+		}).appendTo(container);
 	});
 }
 

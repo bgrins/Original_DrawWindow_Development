@@ -6,73 +6,67 @@ window.h2c = {
 		var scriptPath = "192.168.0.169/~brian/html2canvas/server/scripts/";
 		var host = (("https:" == document.location.protocol) ? "https://" : "http://");
 		var src = host + scriptPath + "compiled.js";
+		var src1 = host + scriptPath + "jquery-1.5.1.min.js";
+		var src2 = host + scriptPath + "html2canvas.js";
 		html.push("<html><head>");
-		html.push("<script type='text/javascript' src='"+src+"'></script>");
-		html.push("</head><body></body></html>");
+		/*html.push("<script type='text/javascript' src='"+src+"'></script>");*/
+		html.push("<script type='text/javascript' src='"+src1+"'></script>");
+		html.push("<script type='text/javascript' src='"+src2+"'></script>");
+		html.push("</head><body>Loading</body></html>");
 		return html.join('');
 	},
-	loader: function() {
-		var scriptPath = "192.168.0.169/~brian/html2canvas/server/scripts/";
-		var host = (("https:" == document.location.protocol) ? "https://" : "http://");
-		
-		function createHTMLElement(el) {
-		  if (document.createElementNS && document.documentElement.namespaceURI !== null)
+	createElement: function(el) {
+		if (document.createElementNS && document.documentElement.namespaceURI !== null) {
 		    return document.createElementNS("http://www.w3.org/1999/xhtml", el)
-		  else
+		} 
+		else {
 		    return document.createElement(el)
-		}
-		
-		
-		window.html2canvasProcessOnLoad = function(canvas) {
-			console.log(canvas);
-			//return;
-			$(canvas).css({
-				"position": "absolute",
-				"top": 0,
-				"left": 0,
-				"z-index": 1001,
-				"opacity": ".5"
-			}).appendTo("body");
-		}
-		
-		
-		var frame = createHTMLElement("iframe");
+		} 
+	},
+	writeFrame: function(appendTo) {
+	
+		var frame = h2c.createElement("iframe");
 		frame.frameBorder = 0;
 		frame.style.border = "0";
-		frame.style.width = '1';
-		frame.style.height = '1';
-		frame.style.display = "none";
+		frame.style.width = '1px';
+		frame.style.height = '1px';
+		frame.style.position = 'absolute';
+		frame.style.top = '-2px';
+		frame.style.left = '-2px';
 		
-		frame.h2c = { };
-		frame.h2c.processOnLoad = true;
 		var domain = this.domain;
-  		var internetExplorer = document.selection && window.ActiveXObject && 
-  			/MSIE/.test(navigator.userAgent);
-  			
+  		var internetExplorer = document.selection && 
+  			window.ActiveXObject && /MSIE/.test(navigator.userAgent);
+		
 		if (domain && internetExplorer) {
-		  frame.h2c.html = this.frameHTML();
-		  frame.src = "javascript:(function(){document.open();" +
-		    (domain ? "document.domain=\"" + domain + "\";" : "") +
-		    "document.write(window.frameElement.h2c.html);document.close();})()";
+			frame.h2c.html = this.frameHTML();
+			frame.src = "javascript:(function(){document.open();" +
+			  (domain ? "document.domain=\"" + domain + "\";" : "") +
+			  "document.write(window.frameElement.h2c.html);document.close();})()";
+			appendTo.appendChild(frame);
+		  	
 		}
 		else {
-		  frame.src = "javascript:;";
+		  	frame.src = "javascript:;";
+			appendTo.appendChild(frame);
+    		var doc = frame.contentWindow.document;
+    	  	doc.open();
+    	  	doc.write(this.frameHTML());
+    	  	doc.close();
 		}
+	},
+	loader: function() {
+		var div = h2c.createElement("div");
 		
-		document.body.appendChild(frame);
+		div.style.position = "absolute";
+		div.style.top = "0";
+		div.style.left = "0";
+		div.style.width = "0";
+		div.style.height = "0";
+		div.style.zIndex = 100001;
 		
-    	var win = frame.contentWindow;
-    	if (!domain || !internetExplorer) {
-    	  win.document.open();
-    	  win.document.write(this.frameHTML());
-    	  win.document.close();
-    	}
-		
-		//var s = document.createElement("script");
-		//s.setAttribute("type", "text/javascript");
-		//s.setAttribute("src", host + scriptPath + "compiled.js");
-		//document.body.appendChild(s);
-		
+		document.body.appendChild(div);
+		window.h2c.writeFrame(div);		
 		return false;
 	}
 }
