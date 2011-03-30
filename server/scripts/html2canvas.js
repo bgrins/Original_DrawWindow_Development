@@ -22,7 +22,7 @@ html2canvas.element = element;
 html2canvas.logLevels = { RELEASE: 0, NORMAL: 1, VERBOSE: 2 };
 var settings = html2canvas.settings = {
 	enabled: true, // temporarily true to test flashcanvas !!document.createElement('canvas').getContext,
-	drawBoundingBox: false,
+	drawBoundingBox: true,
 	logLevel: html2canvas.logLevels.RELEASE,
 	isDevelopment: true
 };
@@ -30,8 +30,11 @@ var settings = html2canvas.settings = {
 function html2canvas(body, cb) {
 	body = $(body.ownerDocument).cloneDocument().body;
 	$(body).splitTextNodes();
-	new element(body, function(canvas) {
-		cb(canvas);
+	
+	$(body.ownerDocument).ready(function() {
+		new element(body, function(canvas) {
+			cb(canvas);
+		});	
 	});
 }
 
@@ -46,7 +49,7 @@ function log() { if (window.console) { console.log(Array.prototype.slice.apply(a
 function log1() { if (settings.logLevel >= 1) { log.apply(this, arguments); } }
 function log2() { if (settings.logLevel >= 2) { log.apply(this, arguments); } }
 function error(msg) { throw "[Web Designer] " + msg; return false; }
-function shouldProcess(dom) { return (dom.nodeType == 1) && (!ignoreTags[dom.tagName.toLowerCase()]); }
+function shouldProcess(dom) { return (dom.nodeType == 1) && (!ignoreTags[dom.tagName.toLowerCase()]) && !$(dom).is("span.h2c"); }
 function computedStyle(elem, styles) {
 
 	// IE - Use jQuery CSS.  Others - Load the computedStyle once and read from it
@@ -148,7 +151,6 @@ $.fn.splitTextNodes = function() {
 			}
 			else {
 				hasOtherNodes = true;
-				//$(this).removeAttr("onload");
 			}
 		});
 		
@@ -253,8 +255,8 @@ $.fn.cloneDocument = function(replaceFrame) {
 	// Overlay for now to test that it isn't messing it up when splitting text nodes.
 	// This renderer frame will be probably need to be hidden 
 	
-	//var styles = 'position:absolute; top: -'+(bodyHeight*2)+'px; left:-'+(bodyWidth*2)+'px';
-	var styles = 'position:absolute; top: 0; left:0; opacity:.9; border:none; padding:0; margin:0;z-index:10000001; background-color:white;';
+	var styles = 'position:absolute; top: -'+(docWidth*2)+'px; left:-'+(docHeight*2)+'px';
+	//var styles = 'position:absolute; top: 0; left:0; opacity:.9; border:none; padding:0; margin:0;z-index:10000001; background-color:white;';
 	var frame;
 	
 	// Replace an existing frame with this new document, or just append it to document instead
@@ -344,12 +346,15 @@ function element(DOMElement, onready) {
 	if (this.tagName == "iframe") {
 		this.body.totalChildren++;
 		var iframe = this;
-		var iframeElement = new element(iframe.jq.contents().find("body")[0], function(canvas) {
-			iframe.contents = canvas;
-			iframe.signalReady();
+		iframe.jq.contents().ready(function() {
+			var iframeElement = new element(iframe.jq.contents().find("body")[0], function(canvas) {
+				log("All good here", canvas);
+				//window.parent.document.body.appendChild(canvas);
+				
+				iframe.contents = canvas;
+				iframe.signalReady();
+			});
 		});
-		
-		iframeElement.renderCanvas();
 	}
 	
 	
@@ -383,17 +388,17 @@ element.prototype.signalReady = function() {
 	    body.copyToCanvas(body.outputCanvas);
 	}
 };
-var runonce = true;
+
 element.prototype.copyToCanvas = function(canvas) {
 	if (this.shouldRender) { 	
-	
 		var ctx = canvas.getContext("2d"),
 			x = this.x, y = this.y,
 			w = this.width, h = this.height;
 		
-		//log("Rendering", this.tagName, this.text, x, y, w, h, canvas.width, canvas.height, this.canvas.width, this.canvas.height);
 		
-		if (this.jq.attr("data-debug") || true || settings.drawBoundingBox) {
+		log("Copying to canvas", this.tagName, this.canvas, x, y, w, h);
+		
+		if (this.jq.attr("data-debug") || settings.drawBoundingBox) {
 			ctx.strokeStyle = "#d66";
 			ctx.lineWidth = 1;
 			ctx.strokeRect(x, y, w, h);
@@ -427,9 +432,32 @@ element.prototype.copyToCanvas = function(canvas) {
 		
 		// iframes have a contents canvas, that we need to render
 		if (this.tagName == "iframe") {
-			var c = this.contents;
+		
+			var contents = this.contents;
 			var innerOffset = this.css.innerOffset;
-			ctx.drawImage(c, innerOffset.left + x, innerOffset.top + y, c.width, c.height);
+			var contentX = x,
+				contentY = y,
+				contentWidth = c.width,
+				contentHeight = c.height;
+			
+			// For some reason, contents does not seem to be ready yet at this point.  Need
+			// To investigate the signalling and all this jazz...
+			
+			//ctx.fillStyle = "blue";
+			//ctx.fillStyle = ctx.createPattern(contents, "no-repeat");
+			//ctx.lineWidth = this.css.outlineWidth;
+			//ctx.fillRect(contentX, contentY, contentWidth, contentHeight);
+        	
+        	// It works inside a timeout, see?
+        	//setTimeout(function() {
+			ctx.drawImage(contents, contentX, contentY, contentWidth, contentHeight);
+			log("Here is an iframe", contents, contentWidth, contentHeight, contentX, contentY);
+			//}, 1000)
+				
+			//window.parent.document.body.appendChild(this.contents);
+			
+			//ctx.drawImage(contents, contentX, contentY, contents.width, contents.height);
+			//ctx.drawImage(contents, contentX, contentY, contentWidth, contentHeight);
 		}
 	}
 	
@@ -610,28 +638,32 @@ element.prototype.copyDOM = function() {
 element.prototype.renderCanvas = function() {
 
 	if (this.shouldRender) {
-		//log("RENDERING CANVAS", this.tagName, this.text, this.height, this.width, this.hasOnlyTextNodes);
 		
-		var canvas = this.canvas = createCanvas();
+		var that = this,
+			canvas = this.canvas = createCanvas(),
+			ctx = canvas.getContext("2d");
+			
 		canvas.width = this.width;
 		canvas.height = this.height;
-		var ctx = canvas.getContext("2d");
+			
+		log("RENDERING CANVAS", that.tagName, that.isTextPlaceholder, that.height, that.width, that.hasOnlyTextNodes);
 		
-		var that = this;
 		that.renderBackground(ctx, function() {
 			that.renderBorders(ctx);
 			that.renderText(ctx);
 			that.signalReady();
 		});
 	}
-	for (var i = 0, len = this.childElements.length; i < len; i++) {
-		this.childElements[i].renderCanvas();
+	
+	var childElements = this.childElements;
+	for (var i = 0, len = childElements.length; i < len; i++) {
+		childElements[i].renderCanvas();
 	}
 };
 
 element.prototype.renderText = function(ctx) {
 	//log("rendering text", this.childTextNodes);
-  	
+	
   	if (this.childTextNodes.length == 0) {
   		return;	
   	}
@@ -798,6 +830,7 @@ function retrieveImage(src, cb, ownerDocument) {
 	    }
 	    else if (authority != document.location.host) {
 	    	loadImageDirectly = false;
+	    	log("NEeeding to proxy this image")
 	    	var proxy = "http://localhost/~brian/html2canvas/form/proxy.php?url=" + src;
 	    	var cssHTTP = "http://localhost/~brian/html2canvas/form/csshttp?url=" + src;
 	    	
@@ -950,13 +983,14 @@ if (window.parent) {
 	
 	html2canvas(parentDoc.body, function(canvas) {
 		//log("DONE", canvas.toDataURL());
-		log("Processing is finished...")
+		log("Processing is finished...", canvas)
 		$(canvas).css({
 		    "position": "absolute",
 		    "top": 0,
 		    "left": 0,
-		    "z-index": 1001,
-		    "opacity": ".5"
+		    "z-index": 1000000001,
+		    //"opacity": ".9",
+		    "background-color": "white"
 		}).appendTo(container);
 	});
 }
