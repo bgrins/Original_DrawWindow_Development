@@ -193,11 +193,19 @@ $.fn.splitTextNodes = function() {
 		}
 	}
 };
-$.fn.cloneDocument = function() {
+
+function qualifyURL(doc, url) {
+	var a = doc.createElement('a');
+	a.href = url;
+	return a.href;
+}
+
+$.fn.cloneDocument = function(replaceFrame) {
 	var $doc = this,
 		doc = $doc[0],
 		docWidth = $doc.width(),
-		docHeight = $doc.height();
+		docHeight = $doc.height(),
+		docType = getDoctypeString(doc);
 	
 	//log(doc.doctype, document.doctype);
 	
@@ -208,89 +216,89 @@ $.fn.cloneDocument = function() {
 	var clonedHead = $(doc.head.cloneNode(true));
 	var clonedBody = $(doc.body.cloneNode(true));
 	
+		
+	// Do some global cleanup on the new body to get URLs to match / get rid of events, etc
+	// This is probably really slow...
+	clonedBody.find("*").removeAttr("onload");
+	clonedBody.find("img").attr("src", function() { return qualifyURL(doc, this.src); });
+	clonedHead.find("link").attr("href", function() { return qualifyURL(doc, this.href); });
+	clonedBody.find("link").attr("href", function() { return qualifyURL(doc, this.href); });
+	clonedHead.find("script").remove();
+	clonedBody.find("script").remove();
+	clonedBody.find("iframe").attr("src", "javascript:");
+	// Get number of iframes before we make any changes to the dom
+	var allOldIframes = $(doc.body).find("iframe"); 
+	
+	
 	// Set image width and height, to lock it in place even if it is still
 	// loading when we initally process.
 	var allOldImages = $(doc.body).find("img");
 	var allNewImages = clonedBody.find("img");
 	
 	assert(allOldImages.length == allNewImages.length, 
-		"Cloned body does not match");
-	
+		"Cloned image count does not match actual image count", 
+		allNewImages.length, allOldImages.length);
+		
 	allOldImages.each(function(i) {
 		allNewImages.eq(i).width($(this).width()).height($(this).height()).
-			attr("data-src", function() { return $(this).attr("src"); }).
-			attr("src", "javascript:");
+			attr("data-src", function() { return this.src }).
+			attr("src", "javascript:;");
 	});
 	
-	clonedHead.find("script").remove();
-	clonedBody.find("script, iframe.h2cframe").remove();
-	clonedBody.find("iframe").attr("src", "javascript:").remove();
 	
-	log(doc.location);
-	if (clonedHead.find("base").length == 0) {
-		clonedHead.prepend(
-			'<base href="'+doc.location.origin+doc.location.pathname+'" />'
-		);
-	}
-	
-	// todo: include attributes on the head and body tags (such as classname)
+	// todo: include attributes on the head and body tags (such as classname, bgcolor, etc)
 	var clonedHeadHtml = clonedHead.html();
 	var clonedBodyHtml = clonedBody.html();
+	
 	// Overlay for now to test that it isn't messing it up when splitting text nodes.
 	// This renderer frame will be probably need to be hidden 
-	var styles = 'position:absolute; top: 0; left:0; opacity:.9; border:none; padding:0; margin:0;z-index:10000001;';
 	
 	//var styles = 'position:absolute; top: -'+(bodyHeight*2)+'px; left:-'+(bodyWidth*2)+'px';
-	var iframe = $("<iframe scrolling='no' id='h2c-render-frame' frameborder='0' style='"+styles+"' src='javascript:' />").appendTo(doc.body).width(docWidth).height(docHeight);
+	var styles = 'position:absolute; top: 0; left:0; opacity:.9; border:none; padding:0; margin:0;z-index:10000001; background-color:white;';
+	var frame;
 	
-	// TODO: Handle IE document domain things, or just do the processing here (since it may be running in iframe)
-	var docType = getDoctypeString(doc);
-	var d = iframe.contents()[0];
+	// Replace an existing frame with this new document, or just append it to document instead
+	if (replaceFrame) {
+		var markup = "<iframe src='javascript:' />";
+		var oldWidth = replaceFrame.width();
+		var oldHeight = replaceFrame.height();
+		frame = $(markup, doc);
+		replaceFrame.replaceWith(frame);
+	}
+	else {
+		var markup = "<iframe scrolling='no' id='h2c-render-frame' frameborder='0' style='"+styles+"' src='javascript:' />";
+		frame = $(markup, doc).appendTo(doc.body).width(docWidth).height(docHeight);
+	}
+	
+	
+	// TODO: Handle IE document domain things, or just do the processing here 
+	// (since it may be running in iframe)
+	
+	var d = frame.contents()[0];
 	
 	d.open();
 	d.write(docType + "<html><head>"+clonedHeadHtml+"</head><body>"+clonedBodyHtml+"</body>");
 	d.close();
 	
+	var allNewIframes = $(d.body).find("iframe");
+	
+	assert(allOldIframes.length == allNewIframes.length, 
+		"Cloned iframe count does not match actual iframe count", 
+		allNewIframes.length, allOldIframes.length);
+		
+	allOldIframes.each(function(i) {
+		var thisFrame = allOldIframes.eq(i);
+		var frameDoc = thisFrame.contents()[0];
+		if (frameDoc.body) {
+			$(frameDoc).cloneDocument(allNewIframes.eq(i));
+		}
+		else {
+			allNewIframes.eq(i).remove();
+		}
+	});
+	
 	// TODO: Inline styles not working in IE.
 	return d;
-	
-	/*
-	//log(clonedHead.html(), clonedBody.html(), b.width(), $(d.body).width());
-	//var html = $("<html>" + originalDocument.documentElement.innerHTML + "</html>");
-	//log(originalDocument.documentElement.innerHTML, originalDocument.head, html.html());
-	
-	var b = $(this[0].body);
-	//log("CLONING", this, b, b.html());
-	var clonedBody = b.clone();
-	clonedBody.find("script, iframe.h2cframe").remove();
-	clonedBody.find("iframe").attr("src", "javascript:");
-	log(this[0].head, this[0].head.innerHTML);
-	var clonedHead = $(this[0].head).clone();
-	clonedHead.find("script").remove();
-	//log(clonedHead, clonedHead[0].innerHTML, clonedBody.html())
-	//var originalFrames = b.find("iframe");
-	
-	//$(d.head).html(clonedHead.html());
-	//$(d.body).html(clonedBody.html()).width(bodyWidth).height(bodyHeight);
-	
-	return d;
-	
-	
-	var d = window.open().document;
-	//iframe.remove(); // wasn't working in firefox
-	
-	$(d.head).replaceWith(clonedHead);
-	$(d.body).replaceWith(clonedBody).width(this[0].width).height(this[0].height);
-	var clonedFrames = clonedBody.find("iframe");
-	
-	//originalFrames.each(function(i) {
-		//var frameDoc = $(this).contents().cloneDocument();
-		//clonedFrames.eq(i).contents().find("head").replaceWith(frameDoc.head);
-		//clonedFrames.eq(i).contents().find("body").html('yo');//replaceWith(frameDoc.body);
-	//});
-
-	return d;
-	*/
 };
 
 function element(DOMElement, onready) {
@@ -905,7 +913,8 @@ function getFeedbackFrameHtml() {
 }
 
 function buildUI(container) {
-	
+	return;
+	// TEMPORARILY TURN OFF UI
 	var doc = container.ownerDocument;
 	var feedbackStyles = "z-index: 100004; border: 0px; width: 250px; height: 200px;" +
 		"display: block; position: fixed; right: 6px; bottom: 0px; background:green;";
