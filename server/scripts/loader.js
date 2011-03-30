@@ -8,10 +8,15 @@ window.h2c = {
 		var src = host + scriptPath + "compiled.js";
 		var src1 = host + scriptPath + "jquery-1.5.1.min.js";
 		var src2 = host + scriptPath + "html2canvas.js";
+		var flashcanvas = host + scriptPath + "flashcanvaspro/flashcanvas.js";
+		
+
+
 		html.push("<html><head>");
 		/*html.push("<script type='text/javascript' src='"+src+"'></script>");*/
 		html.push("<script type='text/javascript' src='"+src1+"'></script>");
 		html.push("<script type='text/javascript' src='"+src2+"'></script>");
+		html.push("<!--[if lt IE 9]><script type='text/javascript' src='"+flashcanvas+"'></script><![endif]-->");
 		html.push("</head><body>Loading</body></html>");
 		return html.join('');
 	},

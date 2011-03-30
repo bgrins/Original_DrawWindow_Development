@@ -27,6 +27,14 @@ var settings = html2canvas.settings = {
 	isDevelopment: true
 };
 
+function html2canvas(body, cb) {
+	body = $(body.ownerDocument).cloneDocument().body;
+	$(body).splitTextNodes();
+	new element(body, function(canvas) {
+		cb(canvas);
+	});
+}
+
 function postValues() {
 	window.open("http://localhost:8080/preview");
 }
@@ -64,6 +72,13 @@ function computedStyle(elem, styles) {
 	}
 	
 	return ret;
+}
+function createCanvas() {
+	var c = document.createElement("canvas");
+    if (typeof FlashCanvas != "undefined") {
+      FlashCanvas.initElement(c);
+    }
+    return c;	
 }
 function getDoctypeString(doc) {
 	if ($.browser.msie) {
@@ -211,6 +226,7 @@ $.fn.cloneDocument = function() {
 	clonedBody.find("script, iframe.h2cframe").remove();
 	clonedBody.find("iframe").attr("src", "javascript:").remove();
 	
+	log(doc.location);
 	if (clonedHead.find("base").length == 0) {
 		clonedHead.prepend(
 			'<base href="'+doc.location.origin+doc.location.pathname+'" />'
@@ -235,7 +251,7 @@ $.fn.cloneDocument = function() {
 	d.write(docType + "<html><head>"+clonedHeadHtml+"</head><body>"+clonedBodyHtml+"</body>");
 	d.close();
 	
-	// TODO: Inline styles not working.
+	// TODO: Inline styles not working in IE.
 	return d;
 	
 	/*
@@ -276,26 +292,6 @@ $.fn.cloneDocument = function() {
 	return d;
 	*/
 };
-
-
-function html2canvas(body, cb) {
-	
-	body = $(body.ownerDocument).cloneDocument().body;
-	
-	$(body).splitTextNodes();
-	
-	new element(body, function(canvas) {
-		cb(canvas);
-	});
-}
-
-function createCanvas() {
-	var c = document.createElement("canvas");
-    if (typeof FlashCanvas != "undefined") {
-      FlashCanvas.initElement(c);
-    }
-    return c;	
-}
 
 function element(DOMElement, onready) {
 
