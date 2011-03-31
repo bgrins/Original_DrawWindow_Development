@@ -187,7 +187,6 @@ $.fn.splitTextNodes = function() {
 		}
 		else if (hasTextNodes && hasOtherNodes) {
 			// Wrap each node, then push it onto list for processing (splitting up spaces)
-			log("Has both", textNodes, textNodes.length, element.tagName);
 			for (var j = 0; j < textNodes.length; j++) {
 				var newElement = $(textNodes[j]).wrap('<span class="h2ccontainer"></span>').parent();
 				all.push(newElement);
@@ -450,11 +449,13 @@ element.prototype.copyToCanvas = function(canvas) {
 				scrollTop = 0,
 				scrollLeft = 0;
 			
-        	ctx.fillStyle = ctx.createPattern(contents, "no-repeat");
-			ctx.fillRect(contentX, 0, contentWidth, contentHeight);
+			log("Here is an iframe", contents, contentWidth, contentHeight, contentX, contentY, w, h);
 			
-			log("Here is an iframe", contents, contentWidth, contentHeight, contentX, contentY);
-			window.parent.document.body.appendChild(this.contents);
+			// Todo: clip iframes from scroll location
+			ctx.drawImage(contents, 
+				contentX, contentY, contents.width, contents.height
+			);
+			//window.parent.document.body.appendChild(this.contents);
 		}
 	}
 	
@@ -736,9 +737,6 @@ element.prototype.renderBackground = function(ctx, cb) {
 	var backgroundRepeat = css.backgroundRepeat;
 	var innerOffset = this.css.innerOffset;
 	var tagName = this.tagName;
-	if (this.tagName == "span" && this.text == "community") {
-		log("HEREEEE", backgroundColor);
-	}
 	
 	if (this.textStartsOnDifferentLine) {
 		backgroundColor = false;
