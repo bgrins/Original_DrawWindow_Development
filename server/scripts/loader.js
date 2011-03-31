@@ -63,6 +63,7 @@ window.h2c = {
 	loader: function() {
 		var div = h2c.createElement("div");
 		
+		div.id = 'h2c-wrapper';
 		div.style.position = "absolute";
 		div.style.top = "0";
 		div.style.left = "0";
@@ -70,6 +71,11 @@ window.h2c = {
 		div.style.height = "0";
 		div.style.zIndex = 100001;
 		
+		var oldWrapper = document.getElementById('h2c-wrapper');
+		
+		if (oldWrapper) {
+			oldWrapper.parentNode.removeChild(oldWrapper);
+		}
 		document.body.appendChild(div);
 		window.h2c.writeFrame(div);		
 		return false;

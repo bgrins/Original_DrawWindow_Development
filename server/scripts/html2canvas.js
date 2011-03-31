@@ -169,8 +169,14 @@ $.fn.splitTextNodes = function() {
 		if (hasTextNodes && !hasOtherNodes) {
 			// Collapse all whitespace down to one space each
 			var singleSpaces = element.html().replace(trimMultiple," ");
+			
 			var wordwrap = element.css("word-wrap");
 			var splitter = wordwrap == "break-word" ? "" : " ";
+			
+			// TODO: Go back to word wrap once we figure out why it is reporting the wrong value
+			// with display inline
+			splitter = " ";
+			//log(wordwrap);
 			var words = singleSpaces.split(splitter);
 			var newHtml = [];
 			var space = '';
@@ -193,15 +199,20 @@ $.fn.splitTextNodes = function() {
 					word = " ";
 				}
 				
-				newHtml.push(space+'<span class="h2c">'+word+'</span>');
+				newHtml.push(space+'<h2c>'+word+'</h2c>');
 			}
 			element.html(newHtml.join(''));
 		}
 		else if (hasTextNodes && hasOtherNodes) {
 			// Wrap each node, then push it onto list for processing (splitting up spaces)
 			for (var j = 0; j < textNodes.length; j++) {
-				var newElement = $(textNodes[j]).wrap('<span class="h2ccontainer"></span>').parent();
+				//if ($.trim(textNodes[j].data).length > 0) {
+				var newElement = $(textNodes[j]).wrap('<h2ccontainer></h2ccontainer>').parent();
 				all.push(newElement);
+				//}
+				//else {
+				//	$(textNodes[j]).remove();
+				//}
 			}
 		}
 	}
@@ -220,8 +231,9 @@ $.fn.cloneDocument = function(replaceFrame) {
 		doc = $doc[0],
 		docWidth = $doc.width(),
 		docHeight = $doc.height(),
-		docType = getDoctypeString(doc);
-	
+		docType = getDoctypeString(doc),
+		appendFrameTo = $doc.find("#h2c-wrapper");
+		
 	//log(doc.doctype, document.doctype);
 	
 	doc.head = doc.head || doc.getElementsByTagName('head')[0];
@@ -241,9 +253,14 @@ $.fn.cloneDocument = function(replaceFrame) {
 	clonedHead.find("script").remove();
 	clonedBody.find("script").remove();
 	clonedBody.find("iframe").attr("src", "javascript:");
-	// Get number of iframes before we make any changes to the dom
-	var allOldIframes = $(doc.body).find("iframe"); 
+	clonedBody.find("#h2c-wrapper").remove();
 	
+	// Get number of iframes before we make any changes to the dom
+	var allOldIframes = $(doc.body).find("iframe").filter(function() {
+		log($(this).closest("#h2c-wrapper").length)
+		return $(this).closest("#h2c-wrapper").length == 0;
+	}); 
+	var allNewIframes = clonedBody.find("iframe");
 	
 	// Set image width and height, to lock it in place even if it is still
 	// loading when we initally process.
@@ -264,6 +281,7 @@ $.fn.cloneDocument = function(replaceFrame) {
 	// todo: include attributes on the head and body tags (such as classname, bgcolor, etc)
 	var clonedHeadHtml = clonedHead.html();
 	var clonedBodyHtml = clonedBody.html();
+	clonedHeadHtml = "<script>/*@cc_on document.createElement('h2c'); document.createElement('h2ccontainer'); @*/</script>" + clonedHeadHtml;
 	
 	// Overlay for now to test that it isn't messing it up when splitting text nodes.
 	// This renderer frame will be probably need to be hidden 
@@ -274,16 +292,17 @@ $.fn.cloneDocument = function(replaceFrame) {
 	
 	// Replace an existing frame with this new document, or just append it to document instead
 	if (replaceFrame) {
-		var markup = "<iframe src='javascript:' />";
+		var markup = "<iframe src='javascript:;' />";
 		var oldWidth = replaceFrame.width();
 		var oldHeight = replaceFrame.height();
 		frame = $(markup, doc);
 		replaceFrame.replaceWith(frame);
 	}
 	else {
-		var markup = "<iframe scrolling='no' id='h2c-render-frame' frameborder='0' style='"+styles+"' src='javascript:' />";
-		frame = $(markup, doc).appendTo(doc.body).width(docWidth).height(docHeight);
+		var markup = "<iframe scrolling='no' id='h2c-render-frame' frameborder='0' style='"+styles+"' src='javascript:;' />";
+		frame = $(markup, doc).appendTo(appendFrameTo).width(docWidth).height(docHeight);
 	}
+	
 	
 	
 	// TODO: Handle IE document domain things, or just do the processing here 
@@ -294,8 +313,6 @@ $.fn.cloneDocument = function(replaceFrame) {
 	d.open();
 	d.write(docType + "<html><head>"+clonedHeadHtml+"</head><body>"+clonedBodyHtml+"</body>");
 	d.close();
-	
-	var allNewIframes = $(d.body).find("iframe");
 	
 	assert(allOldIframes.length == allNewIframes.length, 
 		"Cloned iframe count does not match actual iframe count", 
@@ -381,7 +398,7 @@ function element(DOMElement, onready) {
 		if (shouldProcess(child)) {
 	   		this.childElements.push(new element(child));
 	   	}
-	   	else if ($(child).is("span.h2c")) {
+	   	else if ($(child).is("h2c")) {
 	   		this.childTextNodes.push(child);
 	   	}
 	}
@@ -409,7 +426,7 @@ element.prototype.copyToCanvas = function(canvas) {
 			x = this.x, y = this.y,
 			w = this.width, h = this.height;
 		
-		log("Copying to canvas", this.tagName, this.canvas, x, y, w, h);
+		//log("Copying to canvas", this.tagName, this.canvas, x, y, w, h);
 		
 		if (this.jq.attr("data-debug") || settings.drawBoundingBox) {
 			ctx.strokeStyle = "#d66";
@@ -646,7 +663,7 @@ element.prototype.renderCanvas = function() {
 		canvas.width = this.width;
 		canvas.height = this.height;
 			
-		log("RENDERING CANVAS", that.tagName, that.isTextPlaceholder, that.height, that.width, that.hasOnlyTextNodes);
+		//log("RENDERING CANVAS", that.tagName, that.isTextPlaceholder, that.height, that.width, that.hasOnlyTextNodes);
 		
 		that.renderBackground(ctx, function() {
 			that.renderBorders(ctx);
