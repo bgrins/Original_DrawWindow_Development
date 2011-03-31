@@ -29,7 +29,6 @@ var settings = html2canvas.settings = {
 
 function html2canvas(body, cb) {
 	body = $(body.ownerDocument).cloneDocument().body;
-	$(body).splitTextNodes();
 	
 	$(body.ownerDocument).ready(function() {
 		new element(body, function(canvas) {
@@ -188,12 +187,15 @@ $.fn.splitTextNodes = function() {
 		}
 		else if (hasTextNodes && hasOtherNodes) {
 			// Wrap each node, then push it onto list for processing (splitting up spaces)
+			log("Has both", textNodes, textNodes.length, element.tagName);
 			for (var j = 0; j < textNodes.length; j++) {
 				var newElement = $(textNodes[j]).wrap('<span class="h2ccontainer"></span>').parent();
 				all.push(newElement);
 			}
 		}
 	}
+	
+	return this;
 };
 
 function qualifyURL(doc, url) {
@@ -327,6 +329,7 @@ function element(DOMElement, onready) {
 	if (this.isBody) {
 		this.totalChildren = 0;
 		this.body = this;
+		this.jq.splitTextNodes();
 		this.outputCanvas = createCanvas();
 		this.outputCanvas._el = this;
 	}
@@ -344,16 +347,26 @@ function element(DOMElement, onready) {
 	// Count the new document as another child so no ready signal will be recieved until it is done.
 	// The iframe's readySignal will be recieved when the actual box finishes
 	if (this.tagName == "iframe") {
+	
 		this.body.totalChildren++;
 		var iframe = this;
-		iframe.jq.contents().ready(function() {
+		var doc = iframe.jq.contents()[0];
+		
+		function loaded () {
 			var iframeElement = new element(iframe.jq.contents().find("body")[0], function(canvas) {
-				log("All good here", canvas);
-				//window.parent.document.body.appendChild(canvas);
-				
 				iframe.contents = canvas;
 				iframe.signalReady();
 			});
+		}
+		
+		$(doc).ready(function() {
+			// Hack for Chrome not loading external files before doc ready is called
+			if (doc.readyState != "complete") {
+				iframe.jq[0].contentWindow.onload = loaded;
+			}
+			else {
+				loaded();
+			}
 		});
 	}
 	
@@ -384,8 +397,8 @@ element.prototype.signalReady = function() {
 	if (body.readyChildren == body.totalChildren) {	
 	    body.outputCanvas.width = body.scrollWidth; //body.css.outerWidthMargins;
 	    body.outputCanvas.height = body.css.outerHeightMargins;
-	    body.onready(body.outputCanvas);
 	    body.copyToCanvas(body.outputCanvas);
+	    body.onready(body.outputCanvas);
 	}
 };
 
@@ -394,7 +407,6 @@ element.prototype.copyToCanvas = function(canvas) {
 		var ctx = canvas.getContext("2d"),
 			x = this.x, y = this.y,
 			w = this.width, h = this.height;
-		
 		
 		log("Copying to canvas", this.tagName, this.canvas, x, y, w, h);
 		
@@ -422,42 +434,27 @@ element.prototype.copyToCanvas = function(canvas) {
 		// of keeping track of each element and getting image data...
 		
 		if (w > 0 && h > 0) {
-			
-			var c = this.canvas;
-			//document.body.appendChild(c);
-			//setTimeout(function() {
-			ctx.drawImage(c, x, y, w, h);
-			//}, 5000);
+			// document.body.appendChild(this.canvas);
+			ctx.drawImage(this.canvas, x, y, w, h);
 		}
 		
 		// iframes have a contents canvas, that we need to render
 		if (this.tagName == "iframe") {
 		
-			var contents = this.contents;
-			var innerOffset = this.css.innerOffset;
-			var contentX = x,
-				contentY = y,
-				contentWidth = c.width,
-				contentHeight = c.height;
+			var contents = this.contents,
+				innerOffset = this.css.innerOffset,
+				contentX = x + innerOffset.left,
+				contentY = y + innerOffset.top,
+				contentWidth = w,
+				contentHeight = h,
+				scrollTop = 0,
+				scrollLeft = 0;
 			
-			// For some reason, contents does not seem to be ready yet at this point.  Need
-			// To investigate the signalling and all this jazz...
+        	ctx.fillStyle = ctx.createPattern(contents, "no-repeat");
+			ctx.fillRect(contentX, 0, contentWidth, contentHeight);
 			
-			//ctx.fillStyle = "blue";
-			//ctx.fillStyle = ctx.createPattern(contents, "no-repeat");
-			//ctx.lineWidth = this.css.outlineWidth;
-			//ctx.fillRect(contentX, contentY, contentWidth, contentHeight);
-        	
-        	// It works inside a timeout, see?
-        	//setTimeout(function() {
-			ctx.drawImage(contents, contentX, contentY, contentWidth, contentHeight);
 			log("Here is an iframe", contents, contentWidth, contentHeight, contentX, contentY);
-			//}, 1000)
-				
-			//window.parent.document.body.appendChild(this.contents);
-			
-			//ctx.drawImage(contents, contentX, contentY, contents.width, contents.height);
-			//ctx.drawImage(contents, contentX, contentY, contentWidth, contentHeight);
+			window.parent.document.body.appendChild(this.contents);
 		}
 	}
 	
