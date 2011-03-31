@@ -30,13 +30,25 @@ var settings = html2canvas.settings = {
 function html2canvas(body, cb) {
 	body = $(body.ownerDocument).cloneDocument().body;
 	
-	$(body.ownerDocument).ready(function() {
+	safeReady(body.ownerDocument, function() {
 		new element(body, function(canvas) {
 			cb(canvas);
 		});	
 	});
 }
 
+function safeReady(doc, cb) {
+	// In chrome, sometimes the styles aren't loaded on the $(document).ready call.
+	// This function provides a mechanism for making sure this happens.
+	$(doc).ready(function() {
+		if (doc.readyState != "complete") {
+		    doc.defaultView.onload = cb;
+		}
+		else {
+		    cb();
+		}
+	});
+}
 function postValues() {
 	window.open("http://localhost:8080/preview");
 }
@@ -351,21 +363,11 @@ function element(DOMElement, onready) {
 		var iframe = this;
 		var doc = iframe.jq.contents()[0];
 		
-		function loaded () {
-			var iframeElement = new element(iframe.jq.contents().find("body")[0], function(canvas) {
+		safeReady(doc, function() {
+			var iframeElement = new element(doc.body, function(canvas) {
 				iframe.contents = canvas;
 				iframe.signalReady();
 			});
-		}
-		
-		$(doc).ready(function() {
-			// Hack for Chrome not loading external files before doc ready is called
-			if (doc.readyState != "complete") {
-				iframe.jq[0].contentWindow.onload = loaded;
-			}
-			else {
-				loaded();
-			}
 		});
 	}
 	
