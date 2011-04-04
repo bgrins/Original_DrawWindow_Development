@@ -357,9 +357,27 @@ function element(DOMElement, onready) {
 	if (this.isBody) {
 		this.totalChildren = 0;
 		this.body = this;
+		this.resourceLoadChildren = [];
 		this.jq.splitTextNodes();
 		this.outputCanvas = createCanvas();
 		this.outputCanvas._el = this;
+		this.loadedResourceCount = this.fetchingResourceCount = 0;
+		var body = this;
+		this.resourceLoaded = function() {
+			body.loadedResourceCount++;
+			if (body.allChildElementsInitialized && 
+				body.loadedResourceCount >= body.fetchingResourceCount) {
+				log("All resourcesloaded");
+				// TODO: Use this instead of signal ready...
+				// renderBackgrounds not needed to run a callback anymore
+			}
+		};
+		this.loadResource = function(src, useBroken) {
+			body.fetchingResourceCount++;
+			retrieveImage(src, function() {
+				body.resourceLoaded();
+			}, body.document, useBroken);
+		}
 	}
 	else {
 		this.parent = this._domElement.parentNode._element;
@@ -368,8 +386,15 @@ function element(DOMElement, onready) {
 	}
 	
 	this.copyDOM();
+	
 	if (this.shouldRender) {
 		this.body.totalChildren++;
+		if (this.tagName == "img") {
+			this.body.loadResource(this.src, true);
+		}
+		else if (this.css.backgroundImage != "none") {
+			this.body.loadResource(this.css.backgroundImage, false);
+		}
 	}
 	
 	// Count the new document as another child so no ready signal will be recieved until it is done.
@@ -406,6 +431,11 @@ function element(DOMElement, onready) {
 	// Kick off the rendering since this is the body
 	if (this.isBody) {
 		this.renderCanvas();
+		this.allChildElementsInitialized = true;
+		log(this.loadedResourceCount, this.fetchingResourceCount)
+		if (this.loadedResourceCount == this.fetchingResourceCount) {
+			this.resourceLoaded();
+		}
 	}
 }
 
@@ -826,7 +856,7 @@ element.prototype.renderBackground = function(ctx, cb) {
 
 // retrieveImage: a method to interface with image loading, errors, and proxy
 retrieveImage.cache = { };
-function retrieveImage(src, cb, ownerDocument) {
+function retrieveImage(src, cb, ownerDocument, useBroken) {
 	if (!$.isFunction(cb)) {
 		cb = function() { };
 	}
@@ -888,10 +918,15 @@ function retrieveImage(src, cb, ownerDocument) {
 	}
 	
 	function sendError() {
-		cb("error", 
-			retrieveImage.cache[retrieveImage.brokenImage],
-			retrieveImage.cache[retrieveImage.transparentImage]
-		);
+		
+		var img = new Image();
+		img.onload = sendSuccess;
+		img.src = useBroken ? retrieveImage.brokenImage : retrieveImage.transparentImage;
+	    
+		//cb("error", 
+		//	retrieveImage.cache[retrieveImage.brokenImage],
+		//	retrieveImage.cache[retrieveImage.transparentImage]
+		//);
 	}
 	
 	function sendSuccess() {
