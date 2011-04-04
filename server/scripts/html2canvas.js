@@ -349,7 +349,7 @@ function element(DOMElement, onready) {
 	this.nodeType = this._domElement.nodeType;
 	this.tagName = this._domElement.tagName.toLowerCase();
 	this.isBody = this.tagName == "body";
-	this.isTextPlaceholder = this.jq.is("span.h2c");
+	
 	this.readyChildren = 0;
 	this.ready = false;
 	this.onready = onready || function() { };
@@ -611,9 +611,13 @@ element.prototype.copyDOM = function() {
 	};
 	this.x = this.offsetRenderBox.left;
 	this.y = this.offsetRenderBox.top;
-	this.width = this.css.outerWidthMargins;
-	this.height = this.css.outerHeightMargins;
-	
+	this.width = this.css.outerWidth; //outerWidthMargins;
+	this.height = this.css.outerHeight; //outerHeightMargins;
+	if (this.jq.attr("id") == "site-title") {
+	log(this.css.outerWidth, this.css.outerWidthMargins, this.css.outerWidthMargins < this.css.outerWidth,
+		this.css.marginLeft, this.css.marginTop, this.css.marginRight
+	);
+	}
 	this.css.outlineOffset = {
 		left: this.x + this.css.marginLeft - (this.css.outlineWidth / 2),
 		top: this.y + this.css.marginTop - (this.css.outlineWidth / 2),
@@ -649,7 +653,6 @@ element.prototype.copyDOM = function() {
 	}
 	
 	var childNodes = this._domElement.childNodes;
-	this.hasOnlyTextNodes = childNodes.length > 0 && this.isTextPlaceholder;
 };
 
 element.prototype.renderCanvas = function() {
@@ -663,7 +666,7 @@ element.prototype.renderCanvas = function() {
 		canvas.width = this.width;
 		canvas.height = this.height;
 			
-		//log("RENDERING CANVAS", that.tagName, that.isTextPlaceholder, that.height, that.width, that.hasOnlyTextNodes);
+		//log("RENDERING CANVAS", that.tagName, that.height, that.width);
 		
 		that.renderBackground(ctx, function() {
 			that.renderBorders(ctx);
@@ -693,9 +696,14 @@ element.prototype.renderText = function(ctx) {
 	
 	for (var i = 0, len = this.childTextNodes.length; i < len; i++) {
 		var node = this.childTextNodes[i];
+		
 		var text = node.innerText; // node.childNodes[0].data;
+		
 		var top =  node.offsetTop - textTop + node.offsetHeight;
 		var left = node.offsetLeft - textLeft;
+		
+		//var top = node.offsetTop;
+		//var left = node.offsetLeft;
 		
 		//log(text, top, left, this.css);
 		ctx.fillText(text, left, top);
@@ -756,6 +764,10 @@ element.prototype.renderBackground = function(ctx, cb) {
 	var backgroundRepeat = css.backgroundRepeat;
 	var innerOffset = this.css.innerOffset;
 	var tagName = this.tagName;
+	var jq = this.jq;
+	
+	offsetTop = 0;
+	offsetLeft = 0;
 	
 	if (this.textStartsOnDifferentLine) {
 		backgroundColor = false;
@@ -1003,9 +1015,9 @@ if (window.parent) {
 		    "top": 0,
 		    "left": 0,
 		    "z-index": 1000000001,
-		    //"opacity": ".9",
+		    "opacity": ".7",
 		    "background-color": "white"
-		}).appendTo(container);
+		}).attr("id", "h2c-canvas").appendTo(container);
 	});
 }
 
