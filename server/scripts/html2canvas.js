@@ -367,19 +367,29 @@ function element(DOMElement, onready) {
 		var body = this;
 		this.resourceLoaded = function() {
 			body.loadedResourceCount++;
-			if (body.allChildElementsInitialized && 
-				body.loadedResourceCount >= body.fetchingResourceCount) {
-				log("All resourcesloaded");
-				// TODO: Use this instead of signal ready...
-				// renderBackgrounds not needed to run a callback anymore
+			var hasFetchedAll = body.loadedResourceCount >= body.fetchingResourceCount;
+			if (body.allChildElementsInitialized && hasFetchedAll) {
+				// Time to start rendering now that all children have been initialized and
+				// all resources loaded.
+				
+				body.renderCanvas();
+
+	    		body.outputCanvas.width = body.scrollWidth; //body.css.outerWidthMargins;
+	    		body.outputCanvas.height = body.css.outerHeightMargins;
+	    		body.copyToCanvas(body.outputCanvas);
+	    		body.onready(body.outputCanvas);
 			}
 		};
-		this.loadResource = function(src, useBroken) {
+		this.loadResource = function(src, useBroken, element) {
 			body.fetchingResourceCount++;
-			retrieveImage(src, function() {
+			retrieveImage(src, function(img) {
+				element.loadedImage = img;
+				log("Set elements loaded image", img);
 				body.resourceLoaded();
 			}, body.document, useBroken);
 		}
+		this.onReady = function() {
+		};
 	}
 	else {
 		this.parent = this._domElement.parentNode._element;
@@ -392,10 +402,10 @@ function element(DOMElement, onready) {
 	if (this.shouldRender) {
 		this.body.totalChildren++;
 		if (this.tagName == "img") {
-			this.body.loadResource(this.src, true);
+			this.body.loadResource(this.src, true, this);
 		}
 		else if (this.css.backgroundImage != "none") {
-			this.body.loadResource(this.css.backgroundImage, false);
+			this.body.loadResource(this.css.backgroundImage, false, this);
 		}
 	}
 	
@@ -408,9 +418,10 @@ function element(DOMElement, onready) {
 		var doc = iframe.jq.contents()[0];
 		
 		safeReady(doc, function() {
+			body.fetchingResourceCount++;
 			var iframeElement = new element(doc.body, function(canvas) {
 				iframe.contents = canvas;
-				iframe.signalReady();
+				body.resourceLoaded();
 			});
 		});
 	}
@@ -432,10 +443,8 @@ function element(DOMElement, onready) {
 	
 	// Kick off the rendering since this is the body
 	if (this.isBody) {
-		this.renderCanvas();
 		this.allChildElementsInitialized = true;
-		log(this.loadedResourceCount, this.fetchingResourceCount)
-		if (this.loadedResourceCount == this.fetchingResourceCount) {
+		if (this.loadedResourceCount >= this.fetchingResourceCount) {
 			this.resourceLoaded();
 		}
 	}
@@ -445,10 +454,6 @@ element.prototype.signalReady = function() {
 	var body = this.body;
 	body.readyChildren++;
 	if (body.readyChildren == body.totalChildren) {	
-	    body.outputCanvas.width = body.scrollWidth; //body.css.outerWidthMargins;
-	    body.outputCanvas.height = body.css.outerHeightMargins;
-	    body.copyToCanvas(body.outputCanvas);
-	    body.onready(body.outputCanvas);
 	}
 };
 
@@ -700,11 +705,9 @@ element.prototype.renderCanvas = function() {
 			
 		//log("RENDERING CANVAS", that.tagName, that.height, that.width);
 		
-		that.renderBackground(ctx, function() {
-			that.renderBorders(ctx);
-			that.renderText(ctx);
-			that.signalReady();
-		});
+		this.renderBackground(ctx);
+		this.renderBorders(ctx);
+		this.renderText(ctx);
 	}
 	
 	var childElements = this.childElements;
@@ -819,45 +822,24 @@ element.prototype.renderBackground = function(ctx, cb) {
 	}
 	var ownerDoc = this.jq[0].ownerDocument;
 	
-	if (this.tagName == "img") {
-		retrieveImage(this.src, function(img, broken, transparent) {
-			if (img == "error") {
-				// Draw the 'broken' image if the image couldn't load
-				// This image needs to be centered on the ctx (at least in Chrome)
-				// taking into account the margins
-				var centerX = innerOffset.left + 
-					(outerWidth / 2) - (broken.width);
-				var centerY = innerOffset.top + 
-					(outerHeight / 2) - (broken.height);
-	    		ctx.drawImage(broken, centerX, centerY, broken.width, broken.height);
-			}
-			else {
-	    		ctx.drawImage(img, offsetLeft, offsetTop, img.width, img.height);
-	    	}
-	    	cb();
-		}, ownerDoc);
-	}
-	else if (backgroundImage != "none") {
-		retrieveImage(backgroundImage, function(img, broken, transparent) {
-			if (img == "error") { 
-        		ctx.fillStyle = ctx.createPattern(transparent, backgroundRepeat);
-				ctx.fillRect(offsetLeft, offsetTop, outerWidth, outerHeight);
-			}
-			else {
-				//log("Rendering", ctx.canvas.width, img.src, outerWidth, tagName )
-        		ctx.fillStyle = ctx.createPattern(img, backgroundRepeat);
-				ctx.fillRect(offsetLeft, offsetTop, outerWidth, outerHeight);
-			}
-	    	cb();
-		}, ownerDoc);
-	}
-	else {
-		cb();
+	log("Checking for loaded image", this.loadedImage);
+	if (this.loadedImage) {
+		var repeat = this.tagName == "img" ? "no-repeat" : backgroundRepeat;
+		ctx.fillStyle = ctx.createPattern(this.loadedImage, repeat);
+		ctx.fillRect(offsetLeft, offsetTop, outerWidth, outerHeight);
+
+
+		log("Found a loaded image", this.loadedImage);
+		//ctx.drawImage(this.loadedImage, offsetLeft, offsetTop, this.loadedImage.width, this.loadedImage.height);
 	}
 };
 
 // retrieveImage: a method to interface with image loading, errors, and proxy
 retrieveImage.cache = { };
+function retrieveImageFromCache(src) {
+	assert(retrieveImage.cache.hasOwnProperty(src), "Error: image has not been loaded into cache");
+	return retrieveImage.cache[src];
+}
 function retrieveImage(src, cb, ownerDocument, useBroken) {
 	if (!$.isFunction(cb)) {
 		cb = function() { };
@@ -865,7 +847,7 @@ function retrieveImage(src, cb, ownerDocument, useBroken) {
 	
 	if (retrieveImage.cache[src]) {
 		log("Cache hit", src, retrieveImage.cache[src]);
-		return cb(retrieveImage.cache[src]);	
+		return cb(retrieveImageFromCache(src));	
 	}
 	
 	var loadImageDirectly = true;
@@ -887,11 +869,11 @@ function retrieveImage(src, cb, ownerDocument, useBroken) {
 	   		src = original.resolve(root).toString();
 	    }
 	    else if (authority != document.location.host) {
-	    	loadImageDirectly = false;
+	    	/*loadImageDirectly = false;
 	    	log("NEeeding to proxy this image")
 	    	var proxy = "http://localhost/~brian/html2canvas/form/proxy.php?url=" + src;
 	    	var cssHTTP = "http://localhost/~brian/html2canvas/form/csshttp?url=" + src;
-	    	
+	    	*/
 	    	// TODO: Don't use JSONP, use some kind of cross frame communication instead, since it gives more reliable error handling
 	    	/*$.ajax(proxy, {
 	    		dataType: "jsonp",
@@ -899,12 +881,12 @@ function retrieveImage(src, cb, ownerDocument, useBroken) {
 	    			makeImage(data);
 	    		}
 	    	});*/
-	    	
+	    	/*
 			CSSHttpRequest.get(
     		    cssHTTP,
     		    function(response) { log(response); makeImage(response); }
     		);
-	    	
+	    	*/
 	    }
 	}
 	
@@ -920,15 +902,9 @@ function retrieveImage(src, cb, ownerDocument, useBroken) {
 	}
 	
 	function sendError() {
-		
 		var img = new Image();
 		img.onload = sendSuccess;
 		img.src = useBroken ? retrieveImage.brokenImage : retrieveImage.transparentImage;
-	    
-		//cb("error", 
-		//	retrieveImage.cache[retrieveImage.brokenImage],
-		//	retrieveImage.cache[retrieveImage.transparentImage]
-		//);
 	}
 	
 	function sendSuccess() {
@@ -1029,11 +1005,11 @@ if (window.html2canvasProcessOnLoad) {
 	html2canvas(document.body, window.html2canvasProcessOnLoad);
 }
 
-if (window.parent) {
+if (window.parent != window) {
 	var hasKey = window.parent.h2c && window.parent.h2c.key;
 	assert(hasKey, "No key provided");
 	
-	log("Frame has been loaded.  Key received.", window.parent.document.body, window.parent.h2c.key);
+	log("Frame has been loaded.  Key received.", window.parent.document.body, window.parent.h2c);
 	
 	
 		
