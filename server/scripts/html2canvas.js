@@ -152,18 +152,20 @@ $.fn.splitTextNodes = function() {
 		var hasTextNodes = false;
 		var hasOtherNodes = false;
 		var textNodes = [];
-		element.contents().each(function() {
-			if (this.nodeType == 3) {
+		var contents = element.contents();
+		for (var j = 0, len = contents.length; j < len; j++) {
+			var content = contents[j];
+			if (content.nodeType == 3) {
 				hasTextNodes = true;
-				textNodes.push(this);
+				textNodes.push(content);
 			}
-			else if (this.nodeType != 1) {
-				$(this).remove();
+			else if (content.nodeType != 1) {
+				$(content).remove();
 			}
 			else {
 				hasOtherNodes = true;
 			}
-		});
+		}
 		
 		// If this only has text nodes, 
 		if (hasTextNodes && !hasOtherNodes) {
@@ -175,7 +177,7 @@ $.fn.splitTextNodes = function() {
 			
 			// TODO: Go back to word wrap once we figure out why it is reporting the wrong value
 			// with display inline
-			splitter = " ";
+			splitter = "";
 			//log(wordwrap);
 			var words = singleSpaces.split(splitter);
 			var newHtml = [];
