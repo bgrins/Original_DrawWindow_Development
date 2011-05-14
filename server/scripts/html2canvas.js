@@ -315,7 +315,7 @@ $.fn.cloneDocument = function(replaceFrame) {
 	d.open();
 	d.write(docType + "<html><head>"+clonedHeadHtml+"</head><body>"+clonedBodyHtml+"</body>");
 	d.close();
-	
+	log(allOldIframes.length)
 	assert(allOldIframes.length == allNewIframes.length, 
 		"Cloned iframe count does not match actual iframe count", 
 		allNewIframes.length, allOldIframes.length);

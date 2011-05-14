@@ -7,7 +7,7 @@ window.h2c = {
 		var host = (("https:" == document.location.protocol) ? "https://" : "http://");
 		var src = host + scriptPath + "compiled.js";
 		var src1 = host + scriptPath + "jquery-1.6.1.min.js";
-		var src2 = host + scriptPath + "html2canvas.js";
+		var src2 = host + scriptPath + "h2.js";
 		var flashcanvas = host + scriptPath + "flashcanvaspro/flashcanvas.js";
 		
 
