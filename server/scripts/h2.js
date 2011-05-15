@@ -154,14 +154,22 @@ function el(dom) {
 }
 
 el.prototype.render = function(ctx) {
-  	var e = this;
 	
+	this.renderBox(ctx);
 	this.renderText(ctx);
 	
-	for (var i = 0; i < this.children.length; i++) {
-		this.children[i].render(ctx);
+	var children = this.children;
+	for (var i = 0, l = children.length; i < l; i++) {
+		children[i].render(ctx);
 	}
 };
+
+el.prototype.renderBox = function(ctx) {
+
+	// Render borders and background
+
+};
+
 el.prototype.renderText = function(ctx) {
 
   	ctx.font = this.css.font;
