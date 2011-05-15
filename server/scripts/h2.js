@@ -115,11 +115,11 @@ function getLetterCoords(el, offset) {
 function el(dom) {	
 	var css = this.css = { };
 	this.dom = dom;
+	
 	var computedStyleNormal = computedStyle(dom, styleAttributes);
 	for (var i in computedStyleNormal) {
 	    css[i] = computedStyleNormal[i];
 	}
-	
 	var computedStylePx = computedStyle(dom, styleAttributesPx);
 	for (var i in computedStylePx) {
 	    css[i] = parseInt(computedStylePx[i]) || 0;
@@ -137,15 +137,39 @@ function el(dom) {
 		css.fontSize + "px " + css.fontFamily
 	);
 	
-	log("inited el", this, css);
+	var textNodes = this.textNodes = [];
+	var childNodes = dom.childNodes;
+	for (var j = 0, l = childNodes.length; j < l; j++) {
+		if (childNodes[j].nodeType == 3) {
+			textNodes.push(childNodes[j]);
+		}
+	}
+	
+	log("inited el", this, css, this.children);
+	this.children = $(dom).children().map(function() {
+		return new el(this);
+	});
+	
+	// TODO: order children by z index for rendering
 }
+
 el.prototype.render = function(ctx) {
   	var e = this;
-  	ctx.font = e.css.font;
-  	ctx.fillStyle = e.css.color;
+	
+	this.renderText(ctx);
+	
+	for (var i = 0; i < this.children.length; i++) {
+		this.children[i].render(ctx);
+	}
+};
+el.prototype.renderText = function(ctx) {
+
+  	ctx.font = this.css.font;
+  	ctx.fillStyle = this.css.color;
 	ctx.textBaseline = "bottom";
 	
-	var nodes = $(e.dom).contents().filter(function() { return this.nodeType == 3; });
+	var nodes = this.textNodes;
+	
 	for (var i = 0 ; i < nodes.length; i++) {
 	    var text = nodes[i].data;
 	    for (var f = 0; f < text.length; f++) {
@@ -173,21 +197,17 @@ function initialize(doc, cb) {
 	
 	body.normalize();
 	
-	var width = $(doc.body).outerWidth(true);
-	var height = $(doc.body).outerHeight(true);
-	
+	var width = $(body).outerWidth(true),
+		height = $(body).outerHeight(true);
+		
 	canvas.width = width;
 	canvas.height = height;
 	ctx.fillStyle = "rgba(255,0,0,.2)";
 	ctx.fillRect(0, 0, width, height);
 	
-	var all = $(doc.body).find("*");
-	
-	all.each(function() {
-		var e = new el(this);
-		e.render(ctx);
-	});
-		
+	var bodyElement = new el(body);
+	bodyElement.render(ctx);
+
 	cb(canvas);
 }
 
