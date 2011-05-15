@@ -82,7 +82,8 @@ var styleAttributes = [
 	'display', 'text-decoration',
 	'font-family', 'font-style', 'font-weight', 'color',
 	'position', 'float', 'clear', 'overflow',
-	'background-color', 'background-image', 'background-repeat', 'background-position' 
+	'background-color', 'background-image', 'background-repeat', 'background-position',
+	'z-index'
 ];
 var styleAttributesPx = [
 	'padding-top','padding-right','padding-bottom','padding-left',
@@ -93,31 +94,76 @@ var styleAttributesPx = [
 	'line-height', 'font-size'
 ];
 
-function getSelectionCoordinates(win) {
-    if (win.getSelection) {
-        var sel = win.getSelection();
-        if (sel.rangeCount) {
-        	var range = sel.getRangeAt(sel.rangeCount - 1);
-        	return range.getClientRects()[0];
-        }
-    }
-}
-
-function selectLetter(el, offset) {
+function getLetterCoords(el, offset) {
 	var doc = el.ownerDocument;
 	var range = doc.createRange();
+	var win = doc.defaultView;
+	
 	range.setStart(el, offset);
 	range.setEnd(el, offset + 1);
 	
-	var sel = doc.defaultView.getSelection();
+	var sel = win.getSelection();
 	sel.removeAllRanges();
 	sel.addRange(range);
+	
+	//log("Selecting letter", range, el, offset)
+	var rect = $.extend({ }, sel.getRangeAt(0).getClientRects()[0]);
+	
+	return rect;
 }
 
-function el(dom) {
+function el(dom) {	
+	var css = this.css = { };
+	this.dom = dom;
+	var computedStyleNormal = computedStyle(dom, styleAttributes);
+	for (var i in computedStyleNormal) {
+	    css[i] = computedStyleNormal[i];
+	}
 	
+	var computedStylePx = computedStyle(dom, styleAttributesPx);
+	for (var i in computedStylePx) {
+	    css[i] = parseInt(computedStylePx[i]) || 0;
+	}
 	
+	if (css.zIndex == "auto") {
+		css.zIndex = -1;
+	}
+	else {
+		css.zIndex = parseInt(css.zIndex) || 0;
+	}
+	
+	css.font = $.trim(
+		css.fontStyle + " " + css.fontWeight + " " + 
+		css.fontSize + "px " + css.fontFamily
+	);
+	
+	log("inited el", this, css);
 }
+el.prototype.render = function(ctx) {
+  	var e = this;
+  	ctx.font = e.css.font;
+  	ctx.fillStyle = e.css.color;
+	ctx.textBaseline = "bottom";
+	
+	var nodes = $(e.dom).contents().filter(function() { return this.nodeType == 3; });
+	for (var i = 0 ; i < nodes.length; i++) {
+	    var text = nodes[i].data;
+	    for (var f = 0; f < text.length; f++) {
+	    	var letter = text[f];
+	    	if (letter == ' ' || letter == '\t' || letter == '\n') {
+	    		continue;
+	    	}
+	    	
+	    	var rect = getLetterCoords(nodes[i], f);
+	    	
+	    	//if ($.trim(text).indexOf("consider") == 0) {
+	    	//log(f, text[f], text.length, rect);
+	    	//}
+	    	
+	    	ctx.fillText(text[f], rect.left, rect.bottom);
+	    }
+	}
+};
 
 function initialize(doc, cb) {
 
@@ -127,52 +173,21 @@ function initialize(doc, cb) {
 	
 	body.normalize();
 	
-	
 	var width = $(doc.body).outerWidth(true);
 	var height = $(doc.body).outerHeight(true);
 	
-	canvas.width = canvas.height = 200;
+	canvas.width = width;
+	canvas.height = height;
 	ctx.fillStyle = "rgba(255,0,0,.2)";
-	ctx.fillRect(0, 0, 200, 200);
+	ctx.fillRect(0, 0, width, height);
 	
 	var all = $(doc.body).find("*");
+	
 	all.each(function() {
-		
-		
-		var css = { };
-		
-		
-		var computedStyleNormal = computedStyle(this, styleAttributes);
-		for (var i in computedStyleNormal) {
-			css[i] = computedStyleNormal[i];
-		}
-		
-		var computedStylePx = computedStyle(this, styleAttributesPx);
-		for (var i in computedStylePx) {
-			css[i] = parseInt(computedStylePx[i]) || 0;
-		}
-	
-		var font = $.trim(css.fontStyle + " " + css.fontWeight + " "  + css.fontSize + "px " + css.fontFamily);
-		
-		log(font, css.color)
-  		ctx.font = font;
-  		ctx.fillStyle = css.color;
-		ctx.textBaseline = "bottom";
-		
-		var nodes = $(this).contents().filter(function() { return this.nodeType == 3; });
-		for (var i = 0 ; i < nodes.length; i++) {
-			var text = nodes[i].data;
-			for (var f = 0; f < text.length; f++) {
-				selectLetter(nodes[i], f);
-				var rect = getSelectionCoordinates(window.parent,true);
-				log(f, text, text.length, rect);
-				ctx.fillText(text[f], rect.left, rect.bottom);
-			
-			}
-		}
+		var e = new el(this);
+		e.render(ctx);
 	});
-	
-	
+		
 	cb(canvas);
 }
 
@@ -180,15 +195,22 @@ function render(doc) {
 	var els = [];
 	
 	initialize(doc, function(canvas) {
+		var x = $("<div style='position:absolute; cursor:pointer; width:25px; height:25px; background:red; right:10px; top:10px; z-index:1000;'></div>").click(function() {
+			$(canvas).remove();
+			$(x).remove();
+		});
+		$(canvas).
+			css("position", "absolute").
+			css("top", 0).css("left", 0).
+			css("background", "white");
 		
-		$(doc.body).append("<div style='position:absolute; right:0; top:0; z-index:1000;'>x</div>");
+		$(doc.body).append(x);
 		doc.body.appendChild(canvas);
 	});
 }
 
 if (window.parent != window) {
-	console.log("herE");
-	
+
 	var hasKey = window.parent.h2c && window.parent.h2c.key;
 	assert(hasKey, "No key provided");
 	
@@ -199,8 +221,6 @@ if (window.parent != window) {
 	var parentDoc = window.parent.document;
 	
 	render(parentDoc);
-	log(container, parentDoc);
-	
 }
 
 })();

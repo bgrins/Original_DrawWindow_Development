@@ -7,16 +7,20 @@
   <script type='text/javascript' src='../scripts/jquery-1.5.1.min.js'></script>
   <script type='text/javascript' src='../scripts/loader.js'></script>
   <style>
-  
+  .content { z-index:100; } 
   .wordwrap { word-wrap:break-word; color:red; }
   .box { width:50px; border:solid 1px;}
+  #el1, #el2 { position:absolute; top:10px; left:10px; width: 40px; height: 40px; }
+  #el1 { z-index:10; top:20px; left:20px; background:red;}
+  #el2 { z-index:11; background:blue; }
   </style>
 </head>
 
 <body>
   <div class="content">
     <h2>Better CSS Font Stacks</h2>
-
+	<div id='el1'></div>
+	<div id='el2'></div>
 	<a onclick='return window.h2c.loader();' href='#'>Render</a>
     <ul class="meta">
       <li>by <a href="http://unitinteractive.com/unit-info.php">Nathan Ford</a> 2 years
