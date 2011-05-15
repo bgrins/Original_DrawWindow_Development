@@ -1,13 +1,14 @@
 window.h2c = {
 	key: '_adf2',
 	domain: null,
+	cache: false,
 	frameHTML: function() {
 		var html = [];
 		var scriptPath = "192.168.0.169/~brian/html2canvas/server/scripts/";
 		var host = (("https:" == document.location.protocol) ? "https://" : "http://");
 		var src = host + scriptPath + "compiled.js";
 		var src1 = host + scriptPath + "jquery-1.6.1.min.js";
-		var src2 = host + scriptPath + "h2.js";
+		var src2 = host + scriptPath + "h2.js" + (h2c.cache ? "" : "?dt=" + (new Date()).getTime());
 		var flashcanvas = host + scriptPath + "flashcanvaspro/flashcanvas.js";
 		
 

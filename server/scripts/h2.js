@@ -112,9 +112,36 @@ function getLetterCoords(el, offset) {
 	return rect;
 }
 
-function el(dom) {	
+function el(dom, onready) {	
+
+	this.dom = dom;	
+	this.initializeDOM();
+	
+	var textNodes = this.textNodes = [];
+	var childNodes = dom.childNodes;
+	for (var j = 0, l = childNodes.length; j < l; j++) {
+		if (childNodes[j].nodeType == 3) {
+			textNodes.push(childNodes[j]);
+		}
+	}
+	
+	log("inited el", this);
+	
+	// TODO: order children by z index for rendering
+	this.children = $(dom).children().map(function() {
+		return new el(this);
+	});
+	
+	
+	if (onready) {
+		onready(this);
+	}
+}
+
+el.prototype.initializeDOM = function() {
+	var dom = this.dom;
+	var $dom = $(this.dom);
 	var css = this.css = { };
-	this.dom = dom;
 	
 	var computedStyleNormal = computedStyle(dom, styleAttributes);
 	for (var i in computedStyleNormal) {
@@ -137,25 +164,43 @@ function el(dom) {
 		css.fontSize + "px " + css.fontFamily
 	);
 	
-	var textNodes = this.textNodes = [];
-	var childNodes = dom.childNodes;
-	for (var j = 0, l = childNodes.length; j < l; j++) {
-		if (childNodes[j].nodeType == 3) {
-			textNodes.push(childNodes[j]);
-		}
-	}
+	this.offset = $dom.offset();
+	this.height = $dom.height();
+	this.width = $dom.width();
 	
-	log("inited el", this, css, this.children);
-	this.children = $(dom).children().map(function() {
-		return new el(this);
-	});
+	// outerHeight: Full height, but without the margins
+	css.outerHeight = 
+		this.height + 
+		css.paddingTop +
+		css.paddingBottom +
+		css.borderTopWidth +
+		css.borderBottomWidth;
 	
-	// TODO: order children by z index for rendering
-}
+	// outerHeightMargins: The total bounding height of the object
+	css.outerHeightMargins = 
+		css.outerHeight + 
+		css.marginTop + 
+		css.marginBottom;
+		
+	// outerWidth: Full width, but without the margins
+	css.outerWidth = 
+		this.width + 
+		css.paddingLeft +
+		css.paddingRight +
+		css.borderLeftWidth + 
+		css.borderRightWidth;
+		
+	// outerWidthMargins: The total bounding width of the object
+	css.outerWidthMargins = 
+		css.outerWidth + 
+		css.marginLeft +
+		css.marginRight;		
+};
 
 el.prototype.render = function(ctx) {
 	
 	this.renderBox(ctx);
+	this.renderBorders(ctx);
 	this.renderText(ctx);
 	
 	var children = this.children;
@@ -167,7 +212,14 @@ el.prototype.render = function(ctx) {
 el.prototype.renderBox = function(ctx) {
 
 	// Render borders and background
-
+	
+	var css = this.css;
+	
+	
+	log(css.backgroundColor);
+	ctx.fillStyle = css.backgroundColor;
+	
+	ctx.fillRect(this.offset.left, this.offset.top, css.outerWidth, css.outerHeight);
 };
 
 el.prototype.renderText = function(ctx) {
@@ -197,8 +249,44 @@ el.prototype.renderText = function(ctx) {
 	}
 };
 
-function initialize(doc, cb) {
+el.prototype.renderBorders = function(ctx) {
+	var offsetLeft = this.offset.left;
+	var offsetTop = this.offset.top;
+	var css = this.css;
+	var borderLeftWidth = css.borderLeftWidth;
+	if (borderLeftWidth) {
+		ctx.fillStyle = css.borderLeftColor;
+		ctx.fillRect(
+			offsetLeft, offsetTop, 
+			borderLeftWidth, css.outerHeight);
+	}
+	
+	var borderTopWidth = css.borderTopWidth;
+	if (borderTopWidth) {		
+		ctx.fillStyle = css.borderTopColor;
+		ctx.fillRect(
+			offsetLeft, offsetTop, 
+			css.outerWidth, borderTopWidth);
+	}
+	
+	var borderBottomWidth = css.borderBottomWidth;
+	if (borderBottomWidth) {		
+		ctx.fillStyle = css.borderBottomColor;
+		ctx.fillRect(
+			offsetLeft, offsetTop + css.outerHeight - borderBottomWidth, 
+			css.outerWidth, borderBottomWidth);
+	}
+	
+	var borderRightWidth = css.borderRightWidth;
+	if (borderRightWidth) {		
+		ctx.fillStyle = css.borderRightColor;
+		ctx.fillRect(
+			offsetLeft + css.outerWidth - borderRightWidth, 
+			offsetTop, borderRightWidth, css.outerHeight);
+	}
+};
 
+function initialize(doc, cb) {
 	var body = doc.body;
 	var canvas = doc.createElement("canvas");
 	var ctx = canvas.getContext("2d");
@@ -213,10 +301,10 @@ function initialize(doc, cb) {
 	ctx.fillStyle = "rgba(255,0,0,.2)";
 	ctx.fillRect(0, 0, width, height);
 	
-	var bodyElement = new el(body);
-	bodyElement.render(ctx);
-
-	cb(canvas);
+	new el(body, function(bodyElement) {
+		bodyElement.render(ctx);
+		cb(canvas);
+	});
 }
 
 function render(doc) {
@@ -247,8 +335,9 @@ if (window.parent != window) {
 		
 	var container = window.frameElement.parentNode;
 	var parentDoc = window.parent.document;
-	
-	render(parentDoc);
+	$(document).ready(function() {
+		render(parentDoc);
+	});
 }
 
 })();
