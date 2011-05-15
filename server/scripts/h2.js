@@ -4,6 +4,9 @@ window.h2c = {
 	render: render
 };
 
+var settings = {
+	logLevel: 1
+};
 
 function postValues() {
 	window.open("http://localhost:8080/preview");
@@ -15,8 +18,8 @@ function assert(isTrue) {if (!isTrue){
 function log() { if (window.console) { console.log(Array.prototype.slice.apply(arguments)); } }
 function log1() { if (settings.logLevel >= 1) { log.apply(this, arguments); } }
 function log2() { if (settings.logLevel >= 2) { log.apply(this, arguments); } }
-function error(msg) { throw "[Web Designer] " + msg; return false; }
-function shouldProcess(dom) { return (dom.nodeType == 1) && (!ignoreTags[dom.tagName.toLowerCase()]) && !$(dom).is("span.h2c"); }
+function error(msg) { throw "[H2C] " + msg; return false; }
+
 function computedStyle(elem, styles) {
 
 	// IE - Use jQuery CSS.  Others - Load the computedStyle once and read from it
@@ -43,8 +46,9 @@ function computedStyle(elem, styles) {
 	
 	return ret;
 }
-function createCanvas() {
-	var c = document.createElement("canvas");
+
+function createCanvas(doc) {
+	var c = (doc || document).createElement("canvas");
     if (typeof FlashCanvas != "undefined") {
       FlashCanvas.initElement(c);
     }
@@ -143,6 +147,9 @@ el.prototype.initializeDOM = function() {
 	var $dom = $(this.dom);
 	var css = this.css = { };
 	
+	this.tagName = dom.tagName.toLowerCase();
+	this.isBody = this.tagName == "body";
+	
 	var computedStyleNormal = computedStyle(dom, styleAttributes);
 	for (var i in computedStyleNormal) {
 	    css[i] = computedStyleNormal[i];
@@ -150,6 +157,11 @@ el.prototype.initializeDOM = function() {
 	var computedStylePx = computedStyle(dom, styleAttributesPx);
 	for (var i in computedStylePx) {
 	    css[i] = parseInt(computedStylePx[i]) || 0;
+	}
+	
+	
+	if (css.backgroundColor == "rgba(0, 0, 0, 0)" || css.backgroundColor == "transparent") {
+		css.backgroundColor = false;
 	}
 	
 	if (css.zIndex == "auto") {
@@ -164,13 +176,17 @@ el.prototype.initializeDOM = function() {
 		css.fontSize + "px " + css.fontFamily
 	);
 	
-	this.offset = $dom.offset();
-	this.height = $dom.height();
-	this.width = $dom.width();
+	css.offset = $dom.offset();
+	css.height = $dom.height();
+	css.width = $dom.width();
+	
+	css.scrollHeight = dom.scrollHeight;
+	css.scrollWidth = dom.scrollWidth;
+	
 	
 	// outerHeight: Full height, but without the margins
 	css.outerHeight = 
-		this.height + 
+		css.height + 
 		css.paddingTop +
 		css.paddingBottom +
 		css.borderTopWidth +
@@ -184,7 +200,7 @@ el.prototype.initializeDOM = function() {
 		
 	// outerWidth: Full width, but without the margins
 	css.outerWidth = 
-		this.width + 
+		css.width + 
 		css.paddingLeft +
 		css.paddingRight +
 		css.borderLeftWidth + 
@@ -214,12 +230,21 @@ el.prototype.renderBox = function(ctx) {
 	// Render borders and background
 	
 	var css = this.css;
+	var isBody = this.isBody;
 	
+	if (!css.backgroundColor) {
+		return;
+	}
 	
-	log(css.backgroundColor);
+	var offsetLeft = isBody ? 0 : css.offset.left;
+	var offsetTop = isBody ? 0 : css.offset.top;
+	var outerWidth = isBody ? css.outerWidthMargins : css.outerWidth;
+	var outerHeight = isBody ? css.outerHeightMargins : css.outerHeight;
+	
+	log(css.backgroundColor, offsetLeft, offsetTop, outerHeight, outerWidth);
+	
 	ctx.fillStyle = css.backgroundColor;
-	
-	ctx.fillRect(this.offset.left, this.offset.top, css.outerWidth, css.outerHeight);
+	ctx.fillRect(offsetLeft, offsetTop, outerWidth, outerHeight);
 };
 
 el.prototype.renderText = function(ctx) {
@@ -250,9 +275,10 @@ el.prototype.renderText = function(ctx) {
 };
 
 el.prototype.renderBorders = function(ctx) {
-	var offsetLeft = this.offset.left;
-	var offsetTop = this.offset.top;
 	var css = this.css;
+	var offsetLeft = css.offset.left;
+	var offsetTop = css.offset.top;
+	
 	var borderLeftWidth = css.borderLeftWidth;
 	if (borderLeftWidth) {
 		ctx.fillStyle = css.borderLeftColor;
@@ -288,13 +314,13 @@ el.prototype.renderBorders = function(ctx) {
 
 function initialize(doc, cb) {
 	var body = doc.body;
-	var canvas = doc.createElement("canvas");
+	var canvas = createCanvas(doc);
 	var ctx = canvas.getContext("2d");
 	
 	body.normalize();
 	
-	var width = $(body).outerWidth(true),
-		height = $(body).outerHeight(true);
+	var width = $(doc).width()
+		height = $(doc).height();
 		
 	canvas.width = width;
 	canvas.height = height;
