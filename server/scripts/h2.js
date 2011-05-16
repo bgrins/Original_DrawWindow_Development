@@ -98,7 +98,7 @@ var styleAttributesPx = [
 	'line-height', 'font-size'
 ];
 
-function getLetterCoords(el, offset) {
+function getLetterRect(el, offset) {
 	var doc = el.ownerDocument;
 	var range = doc.createRange();
 	var win = doc.defaultView;
@@ -146,6 +146,9 @@ el.prototype.initializeDOM = function() {
 	var dom = this.dom;
 	var $dom = $(this.dom);
 	var css = this.css = { };
+	
+	
+	this.clientRects = dom.getClientRects();
 	
 	this.tagName = dom.tagName.toLowerCase();
 	this.isBody = this.tagName == "body";
@@ -210,10 +213,14 @@ el.prototype.initializeDOM = function() {
 	css.outerWidthMargins = 
 		css.outerWidth + 
 		css.marginLeft +
-		css.marginRight;		
+		css.marginRight;
+				
 };
 
 el.prototype.render = function(ctx) {
+	if (this.css.display == 'none') {
+		return;
+	}
 	
 	this.renderBox(ctx);
 	this.renderBorders(ctx);
@@ -236,15 +243,32 @@ el.prototype.renderBox = function(ctx) {
 		return;
 	}
 	
+	if (isBody) {
+	
+	}
+	else {
+	
+	}
+	
+	var rects = this.clientRects;
+	for (var i = 0; i < rects.length; i++) {
+		
+		var offsetLeft = isBody ? 0 : rects[i].left;
+		var offsetTop = isBody ? 0 : rects[i].top;
+		var outerWidth = isBody ? css.outerWidthMargins : rects[i].width;
+		var outerHeight = isBody ? css.outerHeightMargins : rects[i].height;
+		
+	log(css.backgroundColor, this.clientRects,offsetLeft, offsetTop, outerHeight, outerWidth);
+	ctx.fillStyle = css.backgroundColor;
+	ctx.fillRect(offsetLeft, offsetTop, outerWidth, outerHeight);
+	}
+	
+	/*
 	var offsetLeft = isBody ? 0 : css.offset.left;
 	var offsetTop = isBody ? 0 : css.offset.top;
 	var outerWidth = isBody ? css.outerWidthMargins : css.outerWidth;
 	var outerHeight = isBody ? css.outerHeightMargins : css.outerHeight;
-	
-	log(css.backgroundColor, offsetLeft, offsetTop, outerHeight, outerWidth);
-	
-	ctx.fillStyle = css.backgroundColor;
-	ctx.fillRect(offsetLeft, offsetTop, outerWidth, outerHeight);
+	*/
 };
 
 el.prototype.renderText = function(ctx) {
@@ -263,11 +287,9 @@ el.prototype.renderText = function(ctx) {
 	    		continue;
 	    	}
 	    	
-	    	var rect = getLetterCoords(nodes[i], f);
+	    	var rect = getLetterRect(nodes[i], f);
 	    	
-	    	//if ($.trim(text).indexOf("consider") == 0) {
-	    	//log(f, text[f], text.length, rect);
-	    	//}
+	    	//log(f, text[f], text.length, rect, this.tagName);
 	    	
 	    	ctx.fillText(text[f], rect.left, rect.bottom);
 	    }
