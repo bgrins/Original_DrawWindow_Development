@@ -308,49 +308,51 @@ el.prototype.renderText = function(ctx) {
 };
 
 el.prototype.renderBorders = function(ctx, rect) {
-	var css = this.css;
-	var offsetLeft = rect.left;
-	var offsetTop = rect.top;
-	
-	var borderLeftWidth = css.borderLeftWidth;
+	var css = this.css,
+		left = rect.left, 
+		top = rect.top, 
+		width = rect.width, 
+		height = rect.height,
+		borderLeftWidth = css.borderLeftWidth,
+		borderTopWidth = css.borderTopWidth,
+		borderBottomWidth = css.borderBottomWidth,
+		borderRightWidth = css.borderRightWidth,
+		outlineWidth = css.outlineWidth;
+		
 	if (borderLeftWidth) {
 		ctx.fillStyle = css.borderLeftColor;
 		ctx.fillRect(
-			offsetLeft, offsetTop, 
-			borderLeftWidth, rect.height);
+			left, top, 
+			borderLeftWidth, height);
 	}
 	
-	var borderTopWidth = css.borderTopWidth;
 	if (borderTopWidth) {		
 		ctx.fillStyle = css.borderTopColor;
 		ctx.fillRect(
-			offsetLeft, offsetTop, 
-			rect.width, borderTopWidth);
+			left, top, 
+			width, borderTopWidth);
 	}
 	
-	var borderBottomWidth = css.borderBottomWidth;
 	if (borderBottomWidth) {		
 		ctx.fillStyle = css.borderBottomColor;
 		ctx.fillRect(
-			offsetLeft, offsetTop + rect.height - borderBottomWidth, 
-			rect.width, borderBottomWidth);
+			left, top + height - borderBottomWidth, 
+			width, borderBottomWidth);
 	}
 	
-	var borderRightWidth = css.borderRightWidth;
 	if (borderRightWidth) {		
 		ctx.fillStyle = css.borderRightColor;
 		ctx.fillRect(
-			offsetLeft + rect.width - borderRightWidth, 
-			offsetTop, borderRightWidth, rect.height);
+			left + width - borderRightWidth, 
+			top, borderRightWidth, height);
 	}
 	
-	var outlineWidth = css.outlineWidth;
 	if (outlineWidth > 0) {
 	    ctx.strokeStyle = css.outlineColor;
 	    ctx.lineWidth = outlineWidth;
 	    ctx.strokeRect(
-	    	offsetLeft - (outlineWidth / 2), offsetTop - (outlineWidth / 2), 
-	    	rect.width + outlineWidth, rect.height + outlineWidth);
+	    	left - (outlineWidth / 2), top - (outlineWidth / 2), 
+	    	rect + outlineWidth, rect + outlineWidth);
 	}
 };
 
