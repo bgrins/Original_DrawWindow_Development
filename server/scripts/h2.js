@@ -98,6 +98,11 @@ var styleAttributesPx = [
 	'line-height', 'font-size'
 ];
 
+
+function orderByZIndex(el1, el2) {
+   return el1.css.zIndex - el2.css.zIndex;
+}
+
 function getLetterRect(el, offset) {
 	var doc = el.ownerDocument;
 	var range = doc.createRange();
@@ -113,6 +118,7 @@ function getLetterRect(el, offset) {
 	//log("Selecting letter", range, el, offset)
 	var rect = $.extend({ }, sel.getRangeAt(0).getClientRects()[0]);
 	
+	sel.removeAllRanges();
 	return rect;
 }
 
@@ -151,12 +157,11 @@ function el(dom, onready) {
 	this.initializeDOM();
 	
 	
-	log("inited el", this);
+	log("Initialized " + this.tagName, this);
 	
-	// TODO: order children by z index for rendering
 	this.children = $(dom).children().map(function() {
 		return new el(this);
-	});
+	}).sort(orderByZIndex);
 	
 	this.childrenInitialized = true;
 	
@@ -195,12 +200,7 @@ el.prototype.initializeDOM = function() {
 		css.fontSize + "px " + css.fontFamily
 	);
 	
-	if (css.zIndex == "auto") {
-		css.zIndex = -1;
-	}
-	else {
-		css.zIndex = parseInt(css.zIndex) || 0;
-	}
+	css.zIndex = parseInt(css.zIndex) || 0;
 	
 	
 	if (this.isBody) {
@@ -237,48 +237,21 @@ el.prototype.render = function(ctx) {
 		return;
 	}
 	
-	this.renderBox(ctx);
+	// Render background and borders for each rectangle (inline elements spanning 
+	// multiple lines could have more than one clientRect)
+	var rects = this.clientRects;
+	for (var i = 0, j = rects.length; i < j; i++) {
+		this.renderBackground(ctx, rects[i]);
+		this.renderBorders(ctx, rects[i]);
+	}
+	
+	// Render text character by character
 	this.renderText(ctx);
 	
+	// Render all children
 	var children = this.children;
 	for (var i = 0, l = children.length; i < l; i++) {
 		children[i].render(ctx);
-	}
-};
-
-
-// Render borders and background colors / images
-el.prototype.renderBox = function(ctx) {
-
-	var css = this.css;
-	var isBody = this.isBody;
-	var backgroundColor = css.backgroundColor;
-	var rects = this.clientRects;
-	var loadedImage = this.loadedImage;
-	
-	for (var i = 0; i < rects.length; i++) {
-	
-		var rect = rects[i];
-		var backgroundRect = isBody ? css.backgroundRect : rect;
-				
-		if (backgroundColor) {
-			ctx.fillStyle = backgroundColor;
-			ctx.fillRect(
-				backgroundRect.left, backgroundRect.top, 
-				backgroundRect.width, backgroundRect.height
-			);
-		}
-		
-		if (loadedImage) {
-			var repeat = this.tagName == "img" ? "no-repeat" : css.backgroundRepeat;
-			ctx.fillStyle = ctx.createPattern(loadedImage, repeat);
-			ctx.fillRect(
-				backgroundRect.left, backgroundRect.top, 
-				backgroundRect.width, backgroundRect.height
-			);
-		}
-		
-		this.renderBorders(ctx, rect);
 	}
 };
 
@@ -307,6 +280,31 @@ el.prototype.renderText = function(ctx) {
 	}
 };
 
+el.prototype.renderBackground = function(ctx, rect) {
+
+	var css = this.css;
+	var isBody = this.isBody;
+	var backgroundColor = css.backgroundColor;
+	var loadedImage = this.loadedImage;
+	var backgroundRect = isBody ? css.backgroundRect : rect;
+	
+	if (backgroundColor) {
+	   ctx.fillStyle = backgroundColor;
+	   ctx.fillRect(
+	   	backgroundRect.left, backgroundRect.top, 
+	   	backgroundRect.width, backgroundRect.height
+	   );
+	}
+	
+	if (loadedImage) {
+	   var repeat = this.tagName == "img" ? "no-repeat" : css.backgroundRepeat;
+	   ctx.fillStyle = ctx.createPattern(loadedImage, repeat);
+	   ctx.fillRect(
+	   	backgroundRect.left, backgroundRect.top, 
+	   	backgroundRect.width, backgroundRect.height
+	   );
+	}
+};
 el.prototype.renderBorders = function(ctx, rect) {
 	var css = this.css,
 		left = rect.left, 
