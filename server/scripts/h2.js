@@ -293,14 +293,16 @@ el.prototype.renderText = function(ctx) {
 	for (var i = 0 ; i < nodes.length; i++) {
 	    var text = nodes[i].data;
 	    for (var f = 0; f < text.length; f++) {
-	    	var letter = text[f];
-	    	if (letter == ' ' || letter == '\t' || letter == '\n') {
+	    	
+	    	// Don't print any whitespace
+	    	if (text[f].match(/\s/)) {
 	    		continue;
 	    	}
 	    	
+	    	// Get the coordinates for this letter, and draw it to the canvas
 	    	var rect = getLetterRect(nodes[i], f);
-	    	//log(f, text[f], text.length, rect, this.tagName);
 	    	ctx.fillText(text[f], rect.left, rect.bottom);
+	    	//log(f, text[f], text.length, rect, this.tagName);
 	    }
 	}
 };
