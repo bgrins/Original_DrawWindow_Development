@@ -179,51 +179,32 @@ el.prototype.initializeDOM = function() {
 		css.fontSize + "px " + css.fontFamily
 	);
 	
-	css.offset = $dom.offset();
-	css.height = $dom.height();
-	css.width = $dom.width();
+	//css.offset = $dom.offset();
+	//css.height = $dom.height();
+	//css.width = $dom.width();
+	//css.outerHeightMargins = $dom.outerHeight(true);
+	//css.outerWidthMargins = $dom.outerWidth(true);
+	//css.scrollWidth = dom.scrollWidth;
+	//css.scrollHeight = dom.scrollHeight;
 	
-	css.scrollHeight = dom.scrollHeight;
-	css.scrollWidth = dom.scrollWidth;
 	
+	if (this.isBody) {
+		var doc = dom.ownerDocument || document;
+		css.backgroundRect = {
+			top: 0, left: 0, width: $(doc).width(), height: $(doc).height()
+		};
+	}
 	
-	// outerHeight: Full height, but without the margins
-	css.outerHeight = 
-		css.height + 
-		css.paddingTop +
-		css.paddingBottom +
-		css.borderTopWidth +
-		css.borderBottomWidth;
-	
-	// outerHeightMargins: The total bounding height of the object
-	css.outerHeightMargins = 
-		css.outerHeight + 
-		css.marginTop + 
-		css.marginBottom;
-		
-	// outerWidth: Full width, but without the margins
-	css.outerWidth = 
-		css.width + 
-		css.paddingLeft +
-		css.paddingRight +
-		css.borderLeftWidth + 
-		css.borderRightWidth;
-		
-	// outerWidthMargins: The total bounding width of the object
-	css.outerWidthMargins = 
-		css.outerWidth + 
-		css.marginLeft +
-		css.marginRight;
-				
 };
 
 el.prototype.render = function(ctx) {
+
+	
 	if (this.css.display == 'none') {
 		return;
 	}
 	
 	this.renderBox(ctx);
-	this.renderBorders(ctx);
 	this.renderText(ctx);
 	
 	var children = this.children;
@@ -232,43 +213,32 @@ el.prototype.render = function(ctx) {
 	}
 };
 
+
+/*
+	Render borders and background colors / images
+*/
 el.prototype.renderBox = function(ctx) {
 
-	// Render borders and background
-	
 	var css = this.css;
 	var isBody = this.isBody;
-	
-	if (!css.backgroundColor) {
-		return;
-	}
-	
-	if (isBody) {
-	
-	}
-	else {
-	
-	}
-	
+	var fillStyle = css.backgroundColor;
 	var rects = this.clientRects;
-	for (var i = 0; i < rects.length; i++) {
-		
-		var offsetLeft = isBody ? 0 : rects[i].left;
-		var offsetTop = isBody ? 0 : rects[i].top;
-		var outerWidth = isBody ? css.outerWidthMargins : rects[i].width;
-		var outerHeight = isBody ? css.outerHeightMargins : rects[i].height;
-		
-	log(css.backgroundColor, this.clientRects,offsetLeft, offsetTop, outerHeight, outerWidth);
-	ctx.fillStyle = css.backgroundColor;
-	ctx.fillRect(offsetLeft, offsetTop, outerWidth, outerHeight);
-	}
 	
-	/*
-	var offsetLeft = isBody ? 0 : css.offset.left;
-	var offsetTop = isBody ? 0 : css.offset.top;
-	var outerWidth = isBody ? css.outerWidthMargins : css.outerWidth;
-	var outerHeight = isBody ? css.outerHeightMargins : css.outerHeight;
-	*/
+	for (var i = 0; i < rects.length; i++) {
+	
+		var rect = rects[i];
+		var backgroundRect = isBody ? css.backgroundRect : rect;
+				
+		if (fillStyle) {
+			ctx.fillStyle = fillStyle;
+			ctx.fillRect(
+				backgroundRect.left, backgroundRect.top, 
+				backgroundRect.width, backgroundRect.height
+			);
+		}
+		
+		this.renderBorders(ctx, rect);
+	}
 };
 
 el.prototype.renderText = function(ctx) {
@@ -296,17 +266,17 @@ el.prototype.renderText = function(ctx) {
 	}
 };
 
-el.prototype.renderBorders = function(ctx) {
+el.prototype.renderBorders = function(ctx, rect) {
 	var css = this.css;
-	var offsetLeft = css.offset.left;
-	var offsetTop = css.offset.top;
+	var offsetLeft = rect.left;
+	var offsetTop = rect.top;
 	
 	var borderLeftWidth = css.borderLeftWidth;
 	if (borderLeftWidth) {
 		ctx.fillStyle = css.borderLeftColor;
 		ctx.fillRect(
 			offsetLeft, offsetTop, 
-			borderLeftWidth, css.outerHeight);
+			borderLeftWidth, rect.height);
 	}
 	
 	var borderTopWidth = css.borderTopWidth;
@@ -314,24 +284,36 @@ el.prototype.renderBorders = function(ctx) {
 		ctx.fillStyle = css.borderTopColor;
 		ctx.fillRect(
 			offsetLeft, offsetTop, 
-			css.outerWidth, borderTopWidth);
+			rect.width, borderTopWidth);
 	}
 	
 	var borderBottomWidth = css.borderBottomWidth;
 	if (borderBottomWidth) {		
 		ctx.fillStyle = css.borderBottomColor;
 		ctx.fillRect(
-			offsetLeft, offsetTop + css.outerHeight - borderBottomWidth, 
-			css.outerWidth, borderBottomWidth);
+			offsetLeft, offsetTop + rect.height - borderBottomWidth, 
+			rect.width, borderBottomWidth);
 	}
 	
 	var borderRightWidth = css.borderRightWidth;
 	if (borderRightWidth) {		
 		ctx.fillStyle = css.borderRightColor;
 		ctx.fillRect(
-			offsetLeft + css.outerWidth - borderRightWidth, 
-			offsetTop, borderRightWidth, css.outerHeight);
+			offsetLeft + rect.width - borderRightWidth, 
+			offsetTop, borderRightWidth, rect.height);
 	}
+	
+	
+	var outlineWidth = css.outlineWidth;
+	if (outlineWidth > 0) {
+	    ctx.strokeStyle = css.outlineColor;
+	    ctx.lineWidth = outlineWidth;
+	    ctx.strokeRect(
+	    	offsetLeft - (outlineWidth / 2), offsetTop - (outlineWidth / 2), 
+	    	rect.width + outlineWidth, rect.height + outlineWidth);
+	}
+		
+	
 };
 
 function initialize(doc, cb) {
