@@ -108,13 +108,15 @@ function getScrolledRects(rects, scrollElement) { //clientRect, body) {
 	scrollElement = scrollElement || rectElement;
 	var body = scrollElement.ownerDocument.body;
 	
-	var parent = scrollElement;
 	var scrollTop = body.scrollTop, scrollLeft = body.scrollLeft;
 	
+	var parent = scrollElement;
 	while (parent != body) {
+		parent = parent.parentNode;
+		if (parent == body) { break; }
+		
 		scrollTop += parent.scrollTop;
 		scrollLeft += parent.scrollLeft;
-		parent = parent.parentNode;
 	}
 	
 	var clientRects = [];
@@ -132,6 +134,22 @@ function getScrolledRects(rects, scrollElement) { //clientRect, body) {
 	}
 	
 	return clientRects;
+}
+
+function getClippingRect(dom) {
+	var rect = {
+		top: dom.offsetTop,
+		left: dom.offsetLeft,
+		width: dom.offsetWidth,
+		height: dom.offsetHeight
+	};
+	rect.bottom = rect.top + rect.height;
+	rect.right = rect.left + rect.width;
+	return rect;
+}
+
+function clip(rect, parent) {
+	return rect;
 }
 
 function getLetterRect(el, offset) {
@@ -181,6 +199,7 @@ function el(dom, onready) {
 	}
 	else {
 		this.parent = dom.parentNode._element;
+		this.scrollParent = this.parent.scrollParent;
 		this.body = this.parent.body;
 	}
 	
@@ -208,10 +227,17 @@ el.prototype.initializeDOM = function() {
 	var $dom = $(this.dom);
 	var css = this.css = { };
 	
-	var clientRects = this.clientRects = getScrolledRects(dom.getClientRects(), dom);
+	this.clientRects = getScrolledRects(dom.getClientRects(), dom);
+	this.clippingRect = getClippingRect(dom);
+	var position = $dom.position();
+	var offset = $dom.offset();
+	
+	this.scrollTop = dom.scrollTop;
+	this.scrollLeft = dom.scrollLeft;
+	if ((this.scrollTop > 0 || this.scrollLeft > 0) && this.body != this) { this.scrollParent = this; }
 	
 	this.src = this.tagName == 'img' ? $dom.attr("src") : false;
-	this.shouldRender = (dom.offsetWidth > 0 && dom.offsetHeight > 0);
+	this.shouldRender = (this.clippingRect.width > 0 && this.clippingRect.height > 0);
 	
 	var computedStyleNormal = computedStyle(dom, styleAttributes);
 	for (var i in computedStyleNormal) {
@@ -232,7 +258,6 @@ el.prototype.initializeDOM = function() {
 	);
 	
 	css.zIndex = parseInt(css.zIndex) || 0;
-	
 	
 	if (this.isBody) {
 		var doc = dom.ownerDocument || document;
@@ -293,6 +318,8 @@ el.prototype.renderText = function(ctx) {
   	ctx.fillStyle = css.color;
 	ctx.textBaseline = "bottom";
 	
+	var scrollParent = this.scrollParent;
+	
 	var nodes = this.textNodes;
 	for (var i = 0 ; i < nodes.length; i++) {
 	    var text = nodes[i].data;
@@ -304,7 +331,13 @@ el.prototype.renderText = function(ctx) {
 	    	}
 	    	
 	    	// Get the coordinates for this letter, and draw it to the canvas
-	    	var rect = getLetterRect(nodes[i], f);
+	    	var rect = getLetterRect(nodes[i], f, true);
+	    	rect = clip(rect, scrollParent);
+	    	if (text[f] == 'Z') {
+	    		log("HERE", rect, nodes[i].parentNode.scrollTop,
+	    			nodes[i].parentNode.parentNode.scrollTop
+	    		 )
+	    	}
 	    	ctx.fillText(text[f], rect.left, rect.bottom);
 	    	//log(f, text[f], text.length, rect, this.tagName);
 	    }

@@ -16,8 +16,8 @@
   #el2 { z-index:11; background:blue; }
   #background {z-index: 101; position:absolute; top:0; left:0;}
   .message { background-color: orange; padding:10px; margin:50px; border: dashed 4px #000; }
-  #overflow-container { overflow:scroll; background:grey; width:200px; height:100px;  }
-  #overflow-child { background:red; height:200px; width:400px;}
+  #overflow-container { border:10px solid blue; padding:10px; margin:10px; overflow:scroll; background:grey; width:200px; height:100px;  }
+  #overflow-child { background:red; height:500px; width:500px;}
   </style>
 </head>
 
@@ -29,7 +29,7 @@
 	</div>
   <div class="content">
     <h2>Better CSS Font Stacks</h2>
-	<a onclick='return window.h2c.loader();' href='#'>Render</a>
+	<a id='render' onclick='return window.h2c.loader();' href='#'>Render</a>
     <ul class="meta">
       <li>by <a href="http://unitinteractive.com/unit-info.php">Nathan Ford</a> 2 years
       ago</li>
@@ -40,7 +40,7 @@
 		Hey, this is a message;
 	</p>
 	<div id='overflow-container'>
-		<div id='overflow-child'>Hey, this is overflow</div>
+		<div id='overflow-child'>Z Hey, this is overflow</div>
 		
 	</div>
     <p id='ptag' style='text-align:right;border-top:solid 10px; margin-left:5px; padding-top:6px; margin-top:3px; '>One aspec
