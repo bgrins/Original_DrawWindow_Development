@@ -4,7 +4,7 @@ window.h2c = {
 	cache: false,
 	frameHTML: function() {
 		var html = [];
-		var scriptPath = "192.168.0.169/~brian/html2canvas/server/scripts/";
+		var scriptPath = "localhost/~brian/html2canvas/server/scripts/";
 		var host = (("https:" == document.location.protocol) ? "https://" : "http://");
 		var src = host + scriptPath + "compiled.js";
 		var src1 = host + scriptPath + "jquery-1.6.1.min.js";

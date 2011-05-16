@@ -103,19 +103,35 @@ function orderByZIndex(el1, el2) {
    return el1.css.zIndex - el2.css.zIndex;
 }
 
-function getScrolledRect(clientRect, body) {
-
-	var scrollTop = body.scrollTop;
-	var scrollLeft = body.scrollLeft;
+function getScrolledRects(rects, scrollElement) { //clientRect, body) {
 	
-	return {
-		left: clientRect.left + scrollLeft,
-		top: clientRect.top + scrollTop,
-		bottom: clientRect.bottom + scrollTop,
-		right: clientRect.right + scrollLeft,
-		width: clientRect.width,
-		height: clientRect.height
-	};
+	scrollElement = scrollElement || rectElement;
+	var body = scrollElement.ownerDocument.body;
+	
+	var parent = scrollElement;
+	var scrollTop = body.scrollTop, scrollLeft = body.scrollLeft;
+	
+	while (parent != body) {
+		scrollTop += parent.scrollTop;
+		scrollLeft += parent.scrollLeft;
+		parent = parent.parentNode;
+	}
+	
+	var clientRects = [];
+	
+	for (var i = 0; i < rects.length; i++) {
+		var rect = rects[i];
+		clientRects.push({
+			left: rect.left + scrollLeft,
+			top: rect.top + scrollTop,
+			bottom: rect.bottom + scrollTop,
+			right: rect.right + scrollLeft,
+			width: rect.width,
+			height: rect.height
+		})
+	}
+	
+	return clientRects;
 }
 
 function getLetterRect(el, offset) {
@@ -130,8 +146,10 @@ function getLetterRect(el, offset) {
 	sel.removeAllRanges();
 	sel.addRange(range);
 	
-	var clientRect = sel.getRangeAt(0).getClientRects()[0];
-	return getScrolledRect(clientRect, doc.body);
+	var rangeRects = sel.getRangeAt(0).getClientRects();
+	var clientRect = getScrolledRects(rangeRects, el.parentNode)[0];
+	sel.removeAllRanges()
+	return clientRect;
 }
 
 function el(dom, onready) {	
@@ -190,14 +208,7 @@ el.prototype.initializeDOM = function() {
 	var $dom = $(this.dom);
 	var css = this.css = { };
 	
-	var bodyScroll = { left: this.body.dom.scrollLeft, top: this.body.dom.scrollTop };
-	var clientRects = this.clientRects = [];
-	var clientRectList = dom.getClientRects();
-	
-	var bodyDOM = this.body.dom;
-	for (var i = 0; i < clientRectList.length; i++) {
-		clientRects.push(getScrolledRect(clientRectList[i], bodyDOM));
-	}
+	var clientRects = this.clientRects = getScrolledRects(dom.getClientRects(), dom);
 	
 	this.src = this.tagName == 'img' ? $dom.attr("src") : false;
 	this.shouldRender = (dom.offsetWidth > 0 && dom.offsetHeight > 0);
@@ -399,7 +410,7 @@ function render(doc) {
 	var els = [];
 	
 	initialize(doc, function(canvas) {
-		var x = $("<div style='position:absolute; cursor:pointer; width:25px; height:25px; background:red; right:10px; top:10px; z-index:1000;'></div>").click(function() {
+		var x = $("<div style='position:absolute; cursor:pointer; width:25px; height:25px; background:red; right:10px; top:10px; z-index:100002;'></div>").click(function() {
 			$(canvas).remove();
 			$(x).remove();
 		});
