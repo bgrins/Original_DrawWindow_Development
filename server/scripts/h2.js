@@ -252,16 +252,26 @@ el.prototype.renderBox = function(ctx) {
 
 	var css = this.css;
 	var isBody = this.isBody;
-	var fillStyle = css.backgroundColor;
+	var backgroundColor = css.backgroundColor;
 	var rects = this.clientRects;
+	var loadedImage = this.loadedImage;
 	
 	for (var i = 0; i < rects.length; i++) {
 	
 		var rect = rects[i];
 		var backgroundRect = isBody ? css.backgroundRect : rect;
 				
-		if (fillStyle) {
-			ctx.fillStyle = fillStyle;
+		if (backgroundColor) {
+			ctx.fillStyle = backgroundColor;
+			ctx.fillRect(
+				backgroundRect.left, backgroundRect.top, 
+				backgroundRect.width, backgroundRect.height
+			);
+		}
+		
+		if (loadedImage) {
+			var repeat = this.tagName == "img" ? "no-repeat" : css.backgroundRepeat;
+			ctx.fillStyle = ctx.createPattern(loadedImage, repeat);
 			ctx.fillRect(
 				backgroundRect.left, backgroundRect.top, 
 				backgroundRect.width, backgroundRect.height
@@ -332,7 +342,6 @@ el.prototype.renderBorders = function(ctx, rect) {
 			offsetTop, borderRightWidth, rect.height);
 	}
 	
-	
 	var outlineWidth = css.outlineWidth;
 	if (outlineWidth > 0) {
 	    ctx.strokeStyle = css.outlineColor;
@@ -341,8 +350,6 @@ el.prototype.renderBorders = function(ctx, rect) {
 	    	offsetLeft - (outlineWidth / 2), offsetTop - (outlineWidth / 2), 
 	    	rect.width + outlineWidth, rect.height + outlineWidth);
 	}
-		
-	
 };
 
 function initialize(doc, cb) {
