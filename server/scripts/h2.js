@@ -103,6 +103,21 @@ function orderByZIndex(el1, el2) {
    return el1.css.zIndex - el2.css.zIndex;
 }
 
+function getScrolledRect(clientRect, body) {
+
+	var scrollTop = body.scrollTop;
+	var scrollLeft = body.scrollLeft;
+	
+	return {
+		left: clientRect.left + scrollLeft,
+		top: clientRect.top + scrollTop,
+		bottom: clientRect.bottom + scrollTop,
+		right: clientRect.right + scrollLeft,
+		width: clientRect.width,
+		height: clientRect.height
+	};
+}
+
 function getLetterRect(el, offset) {
 	var doc = el.ownerDocument;
 	var range = doc.createRange();
@@ -115,11 +130,8 @@ function getLetterRect(el, offset) {
 	sel.removeAllRanges();
 	sel.addRange(range);
 	
-	//log("Selecting letter", range, el, offset)
-	var rect = $.extend({ }, sel.getRangeAt(0).getClientRects()[0]);
-	
-	sel.removeAllRanges();
-	return rect;
+	var clientRect = sel.getRangeAt(0).getClientRects()[0];
+	return getScrolledRect(clientRect, doc.body);
 }
 
 function el(dom, onready) {	
@@ -178,7 +190,15 @@ el.prototype.initializeDOM = function() {
 	var $dom = $(this.dom);
 	var css = this.css = { };
 	
-	this.clientRects = dom.getClientRects();
+	var bodyScroll = { left: this.body.dom.scrollLeft, top: this.body.dom.scrollTop };
+	var clientRects = this.clientRects = [];
+	var clientRectList = dom.getClientRects();
+	
+	var bodyDOM = this.body.dom;
+	for (var i = 0; i < clientRectList.length; i++) {
+		clientRects.push(getScrolledRect(clientRectList[i], bodyDOM));
+	}
+	
 	this.src = this.tagName == 'img' ? $dom.attr("src") : false;
 	this.shouldRender = (dom.offsetWidth > 0 && dom.offsetHeight > 0);
 	
@@ -386,7 +406,8 @@ function render(doc) {
 		$(canvas).
 			css("position", "absolute").
 			css("top", 0).css("left", 0).
-			css("background", "white");
+			css("background", "white").
+			css("z-index", "100001");
 		
 		$(doc.body).append(x);
 		doc.body.appendChild(canvas);
