@@ -119,15 +119,37 @@ function getLetterRect(el, offset) {
 function el(dom, onready) {	
 
 	this.dom = dom;	
-	this.initializeDOM();
+	dom._element = this;
 	
-	var textNodes = this.textNodes = [];
-	var childNodes = dom.childNodes;
-	for (var j = 0, l = childNodes.length; j < l; j++) {
-		if (childNodes[j].nodeType == 3) {
-			textNodes.push(childNodes[j]);
+	this.tagName = dom.tagName.toLowerCase();
+	this.isBody = this.tagName == "body";
+	
+	
+	if (this.isBody) {
+		var body = this.body = this;
+		this.pendingResources = 0;
+		this.checkImages = function() {
+			if (this.childrenInitialized && this.pendingResources <= 0) {
+				onready(this);
+			}
+		};
+		this.loadImage = function(src, useBroken, element) {
+			this.pendingResources++;
+			retrieveImage(src, function(img) {
+				element.loadedImage = img;
+				log("Set elements loaded image", img);
+				body.pendingResources--;
+				body.checkImages();
+			}, dom.ownerDocument, useBroken);
 		}
 	}
+	else {
+		this.parent = dom.parentNode._element;
+		this.body = this.parent.body;
+	}
+	
+	this.initializeDOM();
+	
 	
 	log("inited el", this);
 	
@@ -136,22 +158,24 @@ function el(dom, onready) {
 		return new el(this);
 	});
 	
+	this.childrenInitialized = true;
 	
-	if (onready) {
-		onready(this);
+	
+	if (this.isBody) {
+		this.checkImages();
 	}
+
 }
 
 el.prototype.initializeDOM = function() {
+
 	var dom = this.dom;
 	var $dom = $(this.dom);
 	var css = this.css = { };
 	
-	
 	this.clientRects = dom.getClientRects();
-	
-	this.tagName = dom.tagName.toLowerCase();
-	this.isBody = this.tagName == "body";
+	this.src = this.tagName == 'img' ? $dom.attr("src") : false;
+	this.shouldRender = (dom.offsetWidth > 0 && dom.offsetHeight > 0);
 	
 	var computedStyleNormal = computedStyle(dom, styleAttributes);
 	for (var i in computedStyleNormal) {
@@ -162,16 +186,8 @@ el.prototype.initializeDOM = function() {
 	    css[i] = parseInt(computedStylePx[i]) || 0;
 	}
 	
-	
 	if (css.backgroundColor == "rgba(0, 0, 0, 0)" || css.backgroundColor == "transparent") {
 		css.backgroundColor = false;
-	}
-	
-	if (css.zIndex == "auto") {
-		css.zIndex = -1;
-	}
-	else {
-		css.zIndex = parseInt(css.zIndex) || 0;
 	}
 	
 	css.font = $.trim(
@@ -179,13 +195,12 @@ el.prototype.initializeDOM = function() {
 		css.fontSize + "px " + css.fontFamily
 	);
 	
-	//css.offset = $dom.offset();
-	//css.height = $dom.height();
-	//css.width = $dom.width();
-	//css.outerHeightMargins = $dom.outerHeight(true);
-	//css.outerWidthMargins = $dom.outerWidth(true);
-	//css.scrollWidth = dom.scrollWidth;
-	//css.scrollHeight = dom.scrollHeight;
+	if (css.zIndex == "auto") {
+		css.zIndex = -1;
+	}
+	else {
+		css.zIndex = parseInt(css.zIndex) || 0;
+	}
 	
 	
 	if (this.isBody) {
@@ -195,12 +210,30 @@ el.prototype.initializeDOM = function() {
 		};
 	}
 	
+	// Collect all of the text nodes for future reference 
+	var textNodes = this.textNodes = [];
+	var childNodes = dom.childNodes;
+	for (var j = 0, l = childNodes.length; j < l; j++) {
+		if (childNodes[j].nodeType == 3) {
+			textNodes.push(childNodes[j]);
+		}
+	}
+	
+	// Fetch any images that are necessary for rendering
+	if (this.shouldRender) {
+		if (this.tagName == "img") {
+			this.body.loadImage(this.src, true, this);
+		}
+		else if (css.backgroundImage != "none") {
+			this.body.loadImage(this.css.backgroundImage, false, this);
+		}
+	}
+	
 };
 
 el.prototype.render = function(ctx) {
 
-	
-	if (this.css.display == 'none') {
+	if (!this.shouldRender) {
 		return;
 	}
 	
@@ -214,9 +247,7 @@ el.prototype.render = function(ctx) {
 };
 
 
-/*
-	Render borders and background colors / images
-*/
+// Render borders and background colors / images
 el.prototype.renderBox = function(ctx) {
 
 	var css = this.css;
@@ -243,12 +274,12 @@ el.prototype.renderBox = function(ctx) {
 
 el.prototype.renderText = function(ctx) {
 
-  	ctx.font = this.css.font;
-  	ctx.fillStyle = this.css.color;
+	var css = this.css;
+  	ctx.font = css.font;
+  	ctx.fillStyle = css.color;
 	ctx.textBaseline = "bottom";
 	
 	var nodes = this.textNodes;
-	
 	for (var i = 0 ; i < nodes.length; i++) {
 	    var text = nodes[i].data;
 	    for (var f = 0; f < text.length; f++) {
@@ -258,9 +289,7 @@ el.prototype.renderText = function(ctx) {
 	    	}
 	    	
 	    	var rect = getLetterRect(nodes[i], f);
-	    	
 	    	//log(f, text[f], text.length, rect, this.tagName);
-	    	
 	    	ctx.fillText(text[f], rect.left, rect.bottom);
 	    }
 	}
@@ -369,5 +398,79 @@ if (window.parent != window) {
 		render(parentDoc);
 	});
 }
+
+
+
+
+
+
+// retrieveImage: a method to interface with image loading, errors, and proxy
+function retrieveImageFromCache(src) {
+	assert(retrieveImage.cache.hasOwnProperty(src), "Error: image has not been loaded into cache");
+	return retrieveImage.cache[src];
+}
+
+function retrieveImage(src, cb, ownerDocument, useBroken) {
+
+	if (!$.isFunction(cb)) {
+		cb = function() { };
+	}
+	
+	if (retrieveImage.cache[src]) {
+		log("Cache hit", src, retrieveImage.cache[src]);
+		return cb(retrieveImageFromCache(src));	
+	}
+	
+	var loadImageDirectly = true;
+	
+	if (src.indexOf("data:") == -1) {
+	    var url = new RegExp(/url\((.*)\)/);
+	    //src = src.replace(/['"]/g,''); trim quotes?
+	    var matched = src.match(url);
+	    if (matched && matched[1]) {
+	    	src = matched[1];
+	    }
+	    
+	    // Convert a relative path into absolute.
+	    var original = new URI(src);
+	    var authority = original.getAuthority();
+	    
+	    if (!authority) {
+	    	var root = new URI((ownerDocument || document).location.href);
+	   		src = original.resolve(root).toString();
+	    }
+	    else if (authority != document.location.host) {
+	    	log("Going to need to proxy");
+	    	
+	    }
+	}
+	
+	if (loadImageDirectly) {
+		var img = new Image();
+		img.onload = sendSuccess;
+		img.onerror = sendError;
+		img.src = src;
+	}
+	else {
+	
+	}
+	
+	function sendError() {
+		var img = new Image();
+		img.onload = sendSuccess;
+		img.src = useBroken ? retrieveImage.brokenImage : retrieveImage.transparentImage;
+	}
+	
+	function sendSuccess() {
+	    retrieveImage.cache[src] = this;
+	    cb(this);
+	}
+}
+
+retrieveImage.cache = { };
+retrieveImage.transparentImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAACWCAYAAABkW7XSAAADLUlEQVR4Ae3QQREAAAiAMPqXVjv4HUeCNXWLAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAAAECBAgQIECAwENgAfmTAf/IVJfgAAAAAElFTkSuQmCC";
+
+retrieveImage.brokenImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAAVBAMAAABWJ8jiAAAAIVBMVEUAAAAA//8A/wDAwMD/AP//AACAgIAAAID///8AgAAAAP87p9+eAAAAb0lEQVQImWPogIEGBmQmAwhkgJkcIKE0CNMYCDIyIEzLycYZbRDmpAnGDAwQ5swJxsYNEKYBM5xpbLxqAcQEU2PjhVCmSbDxqgoo09UYqB/CdAnuaIYwDYBOgjKNgSyoYRAngh0JZDBALMbuCzgTAD+sVWJQUviMAAAAAElFTkSuQmCC";
+
 
 })();
