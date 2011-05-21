@@ -87,7 +87,7 @@ var styleAttributes = [
 	'font-family', 'font-style', 'font-weight', 'color',
 	'position', 'float', 'clear', 'overflow',
 	'background-color', 'background-image', 'background-repeat', 'background-position',
-	'z-index'
+	'z-index', 'text-transform'
 ];
 var styleAttributesPx = [
 	'padding-top','padding-right','padding-bottom','padding-left',
@@ -205,15 +205,13 @@ function el(dom, onready) {
 	
 	this.initializeDOM();
 	
-	
-	log("Initialized " + this.tagName, this);
+	//log("Initialized " + this.tagName, this);
 	
 	this.children = $(dom).children().map(function() {
-		return new el(this);
+	    return new el(this);
 	}).sort(orderByZIndex);
 	
 	this.childrenInitialized = true;
-	
 	
 	if (this.isBody) {
 		this.checkImages();
@@ -236,8 +234,7 @@ el.prototype.initializeDOM = function() {
 	this.scrollLeft = dom.scrollLeft;
 	if ((this.scrollTop > 0 || this.scrollLeft > 0) && this.body != this) { this.scrollParent = this; }
 	
-	this.src = this.tagName == 'img' ? $dom.attr("src") : false;
-	this.shouldRender = (this.clippingRect.width > 0 && this.clippingRect.height > 0);
+	this.shouldRender = $dom.is(":visible");
 	
 	var computedStyleNormal = computedStyle(dom, styleAttributes);
 	for (var i in computedStyleNormal) {
@@ -248,9 +245,15 @@ el.prototype.initializeDOM = function() {
 	    css[i] = parseInt(computedStylePx[i]) || 0;
 	}
 	
+	
+	if (css.backgroundImage == "none") {
+		css.backgroundImage = false;
+	}
 	if (css.backgroundColor == "rgba(0, 0, 0, 0)" || css.backgroundColor == "transparent") {
 		css.backgroundColor = false;
 	}
+	
+	this.src = this.tagName == 'img' ? $dom.attr("src") : css.backgroundImage;
 	
 	css.font = $.trim(
 		css.fontStyle + " " + css.fontWeight + " " + 
@@ -275,34 +278,45 @@ el.prototype.initializeDOM = function() {
 		}
 	}
 	
-	// Fetch any images that are necessary for rendering
-	if (this.shouldRender) {
-		if (this.tagName == "img") {
-			this.body.loadImage(this.src, true, this);
-		}
-		else if (css.backgroundImage != "none") {
-			this.body.loadImage(this.css.backgroundImage, false, this);
-		}
+	if (!this.shouldRender) {
+		log("not render", this, this.dom.innerHTML, $dom.is(":visible"))
+		console.dir(this.dom);
 	}
 	
+	// Fetch any images that are necessary for rendering
+	if (this.shouldRender && this.src) {
+		// Strip out the background image: url() rule
+	    var cssRule = new RegExp(/url\((.*)\)/);
+	    //this.src = this.src.replace(/['"]/g,''); trim quotes?
+	    var matched = this.src.match(cssRule);
+	    if (matched && matched[1]) {
+	    	this.src = matched[1];
+	    }
+	    
+	    // Make sure a relative URL gets qualified
+		this.src = qualifyURL(this.src);
+		
+		var loadBroken = this.tagName == "img";
+		this.body.loadImage(this.src, loadBroken, this);
+	}
 };
 
 el.prototype.render = function(ctx) {
 
-	if (!this.shouldRender) {
-		return;
+	if (this.shouldRender) {
+		
+		// Render background and borders for each rectangle (inline elements spanning 
+		// multiple lines could have more than one clientRect)
+		var rects = this.clientRects;
+		for (var i = 0, j = rects.length; i < j; i++) {
+			this.renderBackground(ctx, rects[i]);
+			this.renderBorders(ctx, rects[i]);
+		}
+		
+		// Render text character by character
+		this.renderText(ctx);
+		
 	}
-	
-	// Render background and borders for each rectangle (inline elements spanning 
-	// multiple lines could have more than one clientRect)
-	var rects = this.clientRects;
-	for (var i = 0, j = rects.length; i < j; i++) {
-		this.renderBackground(ctx, rects[i]);
-		this.renderBorders(ctx, rects[i]);
-	}
-	
-	// Render text character by character
-	this.renderText(ctx);
 	
 	// Render all children
 	var children = this.children;
@@ -320,9 +334,15 @@ el.prototype.renderText = function(ctx) {
 	
 	var scrollParent = this.scrollParent;
 	
+	var transform = css.textTransform;
 	var nodes = this.textNodes;
+	
 	for (var i = 0 ; i < nodes.length; i++) {
 	    var text = nodes[i].data;
+	    
+	    if (transform == "uppercase") { text = text.toUpperCase(); }
+	    else if (transform == "uppercase") { text = text.toLowerCase(); }
+	    
 	    for (var f = 0; f < text.length; f++) {
 	    	
 	    	// Don't print any whitespace
@@ -333,13 +353,9 @@ el.prototype.renderText = function(ctx) {
 	    	// Get the coordinates for this letter, and draw it to the canvas
 	    	var rect = getLetterRect(nodes[i], f, true);
 	    	rect = clip(rect, scrollParent);
-	    	if (text[f] == 'Z') {
-	    		log("HERE", rect, nodes[i].parentNode.scrollTop,
-	    			nodes[i].parentNode.parentNode.scrollTop
-	    		 )
-	    	}
-	    	ctx.fillText(text[f], rect.left, rect.bottom);
+	    	
 	    	//log(f, text[f], text.length, rect, this.tagName);
+	    	ctx.fillText(text[f], rect.left, rect.bottom);
 	    }
 	}
 };
@@ -355,18 +371,27 @@ el.prototype.renderBackground = function(ctx, rect) {
 	if (backgroundColor) {
 	   ctx.fillStyle = backgroundColor;
 	   ctx.fillRect(
-	   	backgroundRect.left, backgroundRect.top, 
-	   	backgroundRect.width, backgroundRect.height
+	   		backgroundRect.left, backgroundRect.top, 
+	   		backgroundRect.width, backgroundRect.height
 	   );
 	}
 	
 	if (loadedImage) {
-	   var repeat = this.tagName == "img" ? "no-repeat" : css.backgroundRepeat;
-	   ctx.fillStyle = ctx.createPattern(loadedImage, repeat);
-	   ctx.fillRect(
-	   	backgroundRect.left, backgroundRect.top, 
-	   	backgroundRect.width, backgroundRect.height
-	   );
+	  	
+		log("Rendering", loadedImage, this.src, backgroundRect, repeat);
+	  	
+	  	// Somehow this createPattern is not working with the image (perhaps it is somehow invalidated?)
+	   	var repeat = this.tagName == "img" ? "no-repeat" : css.backgroundRepeat;	   
+	   	var pattern = ctx.createPattern(loadedImage, repeat);
+		
+		ctx.fillStyle = pattern;
+		ctx.fillRect(
+	   		backgroundRect.left, backgroundRect.top, 
+	   		backgroundRect.width, backgroundRect.height
+		);
+		
+		ctx.drawImage(retrieveImageFromCache(this.src),backgroundRect.left, backgroundRect.top,
+			backgroundRect.width, backgroundRect.height);
 	}
 };
 el.prototype.renderBorders = function(ctx, rect) {
@@ -473,19 +498,19 @@ if (window.parent != window) {
 	});
 }
 
-
-
-
-
-
 // retrieveImage: a method to interface with image loading, errors, and proxy
 function retrieveImageFromCache(src) {
 	assert(retrieveImage.cache.hasOwnProperty(src), "Error: image has not been loaded into cache");
 	return retrieveImage.cache[src];
 }
 
-function retrieveImage(src, cb, ownerDocument, useBroken) {
+function qualifyURL(url) {
+	var a = document.createElement('a');
+    a.href = url;
+    return a.href;
+}
 
+function retrieveImage(src, cb, ownerDocument, useBroken) {
 	if (!$.isFunction(cb)) {
 		cb = function() { };
 	}
@@ -498,24 +523,13 @@ function retrieveImage(src, cb, ownerDocument, useBroken) {
 	var loadImageDirectly = true;
 	
 	if (src.indexOf("data:") == -1) {
-	    var url = new RegExp(/url\((.*)\)/);
-	    //src = src.replace(/['"]/g,''); trim quotes?
-	    var matched = src.match(url);
-	    if (matched && matched[1]) {
-	    	src = matched[1];
-	    }
 	    
-	    // Convert a relative path into absolute.
+	    // Check if we can download this
 	    var original = new URI(src);
 	    var authority = original.getAuthority();
 	    
-	    if (!authority) {
-	    	var root = new URI((ownerDocument || document).location.href);
-	   		src = original.resolve(root).toString();
-	    }
-	    else if (authority != document.location.host) {
+	    if (authority != document.location.host) {
 	    	log("Going to need to proxy");
-	    	
 	    }
 	}
 	
@@ -536,7 +550,7 @@ function retrieveImage(src, cb, ownerDocument, useBroken) {
 	}
 	
 	function sendSuccess() {
-	    retrieveImage.cache[src] = this;
+		retrieveImage.cache[src] = this;
 	    cb(this);
 	}
 }

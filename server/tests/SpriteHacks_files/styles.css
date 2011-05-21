@@ -1,0 +1,1057 @@
+/* ------------------------------------------
+NICOLAS GALLAGHER
+nicolasgallagher.com
+twitter.com/necolas
+
+DEFAULT.CSS
+
+Description:   HTML5 + ARIA Wordpress theme with UA detection
+               to improve accessibility for users of legacy browsers.
+Updated:       22 February 2011
+Version:       2.7.2
+
+Dual licensed under MIT and GNU GPLv2 © Nicolas Gallagher 
+------------------------------------------ */
+
+
+/* ============================================================================================================================ **
+**                                              A L L   M E D I A
+** ============================================================================================================================ */
+
+@media all {
+
+/* =============================================================================================================
+** ------------------------------------------------------------------------------------------------------------- RESET
+** ============================================================================================================= */
+
+html, body, div, span, object,
+header, hgroup, nav, footer, section, aside, article, figure, figcaption, time, mark, 
+embed, video, audio,
+h1, h2, h3, h4, h5, h6, p, blockquote,
+a, abbr, address, cite, code, pre,
+del, em, img, ins, q,
+small, strong, sub, sup, samp,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead,
+tr, th, td {
+    padding:0; 
+    border:0; 
+    margin:0; 
+    font-size:100%; 
+    vertical-align:baseline;
+    background:transparent;
+}
+
+header, 
+hgroup, 
+nav, 
+footer, 
+section,
+aside, 
+article, 
+figure, 
+figcaption {
+    display:block;
+}
+
+/* tables still need 'cellspacing="0"' in the markup */
+table {
+    border-collapse:collapse; 
+    border-spacing:0;
+}
+
+
+/* =============================================================================================================
+** ------------------------------------------------------------------------------------------------------------- BASE
+** ============================================================================================================= */
+
+body {
+    font:100%/1 cambria, georgia, times, serif; 
+    color:#333; 
+    background:#fff;
+}
+
+/* ............................................................................................................. Links */
+
+a:link, 
+a:visited {
+    border-bottom:1px solid #c55500; 
+    color:#c55500; 
+    text-decoration:none;
+}
+
+a:visited {
+border-bottom:1px solid #730800; 
+color:#730800;
+}
+
+a:hover, 
+a:focus, 
+a:active {
+    border:0; 
+    color:#fff; 
+    background:#c55500;
+}
+
+a:visited:hover,
+a:visited:focus,
+a:visited:active {
+    color:#fff; 
+    background:#730800;
+}
+
+/* ............................................................................................................. Headings */
+
+h1, 
+h2, 
+h3, 
+h4 {
+    font-weight:normal; 
+    line-height:1.1em; 
+    color:#222;
+}
+
+h1 {
+    margin:0 0 0.5em; 
+    font-size:2.5em; /* 40px */
+    line-height:1.2;
+} 
+
+h2 {
+    clear:both; 
+    margin:1.5em 0 0.5em; 
+    font-size:1.5625em; /* 25px */
+} 
+
+h3 {
+    margin:1.5em 0 0.325em; 
+    font-size:1.25em; /* 20px */
+} 
+
+h4 {
+    margin:1.5em 0 0.4em; 
+    font-size:1em; /* 16px */
+    font-weight:bold;
+} 
+
+/* Intra-heading code */
+
+h2 code {
+    font-size:25px; 
+    line-height:1em;
+}
+
+h3 code {
+    font-size:20px; 
+    line-height:1em;
+}
+
+/* ............................................................................................................. Paragraphs / Quotes */
+
+p, 
+blockquote {
+    margin:0 0 1.5em; 
+    font-size:1em; /* 16px */
+    line-height:1.5em;
+} 
+
+blockquote {
+    padding:0 24px; 
+    border-left:3px solid #ccc; 
+    margin:1em 0 1.5em;
+}
+
+blockquote p {
+    font-size:1em; 
+    color:#666;
+}
+
+blockquote, 
+q {
+    quotes:none;
+}
+
+blockquote blockquote {
+    border:0;
+}
+
+/* ............................................................................................................. Lists */
+
+ul, 
+ol {
+    margin:0 0 1.5em;
+}
+
+ul {
+    list-style:square;
+}
+
+ul li, 
+ol li {
+    padding:0; 
+    margin:0 0 0.5em; 
+    font-size:1em;  /*16px*/
+    line-height:1.5em;
+}
+
+li li {
+    font-size:1em;
+}
+
+li p {
+    font-size:1em;
+}
+
+
+/* ............................................................................................................. Code */
+
+p code, 
+li code {
+    font-size:16px; 
+    line-height:1em; 
+    word-spacing:0; 
+    color:#6a8014;
+}
+
+a code {
+    border:0; 
+    color:inherit; 
+    background:transparent;
+}
+
+blockquote code, 
+blockquote pre {
+    font-size:1em;
+}
+
+pre {
+    padding:15px 20px; 
+    border:1px dashed #ccc; 
+    margin:1.7143em 0; 
+    font-size:14px;
+    line-height:1.5em; 
+    /*overflow:auto;*/ 
+    color:#6a8014;
+    white-space:pre-wrap; 
+    word-wrap:break-word;
+}
+  
+li pre code {
+    font-size:14px; 
+    line-height:1.5em;
+}
+
+pre code mark {
+    font-weight:bold; 
+    color:#000; 
+    background:#fe6;
+}
+
+/* ............................................................................................................. Misc */
+
+strong {font-weight:bold;}
+em {font-style:italic;}
+small {font-size:0.875em;}
+ins {text-decoration:none; color:#000; background:#ff0;}
+sup {font-size:0.75em; vertical-align:super; line-height:0;}
+
+
+/* =============================================================================================================
+** ------------------------------------------------------------------------------------------------------------- TEMPLATE
+** ============================================================================================================= */
+
+body > header,
+nav ul,
+body > section,
+body > article,
+body > aside section,
+body > footer,
+article + nav ul {
+    position:relative; 
+    width:540px; 
+    padding:0 40px; 
+    margin:0 auto;
+}
+
+/* ------------------------------------------------------------------------------------------------------------- HEADER */
+
+body > header {
+    background:#fff;
+}
+
+body > header h1 {
+    position:relative; 
+    z-index:10; 
+    float:left; 
+    padding:0.533em 0; 
+    margin:0 10px 0 0; 
+    font-size:0.9375em; 
+    line-height:1.5em; 
+    color:#666;
+}
+
+body > header h1 a {
+    text-transform:uppercase; 
+    font-weight:bold;
+}
+
+body > header p {
+    position:relative; 
+    z-index:10; 
+    float:right; 
+    margin:10px 0 0 6px;
+}
+
+body > header p + p {
+    margin-left:12px;
+}
+
+body > header p img {
+    display:block; 
+    border:1px solid #d86a05;
+}
+
+body > header p + p img {
+    border-color:#6ed7ed;
+}
+
+body > header a:link,
+body > header a:visited {
+    border:0; 
+    color:#c55500;
+}
+ 
+body > header a:hover, 
+body > header a:visited:hover,
+body > header a:focus, 
+body > header a:visited:focus,
+body > header a:active {
+    border:0; 
+    color:#fff; 
+    background:#c55500;
+}
+
+/* ------------------------------------------------------------------------------------------------------------- NAVIGATION */
+
+nav {
+    width:100%; 
+    padding:0.5em 0; 
+    margin:0;
+}
+
+nav ul {
+    text-align:right;
+}
+
+nav li {
+    display:inline; 
+    padding:0; 
+    margin:0 6px 0 0; 
+    font-size:0.9375em; 
+    text-align:center;
+}
+
+nav a:link,
+nav a:visited {
+    position:relative; 
+    padding:1px 7px 2px; 
+    border:0; 
+    color:#c55500;
+    -webkit-border-radius:10px;
+       -moz-border-radius:10px;
+            border-radius:10px;
+}
+
+nav a:hover,
+nav a:visited:hover,
+nav a:focus,
+nav a:visited:focus,
+nav a:active {
+    color:#fff; 
+    background:#c55500;
+}
+
+nav .current a:link,
+nav .current a:visited {
+    color:#000; 
+    background:#e5e5e5;
+}
+
+nav .current a:hover,
+nav .current a:focus,
+nav .current a:active {
+    color:#666; 
+    background:transparent;
+}
+
+/* ------------------------------------------------------------------------------------------------------------- ARTICLES */
+
+/* ............................................................................................................. Main articles */
+
+body > article {
+    padding-top:4.5em; 
+    margin-bottom:2em;
+}
+
+body > article header {
+    position:relative;
+}
+
+body > article h1 a:link,
+body > article h1 a:visited {
+    border:0; 
+    color:#000;
+}
+
+body > article h1 a:hover,
+body > article h1 a:visited:hover,
+body > article h1 a:focus,
+body > article h1 a:visited:focus,
+body > article h1 a:active,
+body > article h1 a:visited:active {
+    color:#666; 
+    background:transparent;
+}
+
+/* ............................................................................................................. Common to all articles */
+
+article h1 a:link,
+article h1 a:visited {
+    border:0; 
+    text-decoration:none;
+}
+ 
+article time {
+    display:block; 
+    margin:0 0 2em; 
+    font-size:0.875em; 
+    letter-spacing:1px; 
+    line-height:1.6em; 
+    text-transform:uppercase; 
+    color:#757575;
+}
+                                        
+article header + p {
+    margin:1.1429em 0; 
+    font-size:1.3125em; 
+    line-height:1.3333em;
+}
+
+article header + p code {
+    font-size:21px; 
+    line-height:1em;
+}
+
+article header + p + p,
+article header + p + p {
+    font-size:1em; 
+}
+
+
+article footer {
+    padding:0.5em 0 0; 
+    border-top:1px solid #eee; 
+    margin:2em 0 0; 
+    font-style:italic;
+}
+
+article footer p {
+    display:inline; 
+    padding:0; 
+    margin:0; 
+    font-size:0.8125em; 
+    word-spacing:0;
+}
+
+article footer p + p:before {
+    content:" \00b7\00a0"; 
+    color:#000;
+}
+
+article footer p a:link,
+article footer p a:visited {border:0;}
+ 
+article img {
+    display:block; 
+    border:1px solid #ddd; 
+    margin:1em -31px 1.5em;
+}
+
+article pre + p > small:first-child {
+    display:block; 
+    margin:-1em 0 0; 
+    font-size:0.8125em; 
+    word-spacing:0;
+}
+
+article figure {
+    margin:0 0 1.5em;
+}
+
+article figure img {
+    margin-bottom:0.5em;
+}
+
+article figure figcaption {
+    margin:0 -30px; 
+    font-size:0.875em; 
+    line-height:1.5em;
+}
+
+/* Twitter share */
+
+.twitter-share {
+    overflow:hidden; 
+    margin:1em 0 0; 
+    font:bold 12px/1.5 Arial, sans-serif;
+}
+
+a.twitter-button:link,
+a.twitter-button:visited {
+    float:left; 
+    width:55px; 
+    height:20px; 
+    overflow:hidden; 
+    border:0;
+}
+
+a.twitter-button:before {
+    display:inline-block; 
+    font-size:0; 
+    line-height:0; 
+    content:url(../images/tweet.png);
+}
+
+a.twitter-button:hover:before,
+a.twitter-button:focus:before {
+    margin:-20px 0 0;
+}
+
+a.twitter-button:active:before {
+    margin:-40px 0 0;
+}
+
+.twitter-count {
+    position:relative; 
+    float:left; 
+    height:18px; 
+    padding:0 6px; 
+    border:1px solid #cbe3f2; 
+    margin:0 0 0 7px; 
+    line-height:18px;
+    -webkit-border-radius:2px;
+       -moz-border-radius:2px;
+            border-radius:2px;
+}
+
+.twitter-count:before,
+.twitter-count:after {
+    content:""; 
+    position:absolute; 
+    top:50%; 
+    left:0; 
+    border-width:5px 5px 5px 0; 
+    border-style:solid; 
+    border-color:transparent #cbe3f2; 
+    margin:-5px 3px 0 -5px; 
+    display:inline-block; /* Firefox < 3.5 */
+}
+
+.twitter-count:after {
+    left:-3px; 
+    border-width:3px 3px 3px 0; 
+    border-right-color:#fff; 
+    margin:-3px 0 0 0;
+}
+ 
+/* ............................................................................................................. User comments - section */
+
+article nav + section {
+    margin-top:4.5em; 
+    counter-reset:commentnum;
+}
+
+article nav + section > h1:before {
+    content:""; 
+    position:absolute; 
+    z-index:20; 
+    top:14px; 
+    left:0; 
+    width:15px; 
+    height:10px;
+    background:#333;
+    -webkit-border-radius:3px;
+       -moz-border-radius:3px;
+            border-radius:3px;
+}
+
+article nav + section > h1:after {
+    content:""; 
+    position:absolute; 
+    z-index:10; 
+    top:20px; 
+    left:6px; 
+    width:0; 
+    height:0;
+    border:4px solid transparent; 
+    border-left-color:#333;
+    display:block; /* Firefox < 3.5 */
+}
+
+article nav + section > h1 {
+    position:relative; 
+    padding-left:25px; 
+    margin-left:-25px; 
+    font-size:2em; 
+    color:#222;
+}
+
+article nav + section > h1 span {
+    display:block; 
+    margin:0.25em 0 0; 
+    font-size:0.6875em; 
+    color:#555;
+}
+
+/* ............................................................................................................. User comments - entries */
+
+article article {
+    margin:2em 0 2.5em;
+}
+
+article article header {
+    margin:0;
+}
+
+article article h3 {
+    margin:0.25em 0 0.5em; 
+    font-size:1.125em;
+}
+
+article article time {
+    display:inline; 
+    margin:0; 
+    font-size:0.75em;
+}
+
+article article time + a {
+    margin:0.3em 0 0 0; 
+    font-size:0.75em;
+}
+
+article article time + a:after {
+    content:counter(commentnum); 
+    counter-increment:commentnum;
+}
+
+article article header + p,
+article article header + p + p,
+article article p,
+article article li {
+    margin:0 0 1.4em; 
+    font-size:0.875em; 
+    line-height:1.4em;
+}
+ 
+article article p code,
+article article li code {
+    font-size:14px; 
+    line-height:1em;
+}
+
+/* .............................................................................................................  User comments - moderation message */
+
+article article header p {
+    padding:0; 
+    margin:0.5em 0;
+}
+
+article article header p em {
+    padding:0 3px; 
+    background:#fe6;
+}
+
+/* ............................................................................................................. User comments - form */
+
+article nav + section + section {
+    margin:3em 0 1em;
+}
+
+article nav + section + section h1 {
+    margin-bottom:0.25em; 
+    font-size:1.5625em;
+}
+
+article section form {
+    margin-top:1em;
+}
+
+article section label {
+    display:block; 
+    margin:0 0 0.25em; 
+    font-style:italic;
+}
+
+article section input,
+article section textarea {
+    display:block; 
+    font:0.8125em arial, sans-serif;
+}
+ 
+article section label + input {
+    width:250px; 
+    padding:3px; 
+    border:1px solid #aaa; 
+    margin:0.25em 0 1em;
+}
+
+article section textarea {
+    width:530px; 
+    padding:3px; 
+    border:1px solid #aaa; 
+    margin:0 0 1em;
+}
+
+/* ------------------------------------------------------------------------------------------------------------- INTERNAL NAVIGATION */
+
+article + nav,
+article > nav {
+    padding:0; 
+    margin:5em 0 2.5em;
+}
+
+article + nav ul {
+    width:600px; 
+    padding:0 70px;
+}
+
+article > nav ul {
+    width:auto; 
+    padding:0; 
+    margin:0 -20px; 
+    overflow:hidden; 
+    min-height:0; /* for ie7 */
+}
+
+article + nav li,
+article > nav li {
+    float:right; 
+    margin:5px 0; 
+    font-size:1.125em; 
+    text-align:right; 
+    color:#333;
+}
+ 
+article + nav li:first-child,
+article > nav li:first-child {
+    float:left; 
+    text-align:left;
+}
+
+article > nav a:visited {
+    color:#730800;
+}
+
+article > nav a:visited:hover,
+article > nav a:visited:focus,
+article > nav a:visited:active {
+    background:#730800;
+}
+
+/* ------------------------------------------------------------------------------------------------------------- HOME PREVIOUS ENTRIES */
+
+body > section {
+    padding-top:4em; 
+    margin-bottom:1em;
+}
+
+body > section > h1 {
+    margin:0 0 0.75em; 
+    font-size:2.5em;
+}
+
+body > section article {
+    padding:0; 
+    margin:0 0 3em;
+}
+
+body > section article header {
+    padding:0;
+}
+
+body > section article time {
+    margin:0 0 0.75em; 
+    font-size:0.75em;
+}
+
+body > section article h1 {
+    padding:0; 
+    border:0; 
+    margin:0; 
+    font-size:1.5625em;
+}
+
+body > section article > p {
+    margin:0.5em 0 1em; 
+    font-size:1em; 
+    color:#444;
+}
+
+body > section article > p code {
+    font-size:16px;
+}
+
+body > section article footer {
+    padding:0; 
+    border:0; 
+    margin:1em 0 0;
+}
+
+body > section nav {
+    font-size:1.125em; 
+    text-align:center;
+}
+
+/* ------------------------------------------------------------------------------------------------------------- ARCHIVES */
+
+body > article ul time {
+    float:right; 
+    margin:0.4em 0 0; 
+    font-size:0.75em;
+}
+
+/* ------------------------------------------------------------------------------------------------------------- ASIDE */
+
+body > aside {
+    width:100%; 
+    padding:2.5em 0 2em; 
+    border-top:1px solid #f5f5f5; 
+    border-bottom:1px solid #f5f5f5; 
+    margin-top:2.5em; 
+    margin-bottom:1em; 
+    background:#fafafa;
+}
+
+body > aside h1 {
+    font-size:1.75em; 
+    margin:0 0 0.75em;
+}
+
+body > aside p {
+    font-size:0.875em; 
+    line-height:1.5em;
+}
+
+body > aside section p:last-child {
+    font-size:1.125em;
+}
+
+body > aside section p:last-child a {
+    border:0;
+}
+
+body > aside section p:last-child span {
+    font-weight:bold;
+}
+
+/* ------------------------------------------------------------------------------------------------------------- FOOTER NAVIGATION */
+
+body > footer {
+    padding-bottom:1em; 
+    text-align:center; 
+    font-size:0.75em;
+}
+
+body > footer p {
+    margin:0 0 0.75em;
+}
+
+body > footer small {
+    display:block; 
+    font-size:1em; 
+    line-height:1.4em; 
+    color:#777;
+}
+
+body > footer small a:link,
+body > footer small a:visited {
+    border-color:#333; 
+    color:#333;
+}
+
+body > footer small a:hover,
+body > footer small a:focus,
+body > footer small a:active {
+    color:#fff;
+}
+
+/* ------------------------------------------------------------------------------------------------------------- ADMIN */
+
+.post-edit-link:link,
+.post-edit-link:visited,
+.comment-edit-link:link,
+.comment-edit-link:visited {
+    border:0; 
+    text-transform:uppercase; 
+    font-size:13px; 
+    font-weight:bold; 
+    font-style:italic; 
+    color:#c00;
+}
+
+.post-edit-link:hover,
+.comment-edit-link:hover {
+    color:#fff; 
+    background:#c00;
+}
+
+.comment-edit-link:after {
+    content:"\00a0\00b7\00a0"; 
+    color:#000;
+}
+
+/* end of @media all */}
+
+
+
+/* ============================================================================================================================ **
+**                                              P R I N T
+** ============================================================================================================================ */
+
+@media print {
+
+body > header p,
+nav,
+#respond {
+    display:none;
+}
+
+body > aside {
+    border:0; 
+    background:transparent;
+}
+
+
+body > header h1 a[href]:after,
+article a[href]:after,
+aside a[href]:after {
+    content:" (" attr(href) ")";
+    border:0 !important; 
+    color:#555;  
+    text-decoration:none;
+}
+
+body > header h1 a[href]:after {
+    content:" \2014  http://nicolasgallagher.com";
+}
+
+body > article header a[href]:after,
+body > article footer a[href]:after {
+    display:none;
+}
+
+#comments {
+    page-break-before:always;
+}
+
+/* end of @media print */}
+
+
+
+/* ============================================================================================================================ **
+**                                              N A R R O W   V I E W P O R T S
+** ============================================================================================================================ */
+
+@media handheld, screen and (max-width: 620px) {
+
+article img {
+    width:100%; 
+    height:auto; 
+    margin-left:0; 
+    margin-right:0;
+}
+
+body > header,
+nav ul,
+body > section,
+body > article,
+body > aside section,
+body > footer,
+article + nav ul,
+section + nav ul {
+    padding-left:5px; 
+    padding-right:5px;
+}
+    
+/* end of @media handheld, screen and (max-width: 540px) */}
+
+@media handheld, screen and (max-width: 540px) {
+
+body > header,
+nav ul,
+body > section,
+body > article,
+body > aside section,
+body > footer,
+article + nav ul,
+section + nav ul {width:auto;}
+ 
+body > header {overflow:hidden;}
+ body > nav {float:left; width:auto; padding:0;}
+body > nav ul {text-align:left;}
+
+/* end of @media handheld, screen and (max-width: 540px) */}
+
+/* Mobile devices */
+
+@media handheld, screen and (max-width: 480px) {
+
+body, 
+p code,
+li code {
+    font-size:14px;
+}
+ 
+pre {
+    padding:5px 10px; 
+    font-size:12px;
+}
+
+body > article,
+body > section {
+    clear:both;
+    padding-top:2em;
+}
+
+article + nav,
+article > nav {
+    margin:2em 0;
+}
+
+article > nav ul {
+    padding:0; 
+    margin:0;
+}
+
+article nav + section {margin:2em 0;}
+
+article article header a {float:none; margin:0;}
+
+article section label + input,
+article section textarea {width:90%;}
+
+body > article ul time {float:none; margin:1em 0 0;}
+ 
+/* end of @media handheld, screen and (max-width: 480px) */}
+
+@media handheld, screen and (max-width: 300px) {
+
+body > article h1,
+body > section h1 {font-size:2em;}
+
+body > header h1 {float:none; width:100%;}
+body > header h1 a {display:block;}
+body > header p {float:left; margin:0 0 8px;}
+
+/* end of @media handheld, screen and (max-width: 300px) */}

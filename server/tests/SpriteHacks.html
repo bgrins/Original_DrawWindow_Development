@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<!-- saved from url=(0055)http://nicolasgallagher.com/css-background-image-hacks/ -->
+<html id="nicolasgallagher-com" lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <title>CSS background image hacks –  Nicolas Gallagher</title>
+    <link rel="stylesheet" href="SpriteHacks_files/styles.css">
+
+  <script type='text/javascript' src='../scripts/loader.js'></script>
+</head>
+
+<body>
+	<a id='render' onclick='return window.h2c.loader();' href='#'>Render</a>
+    <header role="banner">
+        <h1><a href="http://nicolasgallagher.com/" title="Go to the homepage">Nicolas Gallagher</a> – Web Worker</h1>
+        <p><a href="http://nicolasgallagher.com/feed/" title="Syndicate this site using RSS" style='background-color:red;'>dd<img src="./SpriteHacks_files/icon-rss.png" alt="RSS feed"></a></p>
+        <p><a href="http://twitter.com/necolas" title="Follow me on twitter" ><img src="./SpriteHacks_files/icon-twitter.png" alt="@necolas"></a></p>
+    </header>
+
+    <nav role="navigation">
+        <ul>
+            <li><a href="http://nicolasgallagher.com/archive/">Archive</a></li>
+            <li><a href="http://nicolasgallagher.com/lab/">Lab</a></li>
+            <li><a href="http://nicolasgallagher.com/resume/">Résumé</a></li>
+        </ul>
+    </nav>
+
+    <article role="main">
+        <header>
+            <time datetime="2011-01-17" pubdate="">January 17, 2011</time>
+            <h1>CSS background image hacks</h1>
+        </header>
+
+<p>Emulating background image crop, background image opacity, background transforms, and improved background positioning. A few hacks relying on CSS pseudo-elements to emulate features unavailable or not yet widely supported by modern browsers.</p>
+<p><strong>Demos: <a href="http://nicolasgallagher.com/css-background-image-hacks/demo/">Example CSS background image hacks</a></strong></p>
+<p>Pseudo-element hacks can fill some gaps in existing browser support for CSS features, without resorting to presentational HTML. In some cases, they even make it possible to emulate things that are not currently part of any W3C working draft, like background transforms and background image opacity.</p>
+<p>Most of the hacks in this article tie in with the pseudo-element hack described in an earlier article – <a href="http://nicolasgallagher.com/multiple-backgrounds-and-borders-with-css2">Multiple Backgrounds and Borders with CSS 2.1</a>. That article already describes how to emulate multiple background support and its demo page shows several other uses of the basic principle. This article presents a few of those effects and applications in greater detail.</p>
+<h2>Emulating background-crop</h2>
+<p><em>Known support</em>: Firefox 3.5+, Opera 10+, Safari 4+, Chrome 4+, IE 8+</p>
+<p><strong>Demo: <a href="http://nicolasgallagher.com/css-background-image-hacks/demo/crop.html">Pseudo background-crop</a></strong></p>
+<p>Background image cropping can be emulated in modern browsers using only CSS 2.1. The principle behind a <strong>pseudo background-crop</strong> is to apply a <code>background-image</code> to a pseudo-element rather than the element itself. One example would be to crop an image to display in the background. Another would be to crop an image sprite to display icons alongside text in links.</p>
+<p><img src="./SpriteHacks_files/css-pseudo-background-crop.png" alt="" width="600" height="300"></p>
+<p>In several cases, using pseudo-elements may have advantages over existing, alternative techniques because it combines their strengths and avoids some of their weaknesses.</p>
+<p>Google, Facebook, and Twitter all make use of empty DOM elements to crop dense sprites and display icons next to certain links in their interfaces. The alternative is not to use empty elements but be forced into using multiple images and/or to design sub-optimal image sprites that have their component images spaced out.</p>
+<p>Pseudo-elements can be used in much the same way as empty DOM elements. This simultaneously eliminates the need for presentational HTML and doesn’t depend so heavily on an image sprite’s design. Using pseudo-elements for this purpose does have its own drawback – a lack of support in legacy browsers like IE6 and IE7. However, the technique will progressively enhance capable browsers while leaving a perfectly usable experience for incapable browsers.</p>
+<h3>Example code: cropping a sprite</h3>
+<p>This example shows how to crop icons that are part of a dense image sprite that uses a 16px × 16px grid. It uses a simple list and specifies a <code>class</code> for each type of action.</p>
+<pre><code>&lt;ul class="actions"&gt;
+   &lt;li class="save"&gt;&lt;a href="#"&gt;Save&lt;/a&gt;&lt;/li&gt;
+   &lt;li class="delete"&gt;&lt;a href="#"&gt;Delete&lt;/a&gt;&lt;/li&gt;
+   &lt;li class="share"&gt;&lt;a href="#"&gt;Share&lt;/a&gt;&lt;/li&gt;
+   &lt;li class="comment"&gt;&lt;a href="#"&gt;Comment&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</code></pre>
+<p>Styling can be applied to present this list in whatever way is needed. From that base, a pseudo-element can be created and then treated as you would an empty, inline DOM element (e.g. <code>&lt;span&gt;</code>).</p>
+<p>In this case, the <code>:before</code> pseudo-element is used and sized to match the sprite’s grid unit. It could be sized to whatever dimensions are required to match a section of the sprite that needs to be cropped. </p>
+<pre><code>.actions a:before {
+   content:"";
+   float:left;
+   width:16px;
+   height:16px;
+   margin:0 5px 0 0;
+   background:url(sprite.png);
+}
+
+.save a:before {background-position:0 -16px;}
+.delete a:before {background-position:0 -32px;}
+.share a:before {background-position:0 -48px;}
+.comment a:before {background-position:0 -64px;}</code></pre>
+<p>Providing hover, focus, active, and “saved” states is just a case of declaring the correct background position in each case.</p>
+<pre><code>.save a:hover:before,
+.save a:focus:before,
+.save a:active:before {background-position:-16px -16px;}
+
+.saved a:before {background-position:-32px -16px;}</code></pre>
+<h3>Future alternatives</h3>
+<p>In the future, there will be other alternatives. <a href="http://www.css3.info/firefox-3-6-adds-background-clipping/">Firefox 3.6 added -moz-image-rect</a> to allow background images to be cropped. But this is not supported by other browsers and looks likely to be replaced by an alternative proposal (to use fragment identifiers) that is part of the <a href="http://dev.w3.org/csswg/css3-images/#url">CSS Image Values Module Level 3</a> specification. As far as I know, no stable release of any modern browser supports the use of fragment identifiers with bitmap images.</p>
+<h2>Emulating background-transform</h2>
+<p><em>Known support</em>: Firefox 3.6+, Opera 10.5+, Safari 4+, Chrome 4+, IE 9+</p>
+<p><strong>Demo: <a href="http://nicolasgallagher.com/css-background-image-hacks/demo/transform.html">Pseudo background-transform</a></strong></p>
+<p>Combining pseudo-elements and transforms makes it possible to emulate background transforms. A <strong>pseudo background-transform</strong> can be used to rotate, scale, and skew background images and sprites. There is no proposal for <code>background-image</code> transforms, so a pseudo-element hack is one way to emulate it.</p>
+<h3>Example: rotating a background image</h3>
+<p>The example of cropping sprites can be further developed by reducing the number of different images used in the sprite. Rather than applying transforms to images in a graphics package, they can be applied in the CSS.</p>
+<p><img src="./SpriteHacks_files/css-pseudo-background-transform.png" alt="" width="600" height="350"></p>
+<p>The code to do this is relatively simple and might look something like:</p>
+<pre><code>.accordion a:before {
+   content:"";
+   float:left;
+   width:16px;
+   height:16px;
+   margin:0 5px 0 0;
+   background:url(sprite.png) no-repeat 0 0;
+}
+
+.accordion.open a:before {
+   -webkit-transform:rotate(90deg);
+   -moz-transform:rotate(90deg);
+   -ms-transform:rotate(90deg);
+   -o-transform:rotate(90deg);
+   <mark>transform:rotate(90deg);</mark>
+}</code></pre>
+<p>To apply a transform to a more conventional background image (e.g., a large graphic sitting behind some content that doesn’t affect the positioning of other components) requires use of the positioning technique detailed in the article <a href="http://nicolasgallagher.com/multiple-backgrounds-and-borders-with-css2/">Multiple Backgrounds and Borders with CSS 2.1</a>.</p>
+<p>It involves setting the background image on a pseudo-element which is then positioned behind the content layer of an element using absolute positioning and <code>z-index</code>.</p>
+<h3>Example: mirroring a background image</h3>
+<p>There are instances when mirroring a background image might be desired. The approach is similar to that for rotating an image, but this time uses <code>transform:scale()</code>.</p>
+<p><img src="./SpriteHacks_files/css-pseudo-background-mirror.png" alt="" width="600" height="330"></p>
+<p>Producing an exact mirror of an element or pseudo-element can be done using <code>transform:scaleX(-1)</code>, <code>transform:scaleY(-1)</code>, and <code>transform:scale(-1,-1)</code> to mirror along the x-axis, y-axis, and both axes, respectively.</p>
+<p>The following code is an example of how a pseudo background-transform might be used for pagination links. A pseudo-element displays a single image (or region of a sprite) and is then mirrored. The image’s appearance is such that a rotation cannot produce the desired counterpart. Only a scale operation can do it.</p>
+<pre><code>.prev a:before,
+.next a:before {
+   content:"";
+   float:left;
+   width:16px;
+   height:16px;
+   margin:0 5px 0 0;
+   background:url(sprite.png) no-repeat 0 0;
+}
+
+.next a:before {
+   float:right;
+   margin:0 0 0 5px;
+   -webkit-transform:scaleX(-1);
+   -moz-transform:scaleX(-1);
+   -ms-transform:scaleX(-1);
+   -o-transform:scaleX(-1);
+   <mark>transform:scaleX(-1);</mark>
+}</code></pre>
+<p>There is no support for this in IE 8. Even if you’re a fan of using IE filters to work around some missing CSS support, they won’t work on pseudo-elements.</p>
+<h3>Future alternatives</h3>
+<p>There don’t seem to be any future alternatives in any CSS working draft. For the moment, it looks like pseudo-element hacks will be needed to emulate effects like background transforms and background perspective without resorting to presentational HTML.</p>
+<h2>Emulating background-position</h2>
+<p><em>Known support</em>: Firefox 3.5+, Opera 10+, Safari 4+, Chrome 4+, IE 8+</p>
+<p><strong>Demo: <a href="http://nicolasgallagher.com/css-background-image-hacks/demo/position.html">Pseudo background-position</a></strong></p>
+<p>The CSS 2.1 specification limits the values of <code>background-position</code> to offsets from the left and top sides. It’s possible to emulate positioning a background image from the right and bottom sides by applying the background image to a pseudo-element and using it as an additional background layer.</p>
+<p><img src="./SpriteHacks_files/css-pseudo-background-position.png" alt="" width="600" height="450"></p>
+<p>This hack is easily combined with the other hacks in this article. More details on the <strong>pseudo background-position</strong> hack can be found in the article on <a href="http://nicolasgallagher.com/multiple-backgrounds-and-borders-with-css2/">Multiple Backgrounds and Borders with CSS 2.1</a>.</p>
+<h3>Example code</h3>
+<p>In this example, a pseudo-element is created and placed behind the element’s content layer. The background image is 500px × 300px and declared for the pseudo-element, which is also given dimensions that match those of the image. Since the pseudo-element is absolutely positioned, it can be positioned from the bottom and right of the element using offsets.</p>
+<pre><code>#content {
+   position:relative;
+   z-index:1;
+}
+
+#content:before {
+   content:"";
+   position:absolute;
+   z-index:-1;
+   <mark>bottom:10px;</mark>
+   <mark>right:10px;</mark>
+   width:500px;
+   height:300px;
+   background:url(image.jpg);
+}</code></pre>
+<h3>Future alternatives</h3>
+<p>There is a part of the <a href="http://www.w3.org/TR/css3-background/#the-background-position">CSS Backgrounds and Borders module</a> working draft that describes an improvement to the <code>background-position</code> property to allow positions to be set from any side. At the moment, Opera 11 is the only stable release of a browser that has implemented it.</p>
+<h2>Emulating background-opacity</h2>
+<p><em>Known support</em>: Firefox 3.5+, Opera 10+, Safari 4+, Chrome 4+, IE 9+</p>
+<p><strong>Demo: <a href="http://nicolasgallagher.com/css-background-image-hacks/demo/opacity.html">Pseudo background-opacity</a></strong></p>
+<p>Changing the opacity of a pseudo-background is as simple as modifying the value of the <code>opacity</code> property. There is no IE 8 support for <code>opacity</code> and IE filters will not work on pseudo-elements.</p>
+<h3>Example code</h3>
+<p>This example code shows a pseudo-element being created and positioned behind the rest of the element’s content so as not to interfere with it. The pseudo-element is then sized to fit the element using offsets (but could be offset by other values or given an explicit size), given a background image, and has its opacity changed.</p>
+<pre><code>#content {
+   position:relative;
+   z-index:1;
+}
+
+#content:before {
+   content:"";
+   position:absolute;
+   z-index:-1;
+   top:0;
+   bottom:0;
+   left:0;
+   right:0;
+   background:url(image.jpg);
+   <mark>opacity:0.7;</mark>
+}</code></pre>
+<h2>Notes</h2>
+<p>For now, and as far as I am aware, using CSS 2.1 pseudo-elements is the only widely supported (and backwards compatible) way to emulate background image crop, background transform, background opacity, and improved background positioning with semantic HTML. </p>
+<p>Even when alternatives in CSS working drafts (e.g., the improved <code>background-position</code> and use of fragment identifiers) are widely implemented, pseudo-element background-image hacks will still have the advantage of letting you use other CSS properties like <code>opacity</code>, <code>border-radius</code>, <code>border-image</code>, <code>box-shadow</code>, <code>transforms</code>, etc., which <em>may</em> prove useful in certain situations. It can’t hurt to be aware of these options.</p>
+<p>It’s worth mentioning that although you can only generate 2 pseudo-elements from a DOM element, in many cases you can easily use descendant elements to provide more pseudo-elements to play with. This idea was used to help create the rotated example on the <a href="http://nicolasgallagher.com/css-drop-shadows-without-images/demo/">CSS drop-shadows demo page</a> and several of the CSS3 examples at the bottom of the <a href="http://nicolasgallagher.com/pure-css-speech-bubbles/demo/">pure CSS speech bubbles demo page</a>.</p>
+<p><small><small>Thanks to <a href="http://mathiasbynens.be/">Mathias Bynens</a> for reading and giving feedback on a draft of this article.</small></small></p>
+
+        <div class="twitter-share">
+            <a class="twitter-button" rel="external nofollow" title="Share this article on Twitter" href="http://twitter.com/share?text=CSS+background+image+hacks+-&url=http%3A%2F%2Fj.mp%2FfM1LYm&counturl=http%3A%2F%2Fnicolasgallagher.com%2Fcss-background-image-hacks%2F&via=necolas" target="_blank">Tweet this article</a>
+            <span class="twitter-count">754</span>
+        </div>
+        
+        <footer>
+            <p>Posted in <a href="http://nicolasgallagher.com/category/code/" title="View all posts in Code" rel="category tag">Code</a>, <a href="http://nicolasgallagher.com/category/design/" title="View all posts in Design" rel="category tag">Design</a></p>
+            <p>Tagged with <a href="http://nicolasgallagher.com/tag/css/" rel="tag">CSS</a>, <a href="http://nicolasgallagher.com/tag/css3/" rel="tag">CSS3</a>, <a href="http://nicolasgallagher.com/tag/experiments/" rel="tag">Experiments</a>, <a href="http://nicolasgallagher.com/tag/hacks/" rel="tag">Hacks</a>, <a href="http://nicolasgallagher.com/tag/image-sprites/" rel="tag">Image sprites</a>, <a href="http://nicolasgallagher.com/tag/progressive-enhancement/" rel="tag">Progressive enhancement</a>, <a href="http://nicolasgallagher.com/tag/pseudo-elements/" rel="tag">Pseudo-elements</a>, <a href="http://nicolasgallagher.com/tag/semantics/" rel="tag">Semantics</a>, <a href="http://nicolasgallagher.com/tag/tutorials/" rel="tag">Tutorials</a></p>
+        </footer>
+
+        <nav>
+            <ul>
+                <li><a href="http://nicolasgallagher.com/pure-css-folded-corner-effect/" rel="prev">« Pure CSS folded-corner effect</a></li>
+                <li><a href="http://nicolasgallagher.com/micro-clearfix-hack/" rel="next">A new micro clearfix hack »</a></li>
+            </ul>
+        </nav>
+
+        <section id="comments">
+            <h1>14 comments <span>on “CSS background image hacks”</span></h1>
+
+            <article id="comment-13038">
+                <header>
+					
+                    <time datetime="2011-01-17T14:39+01:00" pubdate="">January 17, 2011 at 2:39 pm</time> <a href="http://nicolasgallagher.com/css-background-image-hacks/#comment-13038" title="Permalink to this comment">#</a>
+
+                    <h3><a href="http://www.onderhond.com/" rel="external nofollow">Niels Matthijs</a> says…</h3>
+                </header>
+                <p>I love the sprite-cropping technique. Background positioning technique is also quite awesome. Lacking IE &lt; 8 support is a bit of a downer though :)</p>
+            </article>
+
+            <article id="comment-13050">
+                <header>
+					
+                    <time datetime="2011-01-17T18:40+01:00" pubdate="">January 17, 2011 at 6:40 pm</time> <a href="http://nicolasgallagher.com/css-background-image-hacks/#comment-13050" title="Permalink to this comment">#</a>
+
+                    <h3><a href="http://www.onioneye.com/" rel="external nofollow">onioneye</a> says…</h3>
+                </header>
+                <p>Ever since I started reading your blog, my HTML got a lot more semantic and readable. I wonder why? Must be because of those great pseudo elements :)</p>
+            </article>
+
+            <article id="comment-13093">
+                <header>
+					
+                    <time datetime="2011-01-18T17:17+01:00" pubdate="">January 18, 2011 at 5:17 pm</time> <a href="http://nicolasgallagher.com/css-background-image-hacks/#comment-13093" title="Permalink to this comment">#</a>
+
+                    <h3><a href="http://www.zomigi.com/" rel="external nofollow">Zoe Gillenwater</a> says…</h3>
+                </header>
+                <p>Very clever stuff! Love it. For IE 6 and 7 support, one could use Dean Edwards IE7.js script to add support for generated content. There are probably other scripts that do this as well. And of course, if just used for progressive enhancement, no harm at all if not everyone sees the effects.</p>
+            </article>
+
+            <article id="comment-13330">
+                <header>
+					
+                    <time datetime="2011-01-22T12:08+01:00" pubdate="">January 22, 2011 at 12:08 pm</time> <a href="http://nicolasgallagher.com/css-background-image-hacks/#comment-13330" title="Permalink to this comment">#</a>
+
+                    <h3><a href="http://ghettocooler.net/" rel="external nofollow">bkeller</a> says…</h3>
+                </header>
+                <p>Great stuff, I look forward to using these techniques immediately.</p>
+            </article>
+
+            <article id="comment-13366">
+                <header>
+					
+                    <time datetime="2011-01-23T04:56+01:00" pubdate="">January 23, 2011 at 4:56 am</time> <a href="http://nicolasgallagher.com/css-background-image-hacks/#comment-13366" title="Permalink to this comment">#</a>
+
+                    <h3><a href="http://juanulloa.com/" rel="external nofollow">Juan</a> says…</h3>
+                </header>
+                <p>Thanks!  I’ve been avoiding using :before and I think you just gave me a good reason to face it’s usefulness.</p>
+            </article>
+
+            <article id="comment-13423">
+                <header>
+					
+                    <time datetime="2011-01-24T07:18+01:00" pubdate="">January 24, 2011 at 7:18 am</time> <a href="http://nicolasgallagher.com/css-background-image-hacks/#comment-13423" title="Permalink to this comment">#</a>
+
+                    <h3><a href="http://www.ifadey.com/" rel="external nofollow">Fawad Hassan</a> says…</h3>
+                </header>
+                <p>I like the way you explained the concepts. Very nice!</p>
+            </article>
+
+            <article id="comment-13574">
+                <header>
+					
+                    <time datetime="2011-01-26T21:11+01:00" pubdate="">January 26, 2011 at 9:11 pm</time> <a href="http://nicolasgallagher.com/css-background-image-hacks/#comment-13574" title="Permalink to this comment">#</a>
+
+                    <h3><a href="http://www.insiteadvice.com/" rel="external nofollow">Insite Advice</a> says…</h3>
+                </header>
+                <p>These are great ways to really exploit the power of css.  These techniques are a great way to clean up my HTML</p>
+<p>Thanks</p>
+            </article>
+
+            <article id="comment-13731">
+                <header>
+					
+                    <time datetime="2011-01-29T19:19+01:00" pubdate="">January 29, 2011 at 7:19 pm</time> <a href="http://nicolasgallagher.com/css-background-image-hacks/#comment-13731" title="Permalink to this comment">#</a>
+
+                    <h3><a href="http://rolling-webdesign.com/" rel="external nofollow">Theo</a> says…</h3>
+                </header>
+                <p>Great stuff, very well explained. A simple yet excellent overview, thanks!</p>
+            </article>
+
+            <article id="comment-13843">
+                <header>
+					
+                    <time datetime="2011-01-31T19:40+01:00" pubdate="">January 31, 2011 at 7:40 pm</time> <a href="http://nicolasgallagher.com/css-background-image-hacks/#comment-13843" title="Permalink to this comment">#</a>
+
+                    <h3><a href="http://www.munkyonline.com/" rel="external nofollow">Darren Lovelock</a> says…</h3>
+                </header>
+                <p>I’m currently updating my own site and adding all the background images as sprites, has been quite tricky when taking into account text resizing which could reveal other parts of images, will definitely be using the background crop hack – that will make it a lot more easy, thanks!</p>
+            </article>
+
+            <article id="comment-14879">
+                <header>
+					
+                    <time datetime="2011-02-18T02:19+01:00" pubdate="">February 18, 2011 at 2:19 am</time> <a href="http://nicolasgallagher.com/css-background-image-hacks/#comment-14879" title="Permalink to this comment">#</a>
+
+                    <h3><a href="http://parscat.com/" rel="external nofollow">Norik Davtian</a> says…</h3>
+                </header>
+                <p>I love the way you style your articles with nice visuals and Known supported browsers, makes it enjoyable to read all the way.</p>
+<p>Keep it coming, will come back to read more :)</p>
+            </article>
+
+            <article id="comment-16746">
+                <header>
+					
+                    <time datetime="2011-03-13T16:36+01:00" pubdate="">March 13, 2011 at 4:36 pm</time> <a href="http://nicolasgallagher.com/css-background-image-hacks/#comment-16746" title="Permalink to this comment">#</a>
+
+                    <h3><a href="http://csswebstandards.com/" rel="external nofollow">CSS Web Standards</a> says…</h3>
+                </header>
+                <p>Good flow of the content which make it interesting to read. One good thing I must appreciate about this blog is, it’s own typography, beautiful use of font and white space.</p>
+            </article>
+
+            <article id="comment-17674">
+                <header>
+					
+                    <time datetime="2011-03-26T15:43+01:00" pubdate="">March 26, 2011 at 3:43 pm</time> <a href="http://nicolasgallagher.com/css-background-image-hacks/#comment-17674" title="Permalink to this comment">#</a>
+
+                    <h3>Jeff says…</h3>
+                </header>
+                <p>Thank you so much for helping me make sense of pseudo-elements. This article has changed the way I build pages!</p>
+            </article>
+
+            <article id="comment-17806">
+                <header>
+					
+                    <time datetime="2011-03-28T17:44+01:00" pubdate="">March 28, 2011 at 5:44 pm</time> <a href="http://nicolasgallagher.com/css-background-image-hacks/#comment-17806" title="Permalink to this comment">#</a>
+
+                    <h3><a href="http://www.biztek.pk/" rel="external nofollow">Biztek</a> says…</h3>
+                </header>
+                <p>CSS the power of web. Great stuff, very well explained. A simple yet excellent overview, thanks thanks thanks</p>
+            </article>
+
+            <article id="comment-19824">
+                <header>
+					
+                    <time datetime="2011-04-27T13:39+01:00" pubdate="">April 27, 2011 at 1:39 pm</time> <a href="http://nicolasgallagher.com/css-background-image-hacks/#comment-19824" title="Permalink to this comment">#</a>
+
+                    <h3><a href="http://www.gikmedia.com/" rel="external nofollow">Iano</a> says…</h3>
+                </header>
+                <p>Thanks Always struggle with designing backgrounds for websites and implementing them with CSS/HTML looking forward to using some of these techniques</p>
+            </article>
+
+        </section>
+
+        <section id="respond">
+            <h1>Comment on this post</h1>
+            <p>Please wrap code fragments in <code>&lt;code&gt;</code> tags, wrap blocks of code in <code>&lt;pre&gt;&lt;code&gt;</code>, and use <a href="http://jsfiddle.net/">JsFiddle</a> to post working examples.</p>
+            <form action="http://nicolasgallagher.com/wp-comments-post.php" method="post">
+                <fieldset>
+                    <label for="comment">Your comments</label>
+                    <textarea id="comment" name="comment" cols="50" rows="10"></textarea>
+
+                    <label for="author">Name (required)</label>
+                    <input id="author" name="author" type="text" value="" required="" aria-required="true">
+
+                    <label for="email">Email (required but will not be published)</label>
+                    <input id="email" name="email" type="email" value="" required="" aria-required="true">
+
+                    <label for="url">Website URL (if you have one)</label>
+                    <input id="url" name="url" type="url" value="">
+					
+                    <input id="submit" type="submit" value="Submit comment">
+<input type="hidden" name="comment_post_ID" value="809" id="comment_post_ID">
+<input type="hidden" name="comment_parent" id="comment_parent" value="0">
+<p style="display: none;"><input type="hidden" id="akismet_comment_nonce" name="akismet_comment_nonce" value="231177a8f0"></p>
+                </fieldset>
+            </form>
+        </section>
+
+
+    </article>
+
+
+
+    <aside role="complementary">
+        <section>
+            <h1>About me</h1>
+            <p>My name is Nicolas Gallagher. I work as a freelance Front-End Developer and Usability &amp; Accessibility Consultant based in London, <abbr title="United Kingdom">UK</abbr>.</p>
+            <p>The organisations I've done work for include <strong>ASOS</strong>, <strong>Central Office of Information</strong>, <strong>The Department of Health</strong>, <strong>Royal Mail</strong>, <strong>Arthritis Research UK</strong>, <strong><abbr title="University College London">UCL</abbr></strong>, <strong>Natural England</strong>, <strong>OCR</strong>, and <strong>Dulwich Picture Gallery</strong>. Further information is available in my <a href="http://nicolasgallagher.com/resume/">résumé</a>.</p>
+            <p>This is my personal blog. I write here – usually on topics related to front-end development – as part of engaging with, and learning from, other developers.</p>
+            <p><a href="http://twitter.com/necolas">You can also find me on <span>twitter</span></a>.</p>
+        </section>
+    </aside>
+
+    <footer role="contentinfo">
+        <p><a href="mailto:nicolas@nicolasgallagher.com">nicolas@nicolasgallagher.com</a>. Copyright © 2011 Nicolas Gallagher.</p>
+		
+        <small>Original code is dual licensed under the MIT and GNU GPLv2 licenses.</small>
+        <small>Original photographs and text are licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons BY-SA</a> license.</small>
+    </footer>
+    
+
+</body></html>
