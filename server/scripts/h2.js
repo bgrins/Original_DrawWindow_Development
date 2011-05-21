@@ -148,10 +148,6 @@ function getClippingRect(dom) {
 	return rect;
 }
 
-function clip(rect, parent) {
-	return rect;
-}
-
 function getLetterRect(el, offset) {
 	var doc = el.ownerDocument;
 	var range = doc.createRange();
@@ -219,6 +215,11 @@ function el(dom, onready) {
 
 }
 
+el.prototype.clip = function(rect) {
+
+	return rect;
+};
+
 el.prototype.initializeDOM = function() {
 
 	var dom = this.dom;
@@ -230,9 +231,9 @@ el.prototype.initializeDOM = function() {
 	var position = $dom.position();
 	var offset = $dom.offset();
 	
-	this.scrollTop = dom.scrollTop;
-	this.scrollLeft = dom.scrollLeft;
-	if ((this.scrollTop > 0 || this.scrollLeft > 0) && this.body != this) { this.scrollParent = this; }
+	var scrollTop = this.scrollTop = dom.scrollTop;
+	var scrollLeft = this.scrollLeft = dom.scrollLeft;
+	if ((scrollTop > 0 || scrollLeft > 0) && this.body != this) { this.scrollParent = this; }
 	
 	this.shouldRender = $dom.is(":visible");
 	
@@ -276,11 +277,6 @@ el.prototype.initializeDOM = function() {
 		if (childNodes[j].nodeType == 3) {
 			textNodes.push(childNodes[j]);
 		}
-	}
-	
-	if (!this.shouldRender) {
-		log("not render", this, this.dom.innerHTML, $dom.is(":visible"))
-		console.dir(this.dom);
 	}
 	
 	// Fetch any images that are necessary for rendering
@@ -351,7 +347,7 @@ el.prototype.renderText = function(ctx) {
 	    	
 	    	// Get the coordinates for this letter, and draw it to the canvas
 	    	var rect = getLetterRect(nodes[i], f, true);
-	    	rect = clip(rect, scrollParent);
+	    	rect = this.clip(rect);
 	    	
 	    	//log(f, text[f], text.length, rect, this.tagName);
 	    	ctx.fillText(text[f], rect.left, rect.bottom);
