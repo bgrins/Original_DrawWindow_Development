@@ -171,7 +171,7 @@ function getLetterRect(el, offset) {
 }
 
 function el(dom, onready) {	
-
+	
 	this.dom = dom;	
 	dom._element = this;
 	
@@ -207,7 +207,7 @@ function el(dom, onready) {
 	
 	//log("Initialized " + this.tagName, this);
 	
-	this.children = $(dom).children().map(function() {
+	this.children = $(dom).children(":not(.h2c-ignore)").map(function() {
 	    return new el(this);
 	}).sort(orderByZIndex);
 	
@@ -445,7 +445,7 @@ el.prototype.renderBorders = function(ctx, rect) {
 	}
 };
 
-function initialize(doc, cb) {
+function render(doc, cb, progCallback) {
 	var body = doc.body;
 	var canvas = createCanvas(doc);
 	var ctx = canvas.getContext("2d");
@@ -460,30 +460,52 @@ function initialize(doc, cb) {
 	ctx.fillStyle = "rgba(255,0,0,.2)";
 	ctx.fillRect(0, 0, width, height);
 	
+	console.time("Initializing");
+	progCallback("Initilizing Elements");
 	new el(body, function(bodyElement) {
+		console.timeEnd("Initializing");
+		console.time("Render");
+		progCallback("Taking Screenshot");
 		bodyElement.render(ctx);
+		console.timeEnd("Render");
 		cb(canvas);
 	});
 }
 
-function render(doc) {
+var PROGRESS = "<div class='h2c-ignore' style='position:fixed; cursor:pointer; width:400px; height:50px; background:#dfd; left:40%; top:20%; z-index:100002;'></div>";
+var CLOSE = "<div style='position:absolute; cursor:pointer; width:25px; height:25px; background:red; right:10px; top:10px; z-index:100002;'></div>";
+
+function initialize(doc) {
 	var els = [];
 	
-	initialize(doc, function(canvas) {
-		var x = $("<div style='position:absolute; cursor:pointer; width:25px; height:25px; background:red; right:10px; top:10px; z-index:100002;'></div>").click(function() {
+	var prog = $(PROGRESS).appendTo(doc.body).click(function() {
+		prog.remove();
+	});
+	
+	render(doc, function(canvas) {
+	
+		
+		var x = $(CLOSE).click(function() {
 			$(canvas).remove();
 			$(x).remove();
 		});
+		$(doc.body).append(x);
+		
 		$(canvas).
 			css("position", "absolute").
 			css("top", 0).css("left", 0).
 			css("background", "white").
 			css("z-index", "100001");
 		
-		$(doc.body).append(x);
 		doc.body.appendChild(canvas);
+		
+		prog.fadeOut();
+		
+	}, function(msg) {
+		prog.html(msg);
 	});
 }
+
 
 if (window.parent != window) {
 
@@ -496,7 +518,7 @@ if (window.parent != window) {
 	var container = window.frameElement.parentNode;
 	var parentDoc = window.parent.document;
 	$(document).ready(function() {
-		render(parentDoc);
+		initialize(parentDoc);
 	});
 }
 

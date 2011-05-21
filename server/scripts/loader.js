@@ -11,8 +11,6 @@ window.h2c = {
 		var src2 = host + scriptPath + "h2.js" + (h2c.cache ? "" : "?dt=" + (new Date()).getTime());
 		var flashcanvas = host + scriptPath + "flashcanvaspro/flashcanvas.js";
 		
-
-
 		html.push("<html><head>");
 		/*html.push("<script type='text/javascript' src='"+src+"'></script>");*/
 		html.push("<script type='text/javascript' src='"+src1+"'></script>");
@@ -71,6 +69,7 @@ window.h2c = {
 		div.style.width = "0";
 		div.style.height = "0";
 		div.style.zIndex = 100001;
+		div.className = "h2c-ignore";
 		
 		var oldWrapper = document.getElementById('h2c-wrapper');
 		
