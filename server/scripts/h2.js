@@ -315,7 +315,6 @@ el.prototype.render = function(ctx) {
 		
 		// Render text character by character
 		this.renderText(ctx);
-		
 	}
 	
 	// Render all children
@@ -377,21 +376,24 @@ el.prototype.renderBackground = function(ctx, rect) {
 	}
 	
 	if (loadedImage) {
-	  	
-		log("Rendering", loadedImage, this.src, backgroundRect, repeat);
-	  	
-	  	// Somehow this createPattern is not working with the image (perhaps it is somehow invalidated?)
-	   	var repeat = this.tagName == "img" ? "no-repeat" : css.backgroundRepeat;	   
-	   	var pattern = ctx.createPattern(loadedImage, repeat);
 		
-		ctx.fillStyle = pattern;
-		ctx.fillRect(
-	   		backgroundRect.left, backgroundRect.top, 
-	   		backgroundRect.width, backgroundRect.height
-		);
-		
-		ctx.drawImage(retrieveImageFromCache(this.src),backgroundRect.left, backgroundRect.top,
-			backgroundRect.width, backgroundRect.height);
+		//log("Rendering", loadedImage, this.src, backgroundRect, repeat);
+	  	
+	   	var repeat = this.tagName == "img" ? "no-repeat" : css.backgroundRepeat;
+	   	
+	   	if (repeat == "no-repeat") {
+			ctx.drawImage(retrieveImageFromCache(this.src),backgroundRect.left, backgroundRect.top,
+				backgroundRect.width, backgroundRect.height);
+	   	}
+	   	else {
+	   		var pattern = ctx.createPattern(loadedImage, repeat);
+			
+			ctx.fillStyle = pattern;
+			ctx.fillRect(
+	   			backgroundRect.left, backgroundRect.top, 
+	   			backgroundRect.width, backgroundRect.height
+			);
+		}
 	}
 };
 el.prototype.renderBorders = function(ctx, rect) {
