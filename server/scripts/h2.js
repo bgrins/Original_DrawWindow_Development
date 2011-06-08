@@ -347,10 +347,13 @@ el.prototype.renderText = function(ctx) {
 	    	
 	    	// Get the coordinates for this letter, and draw it to the canvas
 	    	var rect = getLetterRect(nodes[i], f, true);
-	    	rect = this.clip(rect);
 	    	
-	    	//log(f, text[f], text.length, rect, this.tagName);
-	    	ctx.fillText(text[f], rect.left, rect.bottom);
+	    	if (rect) {
+	    		rect = this.clip(rect);
+	    	
+	    		//log(f, text[f], text.length, rect, this.tagName);
+	    		ctx.fillText(text[f], rect.left, rect.bottom);
+	    	}
 	    }
 	}
 };
