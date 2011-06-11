@@ -271,9 +271,11 @@ el.prototype.initializeDOM = function() {
 	
 	if (this.isBody) {
 		var doc = this.doc = dom.ownerDocument || document;
-		css.backgroundRect = {
+		this.boundingClientRect = {
 			top: 0, left: 0, width: $(doc).width(), height: $(doc).height()
 		};
+		this.boundingClientRect.bottom = this.boundingClientRect.height;
+		this.boundingClientRect.right = this.boundingClientRect.width;
 	}
 	
 	// Collect all of the text nodes for future reference 
@@ -312,7 +314,7 @@ el.prototype.render = function(ctx) {
 		
 		var boundingClientRect = this.boundingClientRect;
 		var parentBoundingClientRect = this.parent.boundingClientRect;
-		var rects = this.clientRects;
+		var rects = this.clientRects.length > 1 ? this.clientRects : [boundingClientRect];
 		
 		var isOverflowing = 
 			boundingClientRect.width > parentBoundingClientRect.width ||
@@ -386,7 +388,7 @@ el.prototype.renderBackground = function(ctx, rect) {
 	var isBody = this.isBody;
 	var backgroundColor = css.backgroundColor;
 	var loadedImage = this.loadedImage;
-	var backgroundRect = isBody ? css.backgroundRect : rect;
+	var backgroundRect = rect;
 	
 	if (backgroundColor) {
 	   ctx.fillStyle = backgroundColor;
