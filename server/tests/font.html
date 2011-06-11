@@ -17,7 +17,8 @@
   #background {z-index: 101; position:absolute; top:0; left:0;}
   .message { background-color: orange; padding:10px; margin:50px; border: dashed 4px #000; }
   #overflow-container { border:10px solid blue; padding:10px; margin:10px; overflow:scroll; background:grey; width:200px; height:100px;  }
-  #overflow-child { background:red; height:500px; width:500px;}
+  #overflow-child { background:red; height:300px; width:300px; padding:20px; overflow:auto;}
+  #overflow-child-inner { background:green; height:1000px; width:1000px; }
   </style>
 </head>
 
@@ -40,7 +41,12 @@
 		Hey, this is a message;
 	</p>
 	<div id='overflow-container'>
-		<div id='overflow-child'>Z Hey, this is overflow</div>
+		<div id='overflow-child'>Z Hey, this is overflow
+			<div id='overflow-child-inner'>
+				Even more overflow
+			</div>
+		
+		</div>
 		
 	</div>
     <p id='ptag' style='text-align:right;border-top:solid 10px; margin-left:5px; padding-top:6px; margin-top:3px; '>One aspec

@@ -107,8 +107,8 @@ function orderByZIndex(el1, el2) {
    return el1.css.zIndex - el2.css.zIndex;
 }
 
-function getScrolledRects(rects, scrollElement) { //clientRect, body) {
-	
+function getScrolledRects(rects, scrollElement) {
+
 	scrollElement = scrollElement || rectElement;
 	var body = scrollElement.ownerDocument.body;
 	
@@ -140,13 +140,21 @@ function getScrolledRects(rects, scrollElement) { //clientRect, body) {
 	return clientRects;
 }
 
-function getClippingRect(dom) {
+function getClippingRect(dom, css) {
+	var outerHeight = $(dom).outerHeight();
+	var outerWidth = $(dom).outerWidth();
+	var borderLeftWidth = css.borderLeftWidth;
+	var borderTopWidth = css.borderTopWidth;
+	var borderRightWidth = css.borderRightWidth;
+	var borderBottomWidth = css.borderBottomWidth;
+	
 	var rect = {
-		top: dom.offsetTop,
-		left: dom.offsetLeft,
-		width: dom.offsetWidth,
-		height: dom.offsetHeight
+		top: dom.offsetTop + borderTopWidth,
+		left: dom.offsetLeft + borderLeftWidth,
+		width: outerWidth - borderLeftWidth - borderRightWidth,
+		height: outerHeight - borderTopWidth - borderBottomWidth
 	};
+	
 	rect.bottom = rect.top + rect.height;
 	rect.right = rect.left + rect.width;
 	return rect;
@@ -230,18 +238,6 @@ el.prototype.initializeDOM = function() {
 	var $dom = $(this.dom);
 	var css = this.css = { };
 	
-	this.boundingClientRect = getScrolledRects([dom.getBoundingClientRect()], dom)[0];
-	this.clientRects = getScrolledRects(dom.getClientRects(), dom);
-	this.clippingRect = getClippingRect(dom);
-	var position = $dom.position();
-	var offset = $dom.offset();
-	
-	var scrollTop = this.scrollTop = dom.scrollTop;
-	var scrollLeft = this.scrollLeft = dom.scrollLeft;
-	if ((scrollTop > 0 || scrollLeft > 0) && this.body != this) { this.scrollParent = this; }
-	
-	this.shouldRender = $dom.is(":visible");
-	
 	var computedStyleNormal = computedStyle(dom, styleAttributes);
 	for (var i in computedStyleNormal) {
 	    css[i] = computedStyleNormal[i];
@@ -250,6 +246,39 @@ el.prototype.initializeDOM = function() {
 	for (var i in computedStylePx) {
 	    css[i] = parseInt(computedStylePx[i]) || 0;
 	}
+	
+	this.boundingClientRect = getScrolledRects([dom.getBoundingClientRect()], dom)[0];
+	this.clientRects = getScrolledRects(dom.getClientRects(), dom);
+	this.clippingRect = getClippingRect(dom, css);
+	
+	var noBorders = this.boundingClientRectNoBorders = $.extend({}, this.boundingClientRect);
+	noBorders.top += css.borderTopWidth;
+	noBorders.height -= (css.borderTopWidth + css.borderBottomWidth);
+	noBorders.left += css.borderLeftWidth;
+	noBorders.width -= (css.borderLeftWidth + css.borderRightWidth);
+	
+	if (this.isBody) {
+		var doc = this.doc = dom.ownerDocument || document;
+		this.boundingClientRect = {
+			top: 0, left: 0, width: $(doc).width(), height: $(doc).height()
+		};
+		this.boundingClientRect.bottom = this.boundingClientRect.height;
+		this.boundingClientRect.right = this.boundingClientRect.width;
+	}
+	
+	
+	var boundingClientRect = this.boundingClientRect;
+	var parentBoundingClientRect = this.parent.boundingClientRect;
+	
+	this.isOverflowing = (this.parent.css.overflow != "visible") &&
+	   ( boundingClientRect.width > parentBoundingClientRect.width ||
+	     boundingClientRect.height > parentBoundingClientRect.height );
+	
+	var scrollTop = this.scrollTop = dom.scrollTop;
+	var scrollLeft = this.scrollLeft = dom.scrollLeft;
+	if ((scrollTop > 0 || scrollLeft > 0) && this.body != this) { this.scrollParent = this; }
+	
+	this.shouldRender = $dom.is(":visible");
 	
 	
 	if (css.backgroundImage == "none") {
@@ -269,14 +298,6 @@ el.prototype.initializeDOM = function() {
 	
 	css.zIndex = parseInt(css.zIndex) || 0;
 	
-	if (this.isBody) {
-		var doc = this.doc = dom.ownerDocument || document;
-		this.boundingClientRect = {
-			top: 0, left: 0, width: $(doc).width(), height: $(doc).height()
-		};
-		this.boundingClientRect.bottom = this.boundingClientRect.height;
-		this.boundingClientRect.right = this.boundingClientRect.width;
-	}
 	
 	// Collect all of the text nodes for future reference 
 	var textNodes = this.textNodes = [];
@@ -307,40 +328,54 @@ el.prototype.initializeDOM = function() {
 
 el.prototype.render = function(ctx) {
 
+	var renderCtx = ctx;
+	var mockCanvas;
+		
+	// If an element is overflowing, render it into a seperate canvas, so we can
+	// clip it and render only what is necessary.
+	if (this.shouldRender && this.isOverflowing) {
+	    mockCanvas = createCanvas(this.body.doc, ctx.canvas.width, ctx.canvas.height);
+	    renderCtx = mockCanvas.getContext("2d");		
+	}
+		
 	if (this.shouldRender) {
 		
 		// Render background and borders for each rectangle (inline elements spanning 
 		// multiple lines could have more than one clientRect)
 		
-		var boundingClientRect = this.boundingClientRect;
-		var parentBoundingClientRect = this.parent.boundingClientRect;
-		var rects = this.clientRects.length > 1 ? this.clientRects : [boundingClientRect];
-		
-		var isOverflowing = 
-			boundingClientRect.width > parentBoundingClientRect.width ||
-			boundingClientRect.height > parentBoundingClientRect.height;
-		
-		if (isOverflowing && this.parent.css.overflow != "visible") {
-			log("overflowing", this.id, boundingClientRect, parentBoundingClientRect)
-			
-		}
-		
-		//var mockCanvas = createCanvas(this.body.doc, boundingClientRect.width, boundingClientRect.height);
-		//var mockContext = mockCanvas.getContext("2d");		
+		var rects = this.isBody ? [this.boundingClientRect] : this.clientRects;
 		
 		for (var i = 0, j = rects.length; i < j; i++) {
-			this.renderBackground(ctx, rects[i]);
-			this.renderBorders(ctx, rects[i]);
+			this.renderBackground(renderCtx, rects[i]);
+			this.renderBorders(renderCtx, rects[i]);
 		}
 		
 		// Render text character by character
-		this.renderText(ctx);
+		this.renderText(renderCtx);
 	}
 	
 	// Render all children
 	var children = this.children;
 	for (var i = 0, l = children.length; i < l; i++) {
-		children[i].render(ctx);
+		children[i].render(renderCtx);
+	}
+	
+	if (this.shouldRender && this.isOverflowing) {
+		
+		// Do the actual clipping of an overflowing child.  See:
+		// https://developer.mozilla.org/en/Canvas_tutorial/Using_images "Slicing"
+		
+		var b = this.parent.clippingRect;
+		var l = this.parent.scrollLeft;
+		var t = this.parent.scrollTop;
+		
+		ctx.drawImage(
+			mockCanvas,
+			b.left + l, b.top + t,
+			b.width, b.height,
+			b.left, b.top,
+			b.width, b.height
+		);
 	}
 };
 
