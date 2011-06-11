@@ -47,10 +47,14 @@ function computedStyle(elem, styles) {
 	return ret;
 }
 
-function createCanvas(doc) {
+function createCanvas(doc, w, h) {
 	var c = (doc || document).createElement("canvas");
     if (typeof FlashCanvas != "undefined") {
       FlashCanvas.initElement(c);
+    }
+    if (w && h) {
+    	c.width = w;
+    	c.height = h;
     }
     return c;	
 }
@@ -82,7 +86,7 @@ var styleAttributes = [
 	'border-right-style', 'border-right-color',
 	'border-bottom-style', 'border-bottom-color',
 	'border-left-style', 'border-left-color',
-	'outline-style', 'outline-color',
+	'outline-style', 'outline-color', 'overflow',
 	'display', 'text-decoration',
 	'font-family', 'font-style', 'font-weight', 'color',
 	'position', 'float', 'clear', 'overflow',
@@ -176,7 +180,7 @@ function el(dom, onready) {
 	
 	
 	if (this.isBody) {
-		var body = this.body = this;
+		var body = this.body = this.parent = this;
 		this.pendingResources = 0;
 		this.checkImages = function() {
 			if (this.childrenInitialized && this.pendingResources <= 0) {
@@ -216,7 +220,7 @@ function el(dom, onready) {
 }
 
 el.prototype.clip = function(rect) {
-
+	
 	return rect;
 };
 
@@ -226,6 +230,7 @@ el.prototype.initializeDOM = function() {
 	var $dom = $(this.dom);
 	var css = this.css = { };
 	
+	this.boundingClientRect = getScrolledRects([dom.getBoundingClientRect()], dom)[0];
 	this.clientRects = getScrolledRects(dom.getClientRects(), dom);
 	this.clippingRect = getClippingRect(dom);
 	var position = $dom.position();
@@ -254,6 +259,7 @@ el.prototype.initializeDOM = function() {
 		css.backgroundColor = false;
 	}
 	
+	this.id = $dom.attr("id") || false;
 	this.src = this.tagName == 'img' ? $dom.attr("src") : css.backgroundImage;
 	
 	css.font = $.trim(
@@ -264,7 +270,7 @@ el.prototype.initializeDOM = function() {
 	css.zIndex = parseInt(css.zIndex) || 0;
 	
 	if (this.isBody) {
-		var doc = dom.ownerDocument || document;
+		var doc = this.doc = dom.ownerDocument || document;
 		css.backgroundRect = {
 			top: 0, left: 0, width: $(doc).width(), height: $(doc).height()
 		};
@@ -303,7 +309,23 @@ el.prototype.render = function(ctx) {
 		
 		// Render background and borders for each rectangle (inline elements spanning 
 		// multiple lines could have more than one clientRect)
+		
+		var boundingClientRect = this.boundingClientRect;
+		var parentBoundingClientRect = this.parent.boundingClientRect;
 		var rects = this.clientRects;
+		
+		var isOverflowing = 
+			boundingClientRect.width > parentBoundingClientRect.width ||
+			boundingClientRect.height > parentBoundingClientRect.height;
+		
+		if (isOverflowing && this.parent.css.overflow != "visible") {
+			log("overflowing", this.id, boundingClientRect, parentBoundingClientRect)
+			
+		}
+		
+		//var mockCanvas = createCanvas(this.body.doc, boundingClientRect.width, boundingClientRect.height);
+		//var mockContext = mockCanvas.getContext("2d");		
+		
 		for (var i = 0, j = rects.length; i < j; i++) {
 			this.renderBackground(ctx, rects[i]);
 			this.renderBorders(ctx, rects[i]);
@@ -336,7 +358,7 @@ el.prototype.renderText = function(ctx) {
 	    var text = nodes[i].data;
 	    
 	    if (transform == "uppercase") { text = text.toUpperCase(); }
-	    else if (transform == "uppercase") { text = text.toLowerCase(); }
+	    else if (transform == "lowercase") { text = text.toLowerCase(); }
 	    
 	    for (var f = 0; f < text.length; f++) {
 	    	
